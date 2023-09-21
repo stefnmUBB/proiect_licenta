@@ -42,8 +42,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Imaging\Color24.cs" />
-    <Compile Include="Imaging\Image24.cs" />
+    <Compile Include="Imaging\ColorRGB.cs" />
+    <Compile Include="Imaging\ImageRGB.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\Bitmaps.cs" />
   </ItemGroup>

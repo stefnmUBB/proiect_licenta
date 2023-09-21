@@ -3,22 +3,24 @@ using System.Linq;
 
 namespace Licenta.Commons.Math
 {
-    public interface IReadMatrix<out T>
+    public interface IMatrix
     {
         int RowsCount { get; }
         int ColumnsCount { get; }
-        T this[int row, int column] { get; }
-        IReadMatrix<T> GetRow(int index);
-        IReadMatrix<T> GetColumn(int index);
-        IReadMatrix<S> Cast<S>();        
+        IReadMatrix<S> Cast<S>();
     }
 
-    public interface IWriteMatrix<in T>
+    public interface IReadMatrix<out T> : IMatrix
     {
-        int RowsCount { get; }
-        int ColumnsCount { get; }
-        T this[int row, int column] { set; }
-        IReadMatrix<S> Cast<S>();
+        T[] Items { get; }
+        T this[int row, int column] { get; }
+        IReadMatrix<T> GetRow(int index);
+        IReadMatrix<T> GetColumn(int index);         
+    }
+
+    public interface IWriteMatrix<in T> : IMatrix
+    {      
+        T this[int row, int column] { set; }        
     }
 
     public interface IMatrix<T> : IReadMatrix<T>, IWriteMatrix<T> { }
@@ -28,6 +30,8 @@ namespace Licenta.Commons.Math
         public int RowsCount { get; }
         public int ColumnsCount { get; }
         public T[] Items { get; }
+
+        public Matrix(IReadMatrix<T> m) : this(m.RowsCount, m.ColumnsCount, m.Items.ToArray()) { }
         public Matrix(int rowsCount, int columnsCount)
         {
             RowsCount = rowsCount;
