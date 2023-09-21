@@ -6,7 +6,10 @@ namespace Licenta.Imaging
 {
     public class Image24 : Matrix<Color24>
     {
-        public Image24(int rowsCount, int columnsCount) : base(rowsCount, columnsCount) { }        
-        public Image24(Bitmap bitmap) : base(bitmap.Width, bitmap.Height, bitmap.GetColorsFromBitmap()) { }       
+        public int Width => ColumnsCount;
+        public int Height => RowsCount;
+
+        public Image24(int width, int height) : base(height, width) { }
+        public Image24(Bitmap bitmap) : base(bitmap.Height, bitmap.Width, bitmap.GetColorsFromBitmap()) { }    
     }
 }

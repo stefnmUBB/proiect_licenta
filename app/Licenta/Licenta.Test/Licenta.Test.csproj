@@ -35,6 +35,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -53,6 +54,10 @@
     <ProjectReference Include="..\Licenta.Commons\Licenta.Commons.csproj">
       <Project>{ddd6e93c-55d4-4b7f-8552-83620b14da23}</Project>
       <Name>Licenta.Commons</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Licenta\Licenta.csproj">
+      <Project>{48A1A3D3-73A9-4BFF-82F3-80E14C539743}</Project>
+      <Name>Licenta</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

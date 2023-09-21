@@ -1,7 +1,10 @@
 ﻿using Licenta.Commons.Math;
 using Licenta.Commons.Math.Arithmetics;
+using Licenta.Imaging;
+using Licenta.Utils;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,9 +15,8 @@ namespace Licenta.Test
     {
         static void Main(string[] args)
         {
-            IWriteMatrix<string> m = new Matrix<IComparable>(2, 2);
-            m[0, 0] = "123";
-           
+            var img = new Image24(new Bitmap(@"C:\Users\Stefan\Desktop\016.jpg"));
+            img.ToBitmap().Save("res.png");
             Console.WriteLine("Done");
             Console.ReadLine();
         }
