@@ -7,14 +7,14 @@ namespace Licenta.Commons.Math
     public static class Matrices
     {
         public static bool HaveSameShape(IMatrix a, IMatrix b) => a.ColumnsCount == b.ColumnsCount && a.RowsCount == b.RowsCount;
-        private static Matrix<TO> DoItemByItem<TO, TI1, TI2>(IReadMatrix<TI1> a, IReadMatrix<TI2> b, Func<TI1,TI2,TO> f)
+        public static Matrix<TO> DoItemByItem<TO, TI1, TI2>(IReadMatrix<TI1> a, IReadMatrix<TI2> b, Func<TI1,TI2,TO> f)
         {
             if (!HaveSameShape(a, b))
                 throw new InvalidOperationException("The two matrices must have same shape for this operation");
             return new Matrix<TO>(a.RowsCount, a.ColumnsCount, a.Items.Zip(b.Items, f).ToArray());
         }
 
-        private static Matrix<TO> DoEachItem<TI,TO>(IReadMatrix<TI> a, Func<TI, TO> f)
+        public static Matrix<TO> DoEachItem<TI,TO>(IReadMatrix<TI> a, Func<TI, TO> f)
         {
             return new Matrix<TO>(a.RowsCount, a.ColumnsCount, a.Items.Select(f).ToArray());
         }
@@ -29,8 +29,21 @@ namespace Licenta.Commons.Math
         public static Matrix<T> Divide<T, S>(Matrix<T> a, S scalar) where T : ISetDivisive<S, T> where S : IOperative
             => DoEachItem(a, x => x.Divide(scalar));
 
+        public static T ItemsSum<T>(IReadMatrix<T> m) where T:ISetAdditive<T>
+        {
+            return m.Items.Aggregate((x, y) => x.Add(y));
+        }
 
-        public static Matrix<TO> Convolute<TI1, TI2, TO>(IReadMatrix<TI1> a, IReadMatrix<TI2> b, ConvolutionBorder borderFilter = ConvolutionBorder.Crop)
+        public static Matrix<T> ApplyDoubleThreshold<T>(IReadMatrix<T> m, T low, T high, T tlow, T thigh) where T:IComparable
+        {
+            return DoEachItem(m, x => x.CompareTo(tlow) <= 0 ? low : x.CompareTo(thigh) >= 0 ? high : x);
+        }
+
+        public static Matrix<T> Convolve<T>(IReadMatrix<T> a, IReadMatrix<T> b, ConvolutionBorder borderFilter = ConvolutionBorder.Crop)
+            where T: ISetAdditive<T>, ISetMultiplicative<T>
+            => Convolve<T, T, T>(a, b, borderFilter);
+
+        public static Matrix<TO> Convolve<TI1, TI2, TO>(IReadMatrix<TI1> a, IReadMatrix<TI2> b, ConvolutionBorder borderFilter = ConvolutionBorder.Crop)
             where TI1 : ISetMultiplicative<TI2, TO>
             where TI2 : IOperative
             where TO : IOperative, ISetAdditive<TO>

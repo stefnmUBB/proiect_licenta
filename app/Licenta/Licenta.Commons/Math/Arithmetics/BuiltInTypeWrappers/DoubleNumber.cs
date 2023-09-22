@@ -1,6 +1,8 @@
-﻿namespace Licenta.Commons.Math.Arithmetics
+﻿using System;
+
+namespace Licenta.Commons.Math.Arithmetics
 {
-    public struct DoubleNumber : INumber, IAddSubMulDivOperative<DoubleNumber>
+    public struct DoubleNumber : INumber, IAddSubMulDivOperative<DoubleNumber>, IComparable
     {
         public double Value { get; }
         public DoubleNumber(double value)
@@ -43,5 +45,15 @@
         IOperative IMultiplicative<DoubleNumber>.Multiply(DoubleNumber x) => Multiply(x);        
 
         IOperative IDivisive<DoubleNumber>.Divide(DoubleNumber x) => Divide(x);
+
+        public override string ToString() => Value.ToString();
+
+        public int CompareTo(DoubleNumber d) => Value.CompareTo(d.Value);
+
+        public int CompareTo(object obj)
+        {
+            if (!(obj is DoubleNumber d)) throw new ArgumentException("Object must be of type DoubleNumber");
+            return CompareTo(d);
+        }
     }
 }

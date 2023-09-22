@@ -51,6 +51,7 @@
     <Compile Include="Math\Arithmetics\BuiltInTypeWrappers\IntNumber.cs" />
     <Compile Include="Math\Arithmetics\Interfaces.cs" />
     <Compile Include="Math\Arithmetics\OperativeConverter.cs" />
+    <Compile Include="Math\Functions.cs" />
     <Compile Include="Math\Matrices.cs" />
     <Compile Include="Math\Matrix.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

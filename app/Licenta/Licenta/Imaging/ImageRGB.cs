@@ -13,7 +13,10 @@ namespace Licenta.Imaging
         public ImageRGB(int width, int height) : base(height, width) { }
         public ImageRGB(Bitmap bitmap) : base(bitmap.Height, bitmap.Width, bitmap.GetColorsFromBitmap()) { }
         public ImageRGB(IReadMatrix<ColorRGB> m) : base(m) { }
-        public ImageRGB Convolute(Matrix<DoubleNumber> c) 
-            => new ImageRGB(Matrices.Convolute<ColorRGB, DoubleNumber, ColorRGB>(this, c));
+
+        public ImageRGB(IReadMatrix<DoubleNumber> m) : base(m.Select(v => new ColorRGB(v, v, v))) { }
+
+        public ImageRGB Convolve(Matrix<DoubleNumber> c) 
+            => new ImageRGB(Matrices.Convolve<ColorRGB, DoubleNumber, ColorRGB>(this, c));
     }
 }

@@ -19,5 +19,8 @@ namespace Licenta.Commons.Utils
             if (items.Length == 0) return default(T);
             return items.Aggregate((x, y) => x.Add(y)).Divide(items.Length);
         }
+
+        public static string JoinToString<T>(this IEnumerable<T> items, string delimiter)
+            => string.Join(delimiter, items.Select(_ => _.ToString()));
     }
 }

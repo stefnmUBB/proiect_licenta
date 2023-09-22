@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Licenta.Commons.Utils;
+using System;
 using System.Linq;
 
 namespace Licenta.Commons.Math
@@ -7,7 +8,7 @@ namespace Licenta.Commons.Math
     {
         int RowsCount { get; }
         int ColumnsCount { get; }
-        IReadMatrix<S> Cast<S>();
+        IReadMatrix<S> Cast<S>();        
     }
 
     public interface IReadMatrix<out T> : IMatrix
@@ -15,7 +16,8 @@ namespace Licenta.Commons.Math
         T[] Items { get; }
         T this[int row, int column] { get; }
         IReadMatrix<T> GetRow(int index);
-        IReadMatrix<T> GetColumn(int index);         
+        IReadMatrix<T> GetColumn(int index);
+        IReadMatrix<S> Select<S>(Func<T, S> selector);
     }
 
     public interface IWriteMatrix<in T> : IMatrix
@@ -68,5 +70,30 @@ namespace Licenta.Commons.Math
         IReadMatrix<T> IReadMatrix<T>.GetRow(int index) => GetRow(index);
         IReadMatrix<T> IReadMatrix<T>.GetColumn(int index) => GetColumn(index);
         public IReadMatrix<S> Cast<S>() => new Matrix<S>(RowsCount, ColumnsCount, Items.Cast<S>().ToArray());
+
+        public IReadMatrix<S> Select<S>(Func<T, S> selector) => new Matrix<S>(RowsCount, ColumnsCount, Items.Select(selector).ToArray());
+
+        public static Matrix<T> Fill(int rowsCount, int colsCount, T value)
+        {
+            return new Matrix<T>(rowsCount, colsCount, Enumerable.Repeat(value, rowsCount * colsCount).ToArray());
+        }
+
+        public static Matrix<T> CreateByRule(int rowsCount, int colsCount, Func<int,int, T> f)
+        {
+            var items = new T[rowsCount * colsCount];
+            for (int i = 0; i < rowsCount; i++)
+                for (int j = 0; j < colsCount; j++)
+                    items[i * rowsCount + j] = f(i, j);
+            return new Matrix<T>(rowsCount, colsCount, items);
+        }
+
+        public override string ToString()
+        {
+            var itemsstr = Items.Select(_ => _.ToString()).ToArray();
+            var maxLen = itemsstr.Max(_ => _.Length);
+            itemsstr = itemsstr.Select(_ => _.PadRight(maxLen)).ToArray();
+            return itemsstr.GroupChunks(ColumnsCount).Select(r => r.JoinToString(" ")).JoinToString("\n");
+
+        }
     }
 }
