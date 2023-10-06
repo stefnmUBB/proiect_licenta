@@ -51,6 +51,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\Bitmaps.cs" />
     <Compile Include="Utils\Images.cs" />
+    <Compile Include="Utils\ParallelModels\CannyEdgeDetectionParallelModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

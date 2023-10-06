@@ -54,12 +54,24 @@
     <Compile Include="Math\Functions.cs" />
     <Compile Include="Math\Matrices.cs" />
     <Compile Include="Math\Matrix.cs" />
+    <Compile Include="Parallelization\InputGraphNode.cs" />
+    <Compile Include="Parallelization\LinqExtensions.cs" />
+    <Compile Include="Parallelization\ParallelForLoop.cs" />
+    <Compile Include="Parallelization\ParallelGraphModel.cs" />
+    <Compile Include="Parallelization\ParallelGraphNode.cs" />
+    <Compile Include="Parallelization\ParallelRuntimeGraph.cs" />
+    <Compile Include="Parallelization\ParallelRuntimeNode.cs" />
+    <Compile Include="Parallelization\TaskGroup.cs" />
+    <Compile Include="Parallelization\TaskManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\Extensions.cs" />
+    <Compile Include="Utils\Graph.cs" />
     <Compile Include="Utils\Reflection.cs" />
+    <Compile Include="Utils\Time.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

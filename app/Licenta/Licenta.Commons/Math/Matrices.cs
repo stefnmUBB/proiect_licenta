@@ -1,5 +1,7 @@
-﻿using Licenta.Commons.Utils;
+﻿using Licenta.Commons.Parallelization;
+using Licenta.Commons.Utils;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Licenta.Commons.Math
@@ -11,12 +13,12 @@ namespace Licenta.Commons.Math
         {
             if (!HaveSameShape(a, b))
                 throw new InvalidOperationException("The two matrices must have same shape for this operation");
-            return new Matrix<TO>(a.RowsCount, a.ColumnsCount, a.Items.Zip(b.Items, f).ToArray());
+            return new Matrix<TO>(a.RowsCount, a.ColumnsCount, a.Items.ZipAsync(b.Items, f).ToArray());                
         }
 
         public static Matrix<TO> DoEachItem<TI,TO>(IReadMatrix<TI> a, Func<TI, TO> f)
         {
-            return new Matrix<TO>(a.RowsCount, a.ColumnsCount, a.Items.Select(f).ToArray());
+            return new Matrix<TO>(a.RowsCount, a.ColumnsCount, a.Items.SelectAsync(f).ToArray());
         }
 
         public static Matrix<T> Add<T>(Matrix<T> a, Matrix<T> b) where T : ISetAdditive<T>
@@ -55,22 +57,25 @@ namespace Licenta.Commons.Math
 
             var items = new TO[a.RowsCount * a.ColumnsCount];
 
-            for(int r=0;r<a.RowsCount;r++)            
+            ParallelForLoop.Run(r =>
+            {
                 for (int c = 0; c < a.ColumnsCount; c++)
                 {
                     int ix = r * a.ColumnsCount + c;
 
-                    for(int ir=0;ir<b.RowsCount;ir++)
+                    for (int ir = 0; ir < b.RowsCount; ir++)
                     {
                         int r2 = r + ir - dr;
-                        for (int ic=0;ic<b.ColumnsCount;ic++)
+                        for (int ic = 0; ic < b.ColumnsCount; ic++)
                         {
                             int c2 = c + ic - dc;
                             TI1 t = GetItem(a, r2, c2, borderFilter);
                             items[ix] = items[ix].Add(t.Multiply(b[ir, ic]));
                         }
                     }
-                }            
+                }
+            }, 0, a.RowsCount);
+
             return new Matrix<TO>(a.RowsCount, a.ColumnsCount, items);
         }
 
