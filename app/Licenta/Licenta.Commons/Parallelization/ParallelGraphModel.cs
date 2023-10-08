@@ -1,10 +1,10 @@
-﻿using Licenta.Commons.Utils;
+﻿using HelpersCurveDetectorDataSetGenerator.Commons.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Licenta.Commons.Parallelization
+namespace HelpersCurveDetectorDataSetGenerator.Commons.Parallelization
 {
     public class ParallelGraphModel
     {

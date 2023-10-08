@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Licenta.Commons.Parallelization
+namespace HelpersCurveDetectorDataSetGenerator.Commons.Parallelization
 {
     public class TaskManager
     {

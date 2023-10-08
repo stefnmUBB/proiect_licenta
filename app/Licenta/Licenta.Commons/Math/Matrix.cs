@@ -1,8 +1,9 @@
-﻿using Licenta.Commons.Utils;
+﻿using HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics;
+using HelpersCurveDetectorDataSetGenerator.Commons.Utils;
 using System;
 using System.Linq;
 
-namespace Licenta.Commons.Math
+namespace HelpersCurveDetectorDataSetGenerator.Commons.Math
 {
     public interface IMatrix
     {
@@ -51,6 +52,13 @@ namespace Licenta.Commons.Math
             set => Items[row * ColumnsCount + column] = value;
         }
 
+        public T[] GetRowArray(int index)
+        {
+            if (index < 0 || index >= RowsCount)
+                throw new IndexOutOfRangeException($"Invalid row index: {index}");
+            return Items.Skip(index * ColumnsCount).Take(ColumnsCount).ToArray();
+        }
+
         public Matrix<T> GetRow(int index)
         {
             if (index < 0 || index >= RowsCount)
@@ -93,7 +101,20 @@ namespace Licenta.Commons.Math
             var maxLen = itemsstr.Max(_ => _.Length);
             itemsstr = itemsstr.Select(_ => _.PadRight(maxLen)).ToArray();
             return itemsstr.GroupChunks(ColumnsCount).Select(r => r.JoinToString(" ")).JoinToString("\n");
-
         }
-    }
+
+        public Matrix<T> Transpose
+        {
+            get 
+            {
+                var matrix = new Matrix<T>(ColumnsCount, RowsCount);
+                for(int i=0;i<RowsCount;i++)
+                {
+                    for (int j = 0; j < ColumnsCount; j++)
+                        matrix[j, i] = this[i, j];
+                }
+                return matrix;
+            }
+        }
+    }    
 }

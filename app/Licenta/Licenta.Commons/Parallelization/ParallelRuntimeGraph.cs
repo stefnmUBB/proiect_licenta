@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 
-namespace Licenta.Commons.Parallelization
+namespace HelpersCurveDetectorDataSetGenerator.Commons.Parallelization
 {
     internal class ParallelRuntimeGraph
     {

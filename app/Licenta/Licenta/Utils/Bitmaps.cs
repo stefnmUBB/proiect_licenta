@@ -1,13 +1,14 @@
-﻿using Licenta.Imaging;
+﻿using HelpersCurveDetectorDataSetGenerator.Imaging;
 using System;
 using System.Drawing.Imaging;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Licenta.Commons.Utils;
+using HelpersCurveDetectorDataSetGenerator.Commons.Utils;
 using System.Runtime.InteropServices.WindowsRuntime;
+using HelpersCurveDetectorDataSetGenerator.Commons.Parallelization;
 
-namespace Licenta.Utils
+namespace HelpersCurveDetectorDataSetGenerator.Utils
 {
     public static class Bitmaps
     {
@@ -16,7 +17,7 @@ namespace Licenta.Utils
 
         public static Bitmap ToBitmap(this ImageRGB image)
         {
-            var colors = image.Items.Select(_ => _.Clamp()).Select(ToColor).Select(_ => _.ToArgb()).ToArray();
+            var colors = image.Items.SelectAsync(_ => ToColor(_.Clamp()).ToArgb()).ToArray();
             var bitmap = new Bitmap(image.Width, image.Height, PixelFormat.Format32bppRgb);
             var r = new Rectangle(Point.Empty, bitmap.Size);
             var data = bitmap.LockBits(r, ImageLockMode.WriteOnly, bitmap.PixelFormat);

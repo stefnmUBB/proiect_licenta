@@ -1,20 +1,32 @@
-﻿using Licenta.Commons.Math;
-using Licenta.Commons.Math.Arithmetics;
-using Licenta.Commons.Parallelization;
-using Licenta.Commons.Utils;
-using Licenta.Imaging;
+﻿using HelpersCurveDetectorDataSetGenerator.Commons.Math;
+using HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics;
+using HelpersCurveDetectorDataSetGenerator.Commons.Parallelization;
+using HelpersCurveDetectorDataSetGenerator.Commons.Utils;
+using HelpersCurveDetectorDataSetGenerator.Imaging;
 using System;
+using System.Runtime.Remoting.Messaging;
 
-namespace Licenta.Utils.ParallelModels
+namespace HelpersCurveDetectorDataSetGenerator.Utils.ParallelModels
 {
     using DoubleMatrix = Matrix<DoubleNumber>;
     internal class CannyEdgeDetectionParallelModel : ParallelGraphModel
     {
-        public CannyEdgeDetectionParallelModel()
+        private double Threshold0;
+        private double Threshold1;
+
+        public CannyEdgeDetectionParallelModel(CannyEdgeDetectionOptions options)
         {
+            Threshold0 = options.Threshold0;
+            Threshold1 = options.Threshold1;
+
+
             var inputImage = CreateInput<ImageRGB>();
 
-            var grayScaleFilter = CreateNode<ImageRGB>(ToGrayscale, inputImage);
+            var grayScaleFilter1 = CreateNode<ImageRGB>(ToGrayscaleDefault, inputImage);
+            var grayScaleFilter2 = CreateNode<ImageRGB>(ToGrayscaleUniform, inputImage);
+            var grayScaleFilter = CreateNode<DoubleMatrix, DoubleMatrix>(Average, grayScaleFilter1, grayScaleFilter2);
+
+
             var gaussianFilter = CreateNode<DoubleMatrix>(GaussianFilter, grayScaleFilter);
 
             var gradX = CreateNode<DoubleMatrix>(ComputeGradX, gaussianFilter);
@@ -25,12 +37,31 @@ namespace Licenta.Utils.ParallelModels
 
             var refined = CreateNode<DoubleMatrix, DoubleMatrix>(Refine, magnitude, direction);
 
-            var doubleThreshold = CreateOutput<DoubleMatrix>(_ => Matrices.ApplyDoubleThreshold(_, 0, 1, 0.2, 0.8), refined);
+            //var normalized = CreateNode<DoubleMatrix>(Normalize, refined);
+
+            var doubleThreshold = CreateOutput<DoubleMatrix>(DoubleThreshold, refined);
         }
+
+        public DoubleMatrix DoubleThreshold(DoubleMatrix m)
+        {
+            return Matrices.ApplyDoubleThreshold(m, 0, 1, Threshold0, Threshold1);
+        }        
 
         public DoubleMatrix Run(ImageRGB image, TaskManager tm = null) => Run(tm, new object[] { image })[0] as DoubleMatrix;
 
-        private static DoubleMatrix ToGrayscale(ImageRGB img) => img.ToGrayScaleMatrix();
+
+        private static DoubleMatrix Normalize(DoubleMatrix m)
+        {
+            var max = Matrices.MaxElement(m);
+            Console.WriteLine($"Max={max}");
+            if (max.Value == 0)
+                return new DoubleMatrix(m);
+            return Matrices.DoEachItem(m, x => x.Divide(max));
+        }
+        private static DoubleMatrix ToGrayscaleDefault(ImageRGB img) => img.ToGrayScaleMatrixLinear();
+        private static DoubleMatrix ToGrayscaleUniform(ImageRGB img) => img.ToGrayScaleMatrixLinear(1.0 / 3, 1.0 / 3, 1.0 / 3);
+        private static DoubleMatrix Average(DoubleMatrix m1, DoubleMatrix m2)
+            => Matrices.DoItemByItem(m1, m2, (a, b) => a.Add(b).Multiply(0.5));
         private static DoubleMatrix GaussianFilter(DoubleMatrix m) => Matrices.Convolve(m, Kernels.GaussianFilter(5, 5, 1.0));
         private static DoubleMatrix ComputeGradX(DoubleMatrix m) => Matrices.Convolve(m, Kernels.SobelX());
         private static DoubleMatrix ComputeGradY(DoubleMatrix m) => Matrices.Convolve(m, Kernels.SobelY());

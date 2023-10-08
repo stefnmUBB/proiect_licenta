@@ -1,5 +1,5 @@
-﻿using Licenta.Commons.Math;
-using Licenta.Commons.Math.Arithmetics;
+﻿using HelpersCurveDetectorDataSetGenerator.Commons.Math;
+using HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Licenta.Imaging
+namespace HelpersCurveDetectorDataSetGenerator.Imaging
 {
     public static class Kernels
     {
@@ -32,11 +32,9 @@ namespace Licenta.Imaging
                 return v;
             });
             if (normalize)
-            {
-                Console.WriteLine(Matrices.ItemsSum(m));
+            {                
                 m = Matrices.Divide(m, Matrices.ItemsSum(m));
-            }
-            Console.WriteLine(Matrices.ItemsSum(m));
+            }            
             return m;
         }
 

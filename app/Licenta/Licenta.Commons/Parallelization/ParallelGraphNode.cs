@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Licenta.Commons.Parallelization
+namespace HelpersCurveDetectorDataSetGenerator.Commons.Parallelization
 {
     public class ParallelGraphNode
     {

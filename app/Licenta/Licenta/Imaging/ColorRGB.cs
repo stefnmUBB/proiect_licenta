@@ -1,8 +1,8 @@
-﻿using Licenta.Commons.Math;
-using Licenta.Commons.Math.Arithmetics;
-using Licenta.Commons.Utils;
+﻿using HelpersCurveDetectorDataSetGenerator.Commons.Math;
+using HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics;
+using HelpersCurveDetectorDataSetGenerator.Commons.Utils;
 
-namespace Licenta.Imaging
+namespace HelpersCurveDetectorDataSetGenerator.Imaging
 {
     using ColorComponentType = DoubleNumber;
     public struct ColorRGB : ISetAddSubOperative<ColorRGB>, ISetMultiplicative<ColorComponentType, ColorRGB>

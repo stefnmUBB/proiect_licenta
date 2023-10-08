@@ -1,9 +1,9 @@
-﻿using Licenta.Commons.Math;
-using Licenta.Commons.Math.Arithmetics;
-using Licenta.Utils;
+﻿using HelpersCurveDetectorDataSetGenerator.Commons.Math;
+using HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics;
+using HelpersCurveDetectorDataSetGenerator.Utils;
 using System.Drawing;
 
-namespace Licenta.Imaging
+namespace HelpersCurveDetectorDataSetGenerator.Imaging
 {
     public class ImageRGB : Matrix<ColorRGB>
     {
@@ -17,6 +17,6 @@ namespace Licenta.Imaging
         public ImageRGB(IReadMatrix<DoubleNumber> m) : base(m.Select(v => new ColorRGB(v, v, v))) { }
 
         public ImageRGB Convolve(Matrix<DoubleNumber> c) 
-            => new ImageRGB(Matrices.Convolve<ColorRGB, DoubleNumber, ColorRGB>(this, c));
+            => new ImageRGB(Matrices.Convolve<ColorRGB, DoubleNumber, ColorRGB>(this, c));        
     }
 }

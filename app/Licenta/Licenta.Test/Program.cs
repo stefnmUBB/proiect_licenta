@@ -1,11 +1,13 @@
-﻿using Licenta.Commons.Math;
-using Licenta.Commons.Math.Arithmetics;
-using Licenta.Commons.Parallelization;
-using Licenta.Commons.Utils;
-using Licenta.Imaging;
-using Licenta.Utils;
+﻿using HelpersCurveDetectorDataSetGenerator.Commons.Math;
+using HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics;
+using HelpersCurveDetectorDataSetGenerator.Commons.Parallelization;
+using HelpersCurveDetectorDataSetGenerator.Commons.Utils;
+using HelpersCurveDetectorDataSetGenerator.Imaging;
+using HelpersCurveDetectorDataSetGenerator.Utils;
+using HelpersCurveDetectorDataSetGenerator.Utils.ParallelModels;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -13,7 +15,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Licenta.Test
+namespace HelpersCurveDetectorDataSetGenerator.Test
 {
     internal class Program
     {
@@ -25,20 +27,48 @@ namespace Licenta.Test
         private static TaskManager TaskManager = new TaskManager(10).RunAsync();
 
         static void Main(string[] args)
+        {           
+
+            var dataset = new string[] { @"D:\Users\Stefan\Datasets\reteta.png" };
+
+            var img = new ImageRGB(new Bitmap(dataset[0]));
+            for (int t0 = 0; t0 < 50; t0 += 10) 
+            {
+                for (int t1 = 50; t1 < 100; t1 += 10) 
+                {
+                    var opts = new CannyEdgeDetectionOptions(t0 * 0.01, t1 * 0.01);
+                    Console.WriteLine(opts);
+                    var newImg = Images.CannyEdgeDetection(img, options: opts, tm: TaskManager);
+
+                    Console.WriteLine("Saving"); 
+                    using (var bmp = newImg.ToBitmap())
+                        bmp.Save($@"dttest\{t0}_{t1}.png");
+                }
+            }                 
+        }
+
+        private static void DefaultMain()
         {
-            List<long> times = new List<long>();            
+            List<long> times = new List<long>();
+            var dataset = Directory.GetFiles(@"D:\Users\Stefan\Datasets\JL");
+            ImageRGB img;
 
             int i = 0;
-            foreach (var arg in Directory.GetFiles(@"D:\Users\Stefan\Datasets\JL").Take(10)) 
-            {               
+            foreach (var arg in dataset)
+            {
                 Console.WriteLine(arg);
-                var bmp = new Bitmap(arg);// @"C:\Users\Stefan\Desktop\017.jpg");
-                bmp = Rescale(bmp, 50);
-                Console.WriteLine("Loading");
-                var img = new ImageRGB(bmp);
-                Console.WriteLine("Detecting edges");                
-                var time = Time.Measure(() => img = Images.CannyEdgeDetection(img, TaskManager));
+                Console.WriteLine("Loading");                
+                using (var bmp = new Bitmap(arg))
+                    img = new ImageRGB(bmp);
+                Console.WriteLine("Detecting edges");
+                var time = Time.Measure(() => img = Images.CannyEdgeDetection(img, tm: TaskManager));
                 times.Add(time);
+
+                //var k = new Matrix<DoubleNumber>(3, 3, new DoubleNumber[] { 1, 1, 1, 1, 0, 1, 1, 1, 1 });
+                //img = img.Convolve(Matrices.Multiply(k, new DoubleNumber(1.0 / 8)));
+
+                //img = img.Convolve(Kernels.GaussianFilter(3, 3));
+
                 Console.WriteLine("Saving");
                 img.ToBitmap().Save($"res\\{i++}.png");
             }

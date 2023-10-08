@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace Licenta.Commons.Utils
+namespace HelpersCurveDetectorDataSetGenerator.Commons.Utils
 {
     public static class Time
     {

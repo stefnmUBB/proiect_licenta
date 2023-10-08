@@ -1,4 +1,4 @@
-﻿namespace Licenta.Commons.Math.Arithmetics
+﻿namespace HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics
 {
     public struct IntNumber : INumber, IAddSubMulDivOperative<IntNumber>
     {

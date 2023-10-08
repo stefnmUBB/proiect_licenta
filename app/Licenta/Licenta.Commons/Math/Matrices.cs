@@ -1,10 +1,10 @@
-﻿using Licenta.Commons.Parallelization;
-using Licenta.Commons.Utils;
+﻿using HelpersCurveDetectorDataSetGenerator.Commons.Parallelization;
+using HelpersCurveDetectorDataSetGenerator.Commons.Utils;
 using System;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Licenta.Commons.Math
+namespace HelpersCurveDetectorDataSetGenerator.Commons.Math
 {
     public static class Matrices
     {
@@ -95,13 +95,37 @@ namespace Licenta.Commons.Math
                 case ConvolutionBorder.Wrap: return m[Mod(i, m.RowsCount), Mod(j, m.ColumnsCount)];
                 default: throw new ArgumentException("Invalid border filter");
             }        
-        }
+        }        
 
         public enum ConvolutionBorder
         {
             Crop,
             Extend,
             Wrap,            
+        }
+
+        public static T MaxElement<T>(IReadMatrix<T> mat) where T:IComparable
+        {
+            return mat.Items.Max();                      
+        }
+
+        public static Matrix<double> Subtract(Matrix<double> a, Matrix<double> b)
+            => DoItemByItem(a, b, (x, y) => x - y);
+
+        public static Matrix<double> Multiply(IReadMatrix<double> a, IReadMatrix<double> b)
+        {
+            if (a.ColumnsCount != b.RowsCount)
+                throw new InvalidOperationException($"Cannot multiply matrices of dimensions ({a.RowsCount},{a.ColumnsCount}) and ({b.RowsCount},{b.ColumnsCount})");
+            var p = new Matrix<double>(a.RowsCount, b.ColumnsCount);
+            ParallelForLoop.Run(r =>
+            {
+                for (int c = 0; c < p.ColumnsCount; c++)
+                {
+                    for (int k = 0; k < a.ColumnsCount; k++)
+                        p[r, c] += a[r, k] * b[k, c];
+                }
+            }, 0, p.RowsCount);
+            return p;
         }
     }
 }

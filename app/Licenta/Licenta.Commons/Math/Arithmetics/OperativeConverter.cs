@@ -1,4 +1,4 @@
-﻿using Licenta.Commons.Utils;
+﻿using HelpersCurveDetectorDataSetGenerator.Commons.Utils;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
 
-namespace Licenta.Commons.Math.Arithmetics
+namespace HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics
 {
     public static class OperativeConverter
     {

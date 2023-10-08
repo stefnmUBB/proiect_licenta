@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Licenta.Commons.Utils
+namespace HelpersCurveDetectorDataSetGenerator.Commons.Utils
 {
     public static class Reflection
     {

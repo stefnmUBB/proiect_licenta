@@ -44,6 +44,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AI\AnnLayerModel.cs" />
+    <Compile Include="AI\HiddenLayerAttribute.cs" />
+    <Compile Include="AI\History.cs" />
+    <Compile Include="AI\LossFunctions.cs" />
+    <Compile Include="AI\Perceptron.cs" />
+    <Compile Include="AI\AnnModel.cs" />
+    <Compile Include="AI\Perceptrons\Input.cs" />
+    <Compile Include="AI\Perceptrons\LeakyRelu.cs" />
+    <Compile Include="AI\Perceptrons\Output.cs" />
+    <Compile Include="AI\Perceptrons\Relu.cs" />
+    <Compile Include="AI\Perceptrons\Self.cs" />
+    <Compile Include="AI\Perceptrons\Sigmoid.cs" />
+    <Compile Include="AI\RuntimeAnn.cs" />
     <Compile Include="Initializer.cs" />
     <Compile Include="Math\Arithmetics\Attributes.cs" />
     <Compile Include="Math\Arithmetics\BuiltInConverters.cs" />

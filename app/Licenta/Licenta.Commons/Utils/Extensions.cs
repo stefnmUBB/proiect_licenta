@@ -1,9 +1,10 @@
-﻿using Licenta.Commons.Math;
-using Licenta.Commons.Math.Arithmetics;
+﻿using HelpersCurveDetectorDataSetGenerator.Commons.Math;
+using HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Licenta.Commons.Utils
+namespace HelpersCurveDetectorDataSetGenerator.Commons.Utils
 {
     public static class Extensions
     {
@@ -22,5 +23,23 @@ namespace Licenta.Commons.Utils
 
         public static string JoinToString<T>(this IEnumerable<T> items, string delimiter)
             => string.Join(delimiter, items.Select(_ => _.ToString()));
+
+        public static int IndexOfMax<T>(this IEnumerable<T> sequence) where T : IComparable<T>
+        {
+            int maxIndex = -1;
+            T maxValue = default(T);
+
+            int index = 0;
+            foreach (T value in sequence)
+            {
+                if (value.CompareTo(maxValue) > 0 || maxIndex == -1)
+                {
+                    maxIndex = index;
+                    maxValue = value;
+                }
+                index++;
+            }
+            return maxIndex;
+        }
     }
 }
