@@ -1,4 +1,4 @@
-﻿namespace HelpersCurveDetectorDataSetGenerator.TestGUI
+﻿namespace Licenta.TestGUI
 {
     partial class Form1
     {

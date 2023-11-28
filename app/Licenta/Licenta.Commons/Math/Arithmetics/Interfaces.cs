@@ -1,4 +1,4 @@
-﻿namespace HelpersCurveDetectorDataSetGenerator.Commons.Math
+﻿namespace Licenta.Commons.Math
 {
     public interface IOperative { IOperative Clone(); }    
     public interface IAdditive<in T> : IOperative { IOperative Add(T x); }    

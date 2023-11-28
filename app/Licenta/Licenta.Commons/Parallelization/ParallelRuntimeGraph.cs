@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 
-namespace HelpersCurveDetectorDataSetGenerator.Commons.Parallelization
+namespace Licenta.Commons.Parallelization
 {
     internal class ParallelRuntimeGraph
     {
@@ -16,6 +16,27 @@ namespace HelpersCurveDetectorDataSetGenerator.Commons.Parallelization
 
         private object[] InputValues;
 
+        public object[] ExecuteSync(object[] inputs)
+        {
+            InputValues = inputs;
+
+            var pendingNodes = new HashSet<ParallelRuntimeNode>(Nodes);            
+            while (pendingNodes.Count > 0)
+            {
+                Thread.Sleep(10);
+                foreach (var node in pendingNodes.ToArray())
+                {
+                    if (node.IsInputReady)
+                    {
+                        pendingNodes.Remove(node);
+                        node.Execute();                        
+                    }
+                }
+            }            
+            return Outputs.Select(_ => _.Result).ToArray();
+        }
+
+
         public object[] Execute(TaskManager tm, object[] inputs)
         {            
             InputValues = inputs;
@@ -24,7 +45,7 @@ namespace HelpersCurveDetectorDataSetGenerator.Commons.Parallelization
             var tg = tm.CreateTaskGroup();
             while (pendingNodes.Count > 0)
             {
-                Thread.Sleep(10);
+                Thread.Sleep(2);
                 foreach (var node in pendingNodes.ToArray()) 
                 {                    
                     if (node.IsInputReady) 

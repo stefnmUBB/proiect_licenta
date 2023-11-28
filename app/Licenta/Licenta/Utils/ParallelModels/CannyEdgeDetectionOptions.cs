@@ -1,4 +1,4 @@
-﻿namespace HelpersCurveDetectorDataSetGenerator.Utils.ParallelModels
+﻿namespace Licenta.Utils.ParallelModels
 {
     public class CannyEdgeDetectionOptions
     {

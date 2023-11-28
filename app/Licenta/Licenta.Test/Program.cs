@@ -1,10 +1,10 @@
-﻿using HelpersCurveDetectorDataSetGenerator.Commons.Math;
-using HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics;
-using HelpersCurveDetectorDataSetGenerator.Commons.Parallelization;
-using HelpersCurveDetectorDataSetGenerator.Commons.Utils;
-using HelpersCurveDetectorDataSetGenerator.Imaging;
-using HelpersCurveDetectorDataSetGenerator.Utils;
-using HelpersCurveDetectorDataSetGenerator.Utils.ParallelModels;
+﻿using Licenta.Commons.Math;
+using Licenta.Commons.Math.Arithmetics;
+using Licenta.Commons.Parallelization;
+using Licenta.Commons.Utils;
+using Licenta.Imaging;
+using Licenta.Utils;
+using Licenta.Utils.ParallelModels;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -15,7 +15,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HelpersCurveDetectorDataSetGenerator.Test
+namespace Licenta.Test
 {
     internal class Program
     {

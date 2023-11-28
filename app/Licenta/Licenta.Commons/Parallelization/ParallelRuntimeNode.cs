@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
-namespace HelpersCurveDetectorDataSetGenerator.Commons.Parallelization
+namespace Licenta.Commons.Parallelization
 {
     internal class ParallelRuntimeNode
     {
@@ -31,13 +31,14 @@ namespace HelpersCurveDetectorDataSetGenerator.Commons.Parallelization
 
         public void Execute()
         {
-            Debug.WriteLine($"[Parallel] Execute {Delegate.Method.Name}");
+            //Debug.WriteLine($"[Parallel] Execute {Delegate.Method.Name}");
             try
             {
                 _Result = Delegate.DynamicInvoke(InputNodes.Select(_ => _.Result).ToArray());
             }
             catch(Exception e)
             {
+                throw;
                 Debug.WriteLine(e.Message);                
                 Environment.Exit(-1);
             }

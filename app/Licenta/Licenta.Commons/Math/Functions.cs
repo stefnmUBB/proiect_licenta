@@ -1,11 +1,11 @@
-﻿using HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics;
+﻿using Licenta.Commons.Math.Arithmetics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HelpersCurveDetectorDataSetGenerator.Commons.Math
+namespace Licenta.Commons.Math
 {
     public static class Functions
     {

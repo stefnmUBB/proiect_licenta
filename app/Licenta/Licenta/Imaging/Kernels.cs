@@ -1,5 +1,5 @@
-﻿using HelpersCurveDetectorDataSetGenerator.Commons.Math;
-using HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics;
+﻿using Licenta.Commons.Math;
+using Licenta.Commons.Math.Arithmetics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HelpersCurveDetectorDataSetGenerator.Imaging
+namespace Licenta.Imaging
 {
     public static class Kernels
     {

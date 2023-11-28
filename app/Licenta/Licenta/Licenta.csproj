@@ -37,6 +37,7 @@
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
     </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -45,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Imaging\ColorHSL.cs" />
     <Compile Include="Imaging\ColorRGB.cs" />
     <Compile Include="Imaging\ImageRGB.cs" />
     <Compile Include="Imaging\Kernels.cs" />
@@ -52,9 +54,19 @@
     <Compile Include="TraceOver\TracedPath.cs" />
     <Compile Include="TraceOver\TraceOverDevice.cs" />
     <Compile Include="Utils\Bitmaps.cs" />
+    <Compile Include="Utils\Display.cs" />
+    <Compile Include="Utils\Forms\ImageRGBDisplayForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Utils\Forms\ImageRGBDisplayForm.Designer.cs">
+      <DependentUpon>ImageRGBDisplayForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Utils\ParallelModels\CannyEdgeDetectionOptions.cs" />
     <Compile Include="Utils\Images.cs" />
+    <Compile Include="Utils\ParallelModels\MonochromeParallelModel.cs" />
     <Compile Include="Utils\ParallelModels\CannyEdgeDetectionParallelModel.cs" />
+    <Compile Include="Utils\ParallelModels\PotraceParallelModel.cs" />
+    <Compile Include="Utils\Potrace.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -65,6 +77,10 @@
       <Name>Licenta.Commons</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Utils\Forms\ImageRGBDisplayForm.resx">
+      <DependentUpon>ImageRGBDisplayForm.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

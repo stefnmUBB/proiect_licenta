@@ -1,12 +1,12 @@
-﻿using HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics;
-using HelpersCurveDetectorDataSetGenerator.Commons.Utils;
+﻿using Licenta.Commons.Math.Arithmetics;
+using Licenta.Commons.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HelpersCurveDetectorDataSetGenerator.Commons
+namespace Licenta.Commons
 {
     public static class Initializer
     {

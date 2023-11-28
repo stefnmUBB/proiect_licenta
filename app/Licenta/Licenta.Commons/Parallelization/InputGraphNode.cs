@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace HelpersCurveDetectorDataSetGenerator.Commons.Parallelization
+namespace Licenta.Commons.Parallelization
 {
     public class InputGraphNode : ParallelGraphNode
     {

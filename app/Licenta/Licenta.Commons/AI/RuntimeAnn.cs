@@ -1,17 +1,25 @@
-﻿using HelpersCurveDetectorDataSetGenerator.Commons.Math;
-using HelpersCurveDetectorDataSetGenerator.Commons.Parallelization;
+﻿using Licenta.Commons.Math;
+using Licenta.Commons.Parallelization;
 using Licenta.Commons.AI.Perceptrons;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Security.Authentication.ExtendedProtection;
 using System.Threading;
+using System.Reflection.Emit;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 
 namespace Licenta.Commons.AI
 {
     public class RuntimeAnn
     {
+        private AnnModel Model;
+
         private readonly Perceptron[][] Layers;
         private readonly Matrix<double>[] Weights;
         private readonly Input[] InputLayer;
@@ -33,17 +41,26 @@ namespace Licenta.Commons.AI
             for (int i = 0; i < Layers.Length; i++)
             {
                 PerceptronOutputs[i] = new double[Layers[i].Length];
-                ErrW.Add(new double[Layers[i].Length]);
+                ErrW.Add(new double[Layers[i].Length]);                
             }
+
+            for (int i = 0; i < weights.Length; i++)
+                DeltaWeights.Add(new Matrix<double>(weights[i].RowsCount, weights[i].ColumnsCount));
         }        
 
         private double XW(int layer, int nodeId)
         {
-            if (layer == 0) return 0;
-            var row = Weights[layer - 1].GetRowArray(nodeId);
-            return Weights[layer - 1].GetRowArray(nodeId).Zip(PerceptronOutputs[layer - 1], (x, y) => x * y).Sum();            
+            if (layer == 0) return 0;            
+            double result = 0;
+            var weights = Weights[layer - 1].Items;
+            var len = Weights[layer - 1].ColumnsCount;
+            var rowIndex = len * nodeId;
+            var outputs = PerceptronOutputs[layer - 1];
+            for (int i = 0; i < len; i++) result += weights[rowIndex + i] * outputs[i];
+            return result;                        
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ComputeValueOf(int i, int j)
         {
             PerceptronOutputs[i][j] = Layers[i][j].Activate(XW(i, j));
@@ -51,18 +68,14 @@ namespace Licenta.Commons.AI
 
         private void PropagateInformation()
         {
-            for (int j = 0; j < InputLayer.Length; j++)
-                PerceptronOutputs[0][j] = InputLayer[j].Value;
+            //ParallelForLoop.RunPartitioned(0, InputLayer.Length, j => PerceptronOutputs[0][j] = InputLayer[j].Value);
+            for (int j = 0; j < InputLayer.Length; j++) PerceptronOutputs[0][j] = InputLayer[j].Value;
 
-            /*ParallelForLoop.Run(i =>
-            {
-                for (int j = 0; j < Layers[i].Length; j++)
-                    ComputeValueOf(i, j);
-            }, 0, Layers.Length);*/            
-
-            for (int i = 1; i < Layers.Length; i++)
-                for (int j = 0; j < Layers[i].Length; j++)
-                    ComputeValueOf(i, j);            
+            for(int i=1;i<Layers.Length;i++)
+            {                
+                //ParallelForLoop.RunPartitioned(0, Layers[i].Length, j => ComputeValueOf(i, j));
+                for (int j = 0; j < Layers[i].Length; j++) ComputeValueOf(i, j);
+            }                        
         }
 
         private void PropagateInformation(double[] x)
@@ -71,12 +84,12 @@ namespace Licenta.Commons.AI
             PropagateInformation();
         }
 
-        private void PropagateError(double[] x, double[] t, double learningRate = 0.001)
+        private void PropagateError(double[] x, double[] t, double learningRate)
         {
             for (int r = 0; r < OutputLayer.Length; r++) 
             {
                 var d = OutputLayer[r].Derivative(XW(Layers.Length - 1, r));
-                var del = d * (t[r] - PerceptronOutputs.Last()[r]);
+                var del = d * (t[r] - PerceptronOutputs[PerceptronOutputs.Length - 1][r]);
                 ErrW[Layers.Length - 1][r] = del;
                 //Console.WriteLine($"Err={del}");
             }
@@ -92,32 +105,26 @@ namespace Licenta.Commons.AI
                 for (int h1 = 0; h1 < thisLayer.Length; h1++)
                 {
                     var d = thisLayer[h1].Derivative(XW(thisLayerId, h1));
-                    //ErrW[thisLayerId][h1] = d * w.GetRow(h1).ToArray().DotProduct(ErrW[nextLayerId]);
+
                     ErrW[thisLayerId][h1] = 0;
 
-                    //Debug.WriteLine($"PE W=({w.RowsCount}, {w.ColumnsCount})");
-                    //Debug.WriteLine($"PE h1={h1}");
-                    //Debug.WriteLine($"PE h2Max={nextLayer.Length}");                    
-
-                    for (int h2 = 0; h2 < nextLayer.Length; h2++)
-                    {
+                    for (int h2 = 0; h2 < nextLayer.Length; h2++) 
                         ErrW[thisLayerId][h1] += d * w[h2, h1] * ErrW[nextLayerId][h2];
-                    }
+                    //ErrW[thisLayerId][h1] = ParallelForLoop.Sum(0, nextLayer.Length, h2 => d * w[h2, h1] * ErrW[nextLayerId][h2]);
 
                     for (int h2 = 0; h2 < nextLayer.Length; h2++)
-                    {
                         w[h2, h1] += learningRate * ErrW[nextLayerId][h2] * PerceptronOutputs[thisLayerId][h1];
-                    }
+                    //ParallelForLoop.RunPartitioned(0, nextLayer.Length, h2 => w[h2, h1] += learningRate * ErrW[nextLayerId][h2] * PerceptronOutputs[thisLayerId][h1]);
                 }
             }
         }
 
-        private void PropagateErrorBatch(double[] x, double[] t, double learningRate = 0.001)
+        private void PropagateErrorBatch(double[] x, double[] t, double learningRate)
         {
             for (int r = 0; r < OutputLayer.Length; r++)
             {
                 var d = OutputLayer[r].Derivative(XW(Layers.Length - 1, r));
-                var del = d * (t[r] - PerceptronOutputs.Last()[r]);
+                var del = d * (t[r] - PerceptronOutputs[PerceptronOutputs.Length-1][r]);
                 ErrW[Layers.Length - 1][r] = del;
             }
 
@@ -146,37 +153,72 @@ namespace Licenta.Commons.AI
             }
         }
 
-        private void Process(double[] x, double[] t, bool batch)
+        private void Process(double[] x, double[] t, bool batch, double learningRate)
         {
-            PropagateInformation(x);            
+            //Debug.WriteLine($"[ANN] PropagateInformation");
+            PropagateInformation(x);
+            //Debug.WriteLine($"[ANN] PropagateError");
             if (!batch)
-                PropagateError(x, t);
+                PropagateError(x, t, learningRate: learningRate);
             else
-                PropagateErrorBatch(x, t);
+                PropagateErrorBatch(x, t, learningRate: learningRate);
         }
 
         public History Train(IEnumerable<(double[] x, double[] t)> data, int batchSize = 0, int epochsCount = 200,
-            Func<double[], double[], double> lossFunction = null)
+            Func<double[], double[], double> lossFunction = null, double learningRate=0.001)
         {
             var history = new History();
 
             lossFunction = lossFunction ?? LossFunctions.MeanSquaredError;
+            var prevLoss = double.PositiveInfinity;
             if (batchSize == 0)
             {
                 for (int i = 0; i < epochsCount; i++)
                 {
                     Debug.WriteLine($"[ANN] Epoch {i}");                    
-                    foreach (var (x, t) in data)                    
-                        Process(x, t, batch: false);                    
-                    
-                    double loss = 0;
+                    Debug.WriteLine($"[ANN] Processing {i}");
+                    int k = 0;
                     foreach (var (x, t) in data)
                     {
-                        var o = PredictSingle(x);
-                        loss += lossFunction(t, o);                      
+                        if ((++k) % 100 == 0) Console.Title = $"[ANN] Items Cnt {k}";
+                        Process(x, t, batch: false, learningRate);
+                        
+                    }
+                    Debug.WriteLine($"[ANN] Testing {i}");
+                    double loss = 0;                    
+                    foreach (var (x, t) in data)
+                    {
+                        var o = PredictSingleInternal(x);
+                        var l = lossFunction(t, o);
+                        Debug.WriteLine(l);
+                        loss += l;
                     }
                     history.Loss.Add(loss);
+                    if (System.Math.Abs(prevLoss - loss) < 0.00001) 
+                    {
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.WriteLine($"[ANN] No Loss Delta");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        break;
+                    }
+                    prevLoss = loss;                    
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine($"[ANN] End Epoch {i}: Loss = {loss}");
+                    Console.ForegroundColor = ConsoleColor.White;
+
+                    if (loss < 0.1) break; // satisfying
+
+                    if (double.IsNaN(loss))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.WriteLine($"[ANN] NaN");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        break;
+                    }
                 }
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"[ANN] Done Training");
+                Console.ForegroundColor = ConsoleColor.White;
             }
             else
             {
@@ -192,18 +234,23 @@ namespace Licenta.Commons.AI
                     {
                         foreach (var (x, t) in batch)
                         {
-                            Process(x, t, batch: true);
-                        }
+                            Process(x, t, batch: true, learningRate);
+                        }                        
                         CommitDeltaWeights();
 
 
                         double loss = 0;
                         foreach (var (x, t) in data)
                         {
-                            var o = PredictSingle(x);
+                            var o = PredictSingleInternal(x);
                             loss += lossFunction(t, o);
                         }
                         history.Loss.Add(loss);
+                        if (System.Math.Abs(prevLoss - loss) < 0.00001)
+                            break;
+                        prevLoss = loss;
+
+                        if (double.IsNaN(loss)) break;
                     }
                 }
 
@@ -212,18 +259,20 @@ namespace Licenta.Commons.AI
         }
 
         public History Train(IEnumerable<double[]> _inputs, IEnumerable<double[]> _outputs, int batchSize = 0, int epochsCount = 200,
-            Func<double[], double[], double> lossFunction = null)
+            Func<double[], double[], double> lossFunction = null, double learningRate = 0.001)
         {
             var inputs = _inputs.ToArray();
             var outputs = _outputs.ToArray();
             var data = inputs.Zip(outputs, (i, o) => (x: i, t: o));
-            return Train(data, batchSize:batchSize, epochsCount: epochsCount, lossFunction:lossFunction);
+            return Train(data, batchSize:batchSize, epochsCount: epochsCount, lossFunction:lossFunction, learningRate:learningRate);
         }
 
-        public double[] PredictSingle(double[] input)
+        public double[] PredictSingle(double[] input) => PredictSingleInternal(input).ToArray();        
+
+        private double[] PredictSingleInternal(double[] input)
         {
             PropagateInformation(input);
-            return PerceptronOutputs.Last().ToArray();
+            return PerceptronOutputs[PerceptronOutputs.Length-1];
         }
 
         private void CommitDeltaWeights()
@@ -233,7 +282,7 @@ namespace Licenta.Commons.AI
                 var w = Weights[k];
                 var d = DeltaWeights[k];
                 for (int i = 0; i < w.RowsCount; i++)
-                {
+                {                    
                     for (int j = 0; j < w.ColumnsCount; j++) 
                     {
                         w[i, j] += d[i, j];
@@ -247,9 +296,9 @@ namespace Licenta.Commons.AI
         public static RuntimeAnn CompileFromModel(AnnModel model)
         {
             var layers = new List<Perceptron[]>();
-            var weights = new List<Matrix<double>>();            
+            var weights = new List<Matrix<double>>();
 
-            layers.Add(CompileLayer(new AnnLayerModel(typeof(Input), model.InputLength)));
+            layers.Add(new AnnLayerModel(typeof(Input), model.InputLength).Compile());
             var prevDim = model.InputLength;
 
             var nextLayers = model.HiddenLayers.ToList();
@@ -260,19 +309,14 @@ namespace Licenta.Commons.AI
             {
                 var m = new Matrix<double>(layer.PerceptronsCount, prevDim);
                 m = Matrices.DoEachItem(m, x => rand.NextDouble());
-                weights.Add(m);
+                weights.Add(m);                
 
-                layers.Add(CompileLayer(layer));
+                layers.Add(layer.Compile());
                 prevDim = layer.PerceptronsCount;
             }
 
-            return new RuntimeAnn(layers.ToArray(), weights.ToArray());
-        }
-
-        private static Perceptron[] CompileLayer(AnnLayerModel layerModel)
-            => Enumerable.Range(0, layerModel.PerceptronsCount)
-                .Select(_ => Activator.CreateInstance(layerModel.PerceptronType) as Perceptron)
-                .ToArray();
+            return new RuntimeAnn(layers.ToArray(), weights.ToArray()) { Model = model.Clone() };
+        }       
 
 
         public void SetInput(double[] input)
@@ -298,6 +342,49 @@ namespace Licenta.Commons.AI
         {
             SetInput(input);
             return ComputeOutput();
-        }      
+        }       
+
+        public SavedStateAnn ToSavedState()
+        {
+            return new SavedStateAnn(Model.Clone(), Weights.Select(_ => new Matrix<double>(_)).ToList());
+        }
+
+        public static RuntimeAnn LoadState(SavedStateAnn state)
+        {
+            var ann = CompileFromModel(state.Model);
+
+            if (state.Weights.Count != ann.Weights.Length)
+                throw new InvalidOperationException("Error loading state: wrong number of weight matrices");
+
+            for (int i = 0; i < ann.Weights.Length; i++)
+            {
+                var src = state.Weights[i];
+                var dst = ann.Weights[i];
+                if (!Matrices.HaveSameShape(src, dst))
+                    throw new InvalidOperationException("Error loading state: wrong weights matrix dimensions relative to model");
+                ann.Weights[i] = new Matrix<double>(src);
+            }
+            return ann;
+        }
+
+        public void Save(string filename)
+        {
+            using(var f=new FileStream(filename, FileMode.Create))
+            {
+                using(var bw=new BinaryWriter(f))
+                {
+                    ToSavedState().WriteToBinaryWriter(bw);
+                }
+            }
+        }
+
+        public static RuntimeAnn Load(string filename)
+        {
+            using(var f=new FileStream(filename, FileMode.Open))
+            {
+                using (var br = new BinaryReader(f))
+                    return LoadState(SavedStateAnn.ReadFromBinaryReader(br));
+            }
+        }
     }    
 }

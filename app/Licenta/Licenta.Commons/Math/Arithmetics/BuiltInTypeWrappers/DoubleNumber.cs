@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics
+namespace Licenta.Commons.Math.Arithmetics
 {
     public struct DoubleNumber : INumber, IAddSubMulDivOperative<DoubleNumber>, IComparable
     {

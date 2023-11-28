@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HelpersCurveDetectorDataSetGenerator.Commons.Parallelization
+namespace Licenta.Commons.Parallelization
 {
     public static class LinqExtensions
     {

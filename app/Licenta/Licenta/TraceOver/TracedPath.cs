@@ -1,4 +1,4 @@
-﻿namespace HelpersCurveDetectorDataSetGenerator.TraceOver
+﻿namespace Licenta.TraceOver
 {
     public class TracedPath
     {

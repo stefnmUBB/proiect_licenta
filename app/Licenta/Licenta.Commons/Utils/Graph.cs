@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace HelpersCurveDetectorDataSetGenerator.Commons.Utils
+namespace Licenta.Commons.Utils
 {
     public class Graph<T> where T:class
     {

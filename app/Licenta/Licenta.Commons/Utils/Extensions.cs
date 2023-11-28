@@ -1,15 +1,20 @@
-﻿using HelpersCurveDetectorDataSetGenerator.Commons.Math;
-using HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics;
+﻿using Licenta.Commons.Math;
+using Licenta.Commons.Math.Arithmetics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HelpersCurveDetectorDataSetGenerator.Commons.Utils
+namespace Licenta.Commons.Utils
 {
     public static class Extensions
     {
+        public static float Clamp(this float x, float a, float b) => x <= a ? a : x >= b ? b : x;
         public static double Clamp(this double x, double a, double b) => x <= a ? a : x >= b ? b : x;
         public static int Clamp(this int x, int a, int b) => x <= a ? a : x >= b ? b : x;
+        public static bool IsBetween(this int x, int a, int b) => a <= x && x <= b;
+        public static bool IsBetween(this double x, double a, double b) => a <= x && x <= b;
+
+        public static int Squared(this int x) => x * x;
 
 
         public static IEnumerable<T[]> GroupChunks<T>(this IEnumerable<T> items, int chunkSize) =>
@@ -40,6 +45,23 @@ namespace HelpersCurveDetectorDataSetGenerator.Commons.Utils
                 index++;
             }
             return maxIndex;
+        }
+
+        public static void ForEach<T>(this IEnumerable<T> items, Action<T> action)
+        {
+            foreach (var item in items)
+            {
+                action(item);
+            }
+        }
+
+        public static IEnumerable<T> Peek<T>(this IEnumerable<T> items, Action<T> action)
+        {
+            foreach(var item in items)
+            {
+                action(item);
+                yield return item;
+            }
         }
     }
 }

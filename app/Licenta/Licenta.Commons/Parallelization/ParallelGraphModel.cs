@@ -1,18 +1,28 @@
-﻿using HelpersCurveDetectorDataSetGenerator.Commons.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
-namespace HelpersCurveDetectorDataSetGenerator.Commons.Parallelization
+namespace Licenta.Commons.Parallelization
 {
     public class ParallelGraphModel
     {
         private readonly List<ParallelGraphNode> Outputs = new List<ParallelGraphNode>();
         private readonly List<InputGraphNode> Inputs = new List<InputGraphNode>();
 
+        public ParallelGraphNode CreateNestedModelNode(ParallelGraphModel model, ParallelGraphNode input1)
+            => CreateNode<object>(in1 => model.RunSync(new[] { in1 }), input1);
+
+        public ParallelGraphNode CreateNestedModelNode(ParallelGraphModel model, ParallelGraphNode input1, int resultIndex)
+            => CreateNode<object>(in1 => model.RunSync(new[] { in1 })[resultIndex], input1);        
+
+        public ParallelGraphNode CreateIndexAccessNode(int index, ParallelGraphNode input)
+        {
+            return CreateNode((object arr) => (arr as object[])[index], input);
+        }
+
         public ParallelGraphNode CreateNode(Delegate del) => new ParallelGraphNode(del);
-        public ParallelGraphNode CreateNode(Func<object> func) => new ParallelGraphNode(func);
+        public ParallelGraphNode CreateNode(Func<object> func) => new ParallelGraphNode(func);        
+
         public ParallelGraphNode CreateNode<T>(Func<T, object> func, ParallelGraphNode input1)
         {
             var node = CreateNode(func);
@@ -34,6 +44,8 @@ namespace HelpersCurveDetectorDataSetGenerator.Commons.Parallelization
             Outputs.Add(node);
             return node;
         }
+
+        public ParallelGraphNode CreateOutput(ParallelGraphNode input1) => CreateOutput<object>(_ => _, input1);
 
         public ParallelGraphNode CreateOutput<T>(Func<T, object> func, ParallelGraphNode input1)
         {
@@ -115,6 +127,11 @@ namespace HelpersCurveDetectorDataSetGenerator.Commons.Parallelization
                 tm.Stop();            
 
             return result;
-        }        
+        }
+
+        public object[] RunSync(object[] inputs)
+        {           
+            return ParallelRuntimeGraph.FromModel(this).ExecuteSync(inputs);
+        }
     }
 }

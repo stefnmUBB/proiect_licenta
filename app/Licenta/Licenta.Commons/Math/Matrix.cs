@@ -1,9 +1,11 @@
-﻿using HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics;
-using HelpersCurveDetectorDataSetGenerator.Commons.Utils;
+﻿using Licenta.Commons.Math.Arithmetics;
+using Licenta.Commons.Utils;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace HelpersCurveDetectorDataSetGenerator.Commons.Math
+namespace Licenta.Commons.Math
 {
     public interface IMatrix
     {
@@ -50,6 +52,13 @@ namespace HelpersCurveDetectorDataSetGenerator.Commons.Math
         {
             get => Items[row * ColumnsCount + column];
             set => Items[row * ColumnsCount + column] = value;
+        }
+
+        public IEnumerable<T> EnumerateRow(int index)
+        {
+            if (index < 0 || index >= RowsCount)
+                throw new IndexOutOfRangeException($"Invalid row index: {index}");
+            return Items.Skip(index * ColumnsCount).Take(ColumnsCount);
         }
 
         public T[] GetRowArray(int index)

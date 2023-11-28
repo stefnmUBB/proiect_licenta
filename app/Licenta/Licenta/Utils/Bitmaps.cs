@@ -1,14 +1,14 @@
-﻿using HelpersCurveDetectorDataSetGenerator.Imaging;
+﻿using Licenta.Imaging;
 using System;
 using System.Drawing.Imaging;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
-using HelpersCurveDetectorDataSetGenerator.Commons.Utils;
+using Licenta.Commons.Utils;
 using System.Runtime.InteropServices.WindowsRuntime;
-using HelpersCurveDetectorDataSetGenerator.Commons.Parallelization;
+using Licenta.Commons.Parallelization;
 
-namespace HelpersCurveDetectorDataSetGenerator.Utils
+namespace Licenta.Utils
 {
     public static class Bitmaps
     {
@@ -29,7 +29,7 @@ namespace HelpersCurveDetectorDataSetGenerator.Utils
         public static ColorRGB[] GetColorsFromBitmap(this Bitmap bitmap)
         {
             var r = new Rectangle(Point.Empty, bitmap.Size);
-            if (bitmap.PixelFormat == PixelFormat.Format32bppRgb || bitmap.PixelFormat == PixelFormat.Format32bppArgb)
+            if (bitmap.PixelFormat == PixelFormat.Format32bppRgb || bitmap.PixelFormat == PixelFormat.Format32bppArgb || bitmap.PixelFormat == PixelFormat.Format32bppPArgb)
             {                
                 var data = bitmap.LockBits(r, ImageLockMode.ReadOnly, bitmap.PixelFormat);
                 var ints = new int[data.Height * data.Width];
@@ -40,10 +40,19 @@ namespace HelpersCurveDetectorDataSetGenerator.Utils
             if(bitmap.PixelFormat == PixelFormat.Format24bppRgb)
             {                
                 var data = bitmap.LockBits(r, ImageLockMode.ReadOnly, bitmap.PixelFormat);
-                var bytes = new byte[data.Height * data.Width * 3];
+
+                var bytes = new byte[data.Height * data.Stride];
                 Marshal.Copy(data.Scan0, bytes, 0, bytes.Length);
                 bitmap.UnlockBits(data);
-                return bytes.GroupChunks(3).Select(c => new ColorRGB(c[0], c[1], c[2])).ToArray();                
+
+                var colors = new ColorRGB[bitmap.Width * bitmap.Height];
+                for (int y = 0; y < bitmap.Height; y++)
+                    for (int x = 0; x < bitmap.Width; x++) 
+                    {
+                        var datai = y * data.Stride + 3 * x;
+                        colors[y * bitmap.Width + x] = new ColorRGB(bytes[datai], bytes[datai + 1], bytes[datai + 2]);
+                    }
+                return colors;                
             }
             throw new InvalidOperationException($"Only 24bpp and 32bpp (A)RGB pixel formats are supported. Current Format = {bitmap.PixelFormat}");
         }

@@ -16,17 +16,20 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -44,19 +47,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AI\AnnArchBuilder.cs" />
     <Compile Include="AI\AnnLayerModel.cs" />
     <Compile Include="AI\HiddenLayerAttribute.cs" />
     <Compile Include="AI\History.cs" />
     <Compile Include="AI\LossFunctions.cs" />
+    <Compile Include="AI\ParameterAttribute.cs" />
     <Compile Include="AI\Perceptron.cs" />
     <Compile Include="AI\AnnModel.cs" />
     <Compile Include="AI\Perceptrons\Input.cs" />
     <Compile Include="AI\Perceptrons\LeakyRelu.cs" />
     <Compile Include="AI\Perceptrons\Output.cs" />
+    <Compile Include="AI\Perceptrons\ParameterizedRelu.cs" />
     <Compile Include="AI\Perceptrons\Relu.cs" />
     <Compile Include="AI\Perceptrons\Self.cs" />
     <Compile Include="AI\Perceptrons\Sigmoid.cs" />
+    <Compile Include="AI\Perceptrons\Squared.cs" />
     <Compile Include="AI\RuntimeAnn.cs" />
+    <Compile Include="AI\SavedStateAnn.cs" />
     <Compile Include="Initializer.cs" />
     <Compile Include="Math\Arithmetics\Attributes.cs" />
     <Compile Include="Math\Arithmetics\BuiltInConverters.cs" />
@@ -67,6 +75,7 @@
     <Compile Include="Math\Functions.cs" />
     <Compile Include="Math\Matrices.cs" />
     <Compile Include="Math\Matrix.cs" />
+    <Compile Include="OS\ProcessUtil.cs" />
     <Compile Include="Parallelization\InputGraphNode.cs" />
     <Compile Include="Parallelization\LinqExtensions.cs" />
     <Compile Include="Parallelization\ParallelForLoop.cs" />
@@ -77,8 +86,10 @@
     <Compile Include="Parallelization\TaskGroup.cs" />
     <Compile Include="Parallelization\TaskManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\BinaryRW.cs" />
     <Compile Include="Utils\Extensions.cs" />
     <Compile Include="Utils\Graph.cs" />
+    <Compile Include="Utils\Iterate.cs" />
     <Compile Include="Utils\Reflection.cs" />
     <Compile Include="Utils\Time.cs" />
   </ItemGroup>

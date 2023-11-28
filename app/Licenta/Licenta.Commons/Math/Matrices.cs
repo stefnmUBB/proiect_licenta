@@ -1,10 +1,11 @@
-﻿using HelpersCurveDetectorDataSetGenerator.Commons.Parallelization;
-using HelpersCurveDetectorDataSetGenerator.Commons.Utils;
+﻿using Licenta.Commons.Math.Arithmetics;
+using Licenta.Commons.Parallelization;
+using Licenta.Commons.Utils;
 using System;
 using System.Diagnostics;
 using System.Linq;
 
-namespace HelpersCurveDetectorDataSetGenerator.Commons.Math
+namespace Licenta.Commons.Math
 {
     public static class Matrices
     {
@@ -13,12 +14,30 @@ namespace HelpersCurveDetectorDataSetGenerator.Commons.Math
         {
             if (!HaveSameShape(a, b))
                 throw new InvalidOperationException("The two matrices must have same shape for this operation");
-            return new Matrix<TO>(a.RowsCount, a.ColumnsCount, a.Items.ZipAsync(b.Items, f).ToArray());                
+            return new Matrix<TO>(a.RowsCount, a.ColumnsCount, a.Items.Zip(b.Items, f).ToArray());                
         }
 
         public static Matrix<TO> DoEachItem<TI,TO>(IReadMatrix<TI> a, Func<TI, TO> f)
         {
-            return new Matrix<TO>(a.RowsCount, a.ColumnsCount, a.Items.SelectAsync(f).ToArray());
+            var m = new Matrix<TO>(a.RowsCount, a.ColumnsCount);
+            for (int i = 0; i < a.Items.Length; i++) m.Items[i] = f(a.Items[i]);
+            return m;            
+        }
+
+        public static Matrix<TO> DoEachItem<TI, TO>(IReadMatrix<TI> a, Func<TI, int, int, TO> f)
+        {
+            var m = new Matrix<TO>(a.RowsCount, a.ColumnsCount);
+            for (int i = 0, k = 0; i < a.RowsCount; i++) 
+                for (int j = 0; j < a.ColumnsCount; j++, k++) 
+                    m.Items[k] = f(a.Items[k], i,j);                        
+            return m;            
+        }
+
+        public static void ForEachItem<TI>(IReadMatrix<TI> a, Func<TI, int, int, bool> f)
+        {           
+            for (int i = 0, k = 0; i < a.RowsCount; i++)
+                for (int j = 0; j < a.ColumnsCount; j++, k++)
+                    if (!f(a.Items[k], i, j)) return;            
         }
 
         public static Matrix<T> Add<T>(Matrix<T> a, Matrix<T> b) where T : ISetAdditive<T>
@@ -36,14 +55,53 @@ namespace HelpersCurveDetectorDataSetGenerator.Commons.Math
             return m.Items.Aggregate((x, y) => x.Add(y));
         }
 
+        public static double ItemsSum(IReadMatrix<double> m)
+        {
+            return m.Items.Aggregate((x, y) => x + y);
+        }
+
         public static Matrix<T> ApplyDoubleThreshold<T>(IReadMatrix<T> m, T low, T high, T tlow, T thigh) where T:IComparable
         {
             return DoEachItem(m, x => x.CompareTo(tlow) <= 0 ? low : x.CompareTo(thigh) >= 0 ? high : x);
         }
 
-        public static Matrix<T> Convolve<T>(IReadMatrix<T> a, IReadMatrix<T> b, ConvolutionBorder borderFilter = ConvolutionBorder.Crop)
+        public static Matrix<T> Convolve<T>(IReadMatrix<T> a, IReadMatrix<T> b, ConvolutionBorder borderFilter = ConvolutionBorder.Extend)
             where T: ISetAdditive<T>, ISetMultiplicative<T>
             => Convolve<T, T, T>(a, b, borderFilter);
+
+        public static Matrix<double> Convolve(IReadMatrix<double> a, IReadMatrix<DoubleNumber> b, ConvolutionBorder borderFilter = ConvolutionBorder.Extend)
+            => Convolve(a, Matrices.DoEachItem(b, x => x.Value), borderFilter);
+
+        public static Matrix<double> Convolve(IReadMatrix<double> a, IReadMatrix<double> b, ConvolutionBorder borderFilter = ConvolutionBorder.Extend)
+        {
+            if (b.RowsCount % 2 == 0 || b.ColumnsCount % 2 == 0)
+                throw new ArgumentException("Convolution matrix must have an odd number of rows and column");
+            int dr = b.RowsCount / 2;
+            int dc = b.ColumnsCount / 2;
+
+            var items = new double[a.RowsCount * a.ColumnsCount];
+
+            ParallelForLoop.Run(r =>
+            {
+                for (int c = 0; c < a.ColumnsCount; c++)
+                {
+                    int ix = r * a.ColumnsCount + c;
+
+                    for (int ir = 0; ir < b.RowsCount; ir++)
+                    {
+                        int r2 = r + ir - dr;
+                        for (int ic = 0; ic < b.ColumnsCount; ic++)
+                        {
+                            int c2 = c + ic - dc;
+                            double t = GetItem(a, r2, c2, borderFilter);
+                            items[ix] = items[ix]+(t*(b[ir, ic]));
+                        }
+                    }
+                }
+            }, 0, a.RowsCount);
+
+            return new Matrix<double>(a.RowsCount, a.ColumnsCount, items);
+        }
 
         public static Matrix<TO> Convolve<TI1, TI2, TO>(IReadMatrix<TI1> a, IReadMatrix<TI2> b, ConvolutionBorder borderFilter = ConvolutionBorder.Crop)
             where TI1 : ISetMultiplicative<TI2, TO>
@@ -126,6 +184,36 @@ namespace HelpersCurveDetectorDataSetGenerator.Commons.Math
                 }
             }, 0, p.RowsCount);
             return p;
+        }
+
+        public static Matrix<T> SelectChunks<T>(IReadMatrix<T> m, int chkLines, int chkCols, Func<Matrix<T>, Matrix<T>> sel)
+        {
+            int chunksI = m.RowsCount / chkLines + (m.RowsCount % chkLines == 0 ? 0 : 1);
+            int chunksJ = m.ColumnsCount / chkCols + (m.ColumnsCount % chkCols == 0 ? 0 : 1);
+            var r = new Matrix<T>(m.RowsCount, m.ColumnsCount);
+            for (int ci = 0; ci < chunksI; ci++)
+            {
+                int l = System.Math.Min((ci + 1) * chkLines, m.RowsCount) - ci*chkLines;
+
+                for (int cj = 0; cj < chunksJ; cj++)
+                {
+                    int c = System.Math.Min((cj + 1) * chkCols, m.ColumnsCount) - cj * chkCols;
+
+                    var subM = new Matrix<T>(l, c);
+                    for (int i = 0; i < l; i++)
+                        for (int j = 0; j < c; j++)                         
+                            subM[i, j] = m[ci * chkLines + i, cj * chkCols + j];                    
+                    subM = sel(subM);
+
+                    if (subM.RowsCount != l || subM.ColumnsCount != c)
+                        throw new InvalidOperationException("Submatrix selector changed dimensions");
+
+                    for (int i = 0; i < l; i++)
+                        for (int j = 0; j < c; j++)
+                            r[ci * chkLines + i, cj * chkCols + j] = subM[i, j];
+                }
+            }
+            return r;
         }
     }
 }

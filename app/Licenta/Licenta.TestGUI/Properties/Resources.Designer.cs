@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace HelpersCurveDetectorDataSetGenerator.TestGUI.Properties {
+namespace Licenta.TestGUI.Properties {
     using System;
     
     

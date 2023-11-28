@@ -1,9 +1,9 @@
-﻿using HelpersCurveDetectorDataSetGenerator.Commons.Math;
-using HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics;
-using HelpersCurveDetectorDataSetGenerator.Imaging;
-using HelpersCurveDetectorDataSetGenerator.TestGUI.Properties;
-using HelpersCurveDetectorDataSetGenerator.TraceOver;
-using HelpersCurveDetectorDataSetGenerator.Utils;
+﻿using Licenta.Commons.Math;
+using Licenta.Commons.Math.Arithmetics;
+using Licenta.Imaging;
+using Licenta.TestGUI.Properties;
+using Licenta.TraceOver;
+using Licenta.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,7 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace HelpersCurveDetectorDataSetGenerator.TestGUI
+namespace Licenta.TestGUI
 {
     public partial class Form1 : Form
     {

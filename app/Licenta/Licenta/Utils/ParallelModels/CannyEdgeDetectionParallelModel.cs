@@ -1,12 +1,11 @@
-﻿using HelpersCurveDetectorDataSetGenerator.Commons.Math;
-using HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics;
-using HelpersCurveDetectorDataSetGenerator.Commons.Parallelization;
-using HelpersCurveDetectorDataSetGenerator.Commons.Utils;
-using HelpersCurveDetectorDataSetGenerator.Imaging;
+﻿using Licenta.Commons.Math;
+using Licenta.Commons.Math.Arithmetics;
+using Licenta.Commons.Parallelization;
+using Licenta.Commons.Utils;
+using Licenta.Imaging;
 using System;
-using System.Runtime.Remoting.Messaging;
 
-namespace HelpersCurveDetectorDataSetGenerator.Utils.ParallelModels
+namespace Licenta.Utils.ParallelModels
 {
     using DoubleMatrix = Matrix<DoubleNumber>;
     internal class CannyEdgeDetectionParallelModel : ParallelGraphModel
@@ -22,9 +21,9 @@ namespace HelpersCurveDetectorDataSetGenerator.Utils.ParallelModels
 
             var inputImage = CreateInput<ImageRGB>();
 
-            var grayScaleFilter1 = CreateNode<ImageRGB>(ToGrayscaleDefault, inputImage);
-            var grayScaleFilter2 = CreateNode<ImageRGB>(ToGrayscaleUniform, inputImage);
-            var grayScaleFilter = CreateNode<DoubleMatrix, DoubleMatrix>(Average, grayScaleFilter1, grayScaleFilter2);
+            //var grayScaleFilter1 = CreateNode<ImageRGB>(ToGrayscaleDefault, inputImage);
+            //var grayScaleFilter2 = CreateNode<ImageRGB>(ToGrayscaleUniform, inputImage);
+            var grayScaleFilter = CreateNode<ImageRGB>(ToGrayscaleDefault, inputImage);
 
 
             var gaussianFilter = CreateNode<DoubleMatrix>(GaussianFilter, grayScaleFilter);
@@ -37,9 +36,10 @@ namespace HelpersCurveDetectorDataSetGenerator.Utils.ParallelModels
 
             var refined = CreateNode<DoubleMatrix, DoubleMatrix>(Refine, magnitude, direction);
 
-            //var normalized = CreateNode<DoubleMatrix>(Normalize, refined);
+            //var normalized = CreateNode<DoubleMatrix>(Normalize, refined);            
 
-            var doubleThreshold = CreateOutput<DoubleMatrix>(DoubleThreshold, refined);
+            var doubleThreshold = CreateNode<DoubleMatrix>(DoubleThreshold, refined);
+            var hysteresis = CreateOutput<DoubleMatrix>(Hysteresis, refined);
         }
 
         public DoubleMatrix DoubleThreshold(DoubleMatrix m)
@@ -48,6 +48,7 @@ namespace HelpersCurveDetectorDataSetGenerator.Utils.ParallelModels
         }        
 
         public DoubleMatrix Run(ImageRGB image, TaskManager tm = null) => Run(tm, new object[] { image })[0] as DoubleMatrix;
+        public DoubleMatrix RunSync(ImageRGB image) => RunSync(new object[] { image })[0] as DoubleMatrix;
 
 
         private static DoubleMatrix Normalize(DoubleMatrix m)
@@ -62,13 +63,13 @@ namespace HelpersCurveDetectorDataSetGenerator.Utils.ParallelModels
         private static DoubleMatrix ToGrayscaleUniform(ImageRGB img) => img.ToGrayScaleMatrixLinear(1.0 / 3, 1.0 / 3, 1.0 / 3);
         private static DoubleMatrix Average(DoubleMatrix m1, DoubleMatrix m2)
             => Matrices.DoItemByItem(m1, m2, (a, b) => a.Add(b).Multiply(0.5));
-        private static DoubleMatrix GaussianFilter(DoubleMatrix m) => Matrices.Convolve(m, Kernels.GaussianFilter(5, 5, 1.0));
-        private static DoubleMatrix ComputeGradX(DoubleMatrix m) => Matrices.Convolve(m, Kernels.SobelX());
-        private static DoubleMatrix ComputeGradY(DoubleMatrix m) => Matrices.Convolve(m, Kernels.SobelY());
-        private static DoubleMatrix ComputeMagnitude(DoubleMatrix gx, DoubleMatrix gy) => Matrices.DoItemByItem(gx, gy, Functions.Hypot);
-        private static DoubleMatrix ComputeDirection(DoubleMatrix gx, DoubleMatrix gy) => Matrices.DoItemByItem(gx, gy, Functions.Atan2);
+        private static DoubleMatrix GaussianFilter(DoubleMatrix m) => Matrices.Convolve(m, Kernels.GaussianFilter(5, 5, 1.0), Matrices.ConvolutionBorder.Extend);
+        private static DoubleMatrix ComputeGradX(DoubleMatrix m) => Matrices.Convolve(m, Kernels.SobelX(), Matrices.ConvolutionBorder.Extend);
+        private static DoubleMatrix ComputeGradY(DoubleMatrix m) => Matrices.Convolve(m, Kernels.SobelY(), Matrices.ConvolutionBorder.Extend);
+        public static DoubleMatrix ComputeMagnitude(DoubleMatrix gx, DoubleMatrix gy) => Matrices.DoItemByItem(gx, gy, Functions.Hypot);
+        public static DoubleMatrix ComputeDirection(DoubleMatrix gx, DoubleMatrix gy) => Matrices.DoItemByItem(gx, gy, Functions.Atan2);
 
-        private static DoubleMatrix Refine(DoubleMatrix magn, DoubleMatrix dir)
+        public static DoubleMatrix Refine(DoubleMatrix magn, DoubleMatrix dir)
         {
             magn = new DoubleMatrix(magn);
             (int X, int Y)[] dirs = { (1, 0), (1, 1), (0, 1), (-1, -1), (-1, 0) };
@@ -111,5 +112,22 @@ namespace HelpersCurveDetectorDataSetGenerator.Utils.ParallelModels
             }
             return magn;
         }
+
+        public DoubleMatrix Hysteresis(DoubleMatrix m) => Hysteresis(m, (Threshold0 + Threshold1) / 3);
+
+        public static DoubleMatrix Hysteresis(DoubleMatrix m, double threshold) => Matrices.DoEachItem(m, (x, i, j) =>
+        {                        
+            for(int di=-1;di<=1;di++)            
+                for(int dj=-1;dj<=1;dj++)
+                {
+                    int ni = (i + di).Clamp(0, m.RowsCount - 1);
+                    int nj = (j + dj).Clamp(0, m.ColumnsCount - 1);
+                    if (m[ni, nj].Value > threshold)                    
+                        return x;                    
+                }
+            return new DoubleNumber(0d);
+        });
+
+
     }
 }

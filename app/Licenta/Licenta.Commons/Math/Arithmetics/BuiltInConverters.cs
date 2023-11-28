@@ -1,4 +1,4 @@
-﻿namespace HelpersCurveDetectorDataSetGenerator.Commons.Math.Arithmetics
+﻿namespace Licenta.Commons.Math.Arithmetics
 {
     [OperativeConverter]
     public static class BuiltInConverters
