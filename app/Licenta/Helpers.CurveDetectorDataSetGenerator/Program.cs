@@ -186,8 +186,11 @@ namespace Helpers.CurveDetectorDataSetGenerator
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            IAMXMLTranslate.Run();
+            Console.WriteLine("Done.");
+            Console.ReadLine();
             return;
+            Application.Run(new Form1());            
 
             //CreateDataSet();
             //ProcessDataSet();            

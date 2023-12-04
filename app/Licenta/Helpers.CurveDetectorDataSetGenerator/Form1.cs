@@ -32,7 +32,7 @@ namespace Helpers.CurveDetectorDataSetGenerator
             //var img = ImageRGB.FromFile("D:\\Users\\Stefan\\Datasets\\IAM\\data\\008\\a01-014x.png");
             //var img = ImageRGB.FromFile("D:\\Users\\Stefan\\Datasets\\JL\\015.jpg");
             //var img = ImageRGB.FromFile("C:\\Users\\Stefan\\Desktop\\EMNIST-Image.png", 32, 32);
-            //var img = ImageRGB.FromFile("D:\\Users\\Stefan\\fuck_it_licenta\\textcaps-master\\emnist_bal_200\\images\\original reconstruction.png");
+            //var img = ImageRGB.FromFile("D:\\Users\\Stefan\\licenta\\textcaps-master\\emnist_bal_200\\images\\original reconstruction.png");
             //var img = ImageRGB.FromFile("D:\\Users\\Stefan\\Datasets\\reteta.png");
 
             var r = img.ApplyPotrace();
@@ -57,7 +57,7 @@ namespace Helpers.CurveDetectorDataSetGenerator
 
 
             var inPath = @"D:\Users\Stefan\Datasets\JL";
-            var outPath = @"D:\Users\Stefan\fuck_it_licenta\proiect_licenta\app\Licenta\Helpers.CurveDetectorDataSetGenerator\bin\Debug\jl_bez";
+            var outPath = @"D:\Users\Stefan\licenta\proiect_licenta\app\Licenta\Helpers.CurveDetectorDataSetGenerator\bin\Debug\jl_bez";
 
             var bkp = @"D:\Users\Stefan\Datasets\IAM_Words\JL";
             
