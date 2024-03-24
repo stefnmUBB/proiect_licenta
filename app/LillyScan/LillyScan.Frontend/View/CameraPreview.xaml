@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LillyScan.Frontend.View.CameraPreview"
+             xmlns:cv="clr-namespace:Camera.MAUI;assembly=Camera.MAUI">
+    <Grid RowDefinitions="32, *">
+        <Grid Grid.Row="0" Grid.RowSpan="2">
+            <cv:CameraView x:Name="CameraView" HorizontalOptions="Fill" VerticalOptions="Fill"
+                           TorchEnabled="{Binding Source={x:Reference BlitzCheckBox}, Path=IsChecked, Mode=TwoWay}"/>
+            <Path Data="M 80,200 A 100,50 45 1 0 100,50" Stroke="Red" StrokeThickness="4">
+                
+            </Path>
+        </Grid>
+
+        <Border Grid.Row="0" HorizontalOptions="Fill" StrokeThickness="0" Background="#33333333">
+            <HorizontalStackLayout  HorizontalOptions="Center" HeightRequest="32" Padding="3">
+                <CheckBox IsChecked="False" x:Name="BlitzCheckBox">
+                    <CheckBox.Clip>
+                        <PathGeometry Figures="M15,0 L24,0 L18,10 L25,10 L7,31 L13,17 L7,17 Z" />
+                    </CheckBox.Clip>
+                    <CheckBox.Style>
+                        <Style TargetType="{x:Type CheckBox}">
+                            <Style.Triggers>
+                                <DataTrigger TargetType="{x:Type CheckBox}" 
+                                         Binding="{Binding Source={RelativeSource Self},Path=IsChecked}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="Yellow"/>
+                                    <Setter Property="Color" Value="Yellow"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="{x:Type CheckBox}" 
+                                         Binding="{Binding Source={RelativeSource Self},Path=IsChecked}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="White"/>
+                                    <Setter Property="Color" Value="White"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </CheckBox.Style>
+                </CheckBox>
+            </HorizontalStackLayout>
+        </Border>
+    </Grid>
+</ContentView>
