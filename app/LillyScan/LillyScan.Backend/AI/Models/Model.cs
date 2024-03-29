@@ -7,8 +7,11 @@ namespace LillyScan.Backend.AI.Models
 {
     internal class Model
     {
-        public List<Layer> Layers { get; }
+        private readonly Layer[] Layers;
 
+        private readonly Dictionary<Layer, Layer[]> InputFlow;        
+
+        
 
 
     }

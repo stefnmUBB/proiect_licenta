@@ -8,10 +8,12 @@ namespace LillyScan.Backend.AI.Activations
     {
         private readonly float NegativeSlope;
 
-        public LeakyReLU(float negativeSlope = 0.2f)
+        public LeakyReLU(float negativeSlope)
         {
             NegativeSlope = negativeSlope;
         }
+
+        public LeakyReLU() : this(0.2f) { }
 
         public override Tensor<float> Call(Tensor<float> input)
         {

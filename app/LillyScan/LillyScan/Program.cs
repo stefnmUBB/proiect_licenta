@@ -1,9 +1,11 @@
 ﻿using LillyScan.Backend.AI.Layers;
+using LillyScan.Backend.AI.Models;
 using LillyScan.Backend.Math;
 using LillyScan.Backend.Types;
 using LillyScan.Backend.Utils;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -18,7 +20,9 @@ namespace LillyScan
         /// </summary>
         [STAThread]
         static void Main()
-        {
+        {            
+            ModelLoader.LoadFromStream(File.Open(@"D:\Public\model_saver\model.txt", FileMode.Open));
+            /*
             var a = Tensors.Ones<float>((1, 4, 4, 1));
 
             var l0 = new InputLayer(a.Shape.AsPlaceholder(axis: 0));
@@ -27,9 +31,7 @@ namespace LillyScan
             var b = l0.Call(a);
             b = l1.Call(b);
 
-
-
-            b[0].Squeeze().Print();            
+            b[0].Squeeze().Print();    */
 
             Console.WriteLine("Done");
             Console.ReadLine();

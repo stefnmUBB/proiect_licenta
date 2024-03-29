@@ -185,7 +185,7 @@ namespace LillyScan.Backend.Math
         public static Tensor<T> Squeeze<T>(this Tensor<T> t)
         {
             return new Tensor<T>(t.Shape.Where(d => d != 1).ToArray(), t.Buffer);
-        }
+        }        
 
         public static Tensor<T> Conv2D<T>(this Tensor<T> t, Tensor<T> kernel)
         {
@@ -236,5 +236,7 @@ namespace LillyScan.Backend.Math
             return Tensors.Stack(cells).Reshape((B, n, m, f2));
         }
 
+
+        public static IEnumerable<Shape> SelectShapes<T>(this IEnumerable<Tensor<T>> tensors) => tensors.Select(_ => _.Shape);
     }   
 }

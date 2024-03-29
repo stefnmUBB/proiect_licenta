@@ -49,5 +49,32 @@ namespace LillyScan.Backend.Math
 
             return new Tensor<T>(new[] { list.Count }.Concat(list[0].Shape).ToArray(), list.SelectMany(_ => _.Buffer).ToArray());
         }
+
+        public static Tensor<T> Concatenate<T>(IEnumerable<Tensor<T>> tensors, int axis=-1)
+        {                       
+            var list = tensors.ToList();
+            var concatShape = Shapes.GetConcatenatedShape(list.SelectShapes(), axis);
+            axis = Shape.ResolveIndex(list[0].Rank, axis);
+
+            var transportSize = list.SelectShapes()
+                .Select(s => s.Skip(axis).Aggregate(1, (x, y) => x * y)).ToArray();
+            var elemsCount = list.SelectShapes().Select(_ => _.ElementsCount).ToArray();
+
+            var buffer = new T[concatShape.ElementsCount];
+            int k = 0;
+            int count = 0;
+
+            while (transportSize.Select((s, i) => s * count < elemsCount[i]).All(_=>_))
+            {
+                for(int i=0;i<list.Count;i++)
+                {
+                    list[i].Buffer.CopyTo(count * transportSize[i], buffer, k, transportSize[i]);
+                    k += transportSize[i];
+                }
+                count++;
+            }
+            return new Tensor<T>(concatShape, buffer);
+        }
+
     }
 }

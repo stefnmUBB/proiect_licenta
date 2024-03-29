@@ -11,7 +11,7 @@ namespace LillyScan.Backend.AI
         public TfConfig(string config)
         {
             Properties = PythonDictionaryParser.Parse(config);
-        }
+        }        
 
         public T GetValue<T>(string key)
         {

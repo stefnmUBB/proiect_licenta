@@ -48,6 +48,13 @@ namespace LillyScan.Backend.Utils
             }
         }
 
+        public static IEnumerable<T> WhereNot<T>(this IEnumerable<T> items, Predicate<T> predicate)
+        {
+            foreach (var item in items)
+                if (!predicate(item))
+                    yield return item;
+        }
+
         public static IEnumerable<T> Peek<T>(this IEnumerable<T> items, Action<T> action)
         {
             foreach (var item in items)
@@ -55,6 +62,32 @@ namespace LillyScan.Backend.Utils
                 action(item);
                 yield return item;
             }
+        }
+
+        public static void DeepPrint(this object o)
+        {
+            if (o is Dictionary<string, object> d)
+            {
+                foreach (var kv in d)
+                {
+                    Console.Write($"{{{kv.Key}: ");
+                    DeepPrint(kv.Value);
+                    Console.WriteLine($"}}");
+                }
+                return;
+            }
+            if (o is object[] a)
+            {
+                Console.Write("[");
+                foreach (var x in a)
+                {
+                    DeepPrint(x);
+                    Console.Write(",");
+                }
+                Console.Write("]");
+                return;
+            }
+            Console.Write(o ?? "None");
         }
     }
 }

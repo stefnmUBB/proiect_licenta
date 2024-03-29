@@ -1,4 +1,5 @@
-﻿using LillyScan.Backend.Math;
+﻿using LillyScan.Backend.AI.Layers.TfConfigConverters;
+using LillyScan.Backend.Math;
 using LillyScan.Backend.Types;
 using System.Linq;
 
@@ -6,10 +7,17 @@ namespace LillyScan.Backend.AI.Layers
 {
     [Named("Conv2D")]
     public class Conv2D : Layer
-    {        
-        readonly int Filters;
-        readonly (int Rows, int Cols) KernelSize;
-        readonly bool UseBias;
+    {
+        [TfConfigProperty("filters")]
+        public int Filters { get; private set; }
+
+        [TfConfigProperty("kernel_size", converter:typeof(IntValueTuple2Converter))]
+        public (int Rows, int Cols) KernelSize { get; private set; }
+
+        [TfConfigProperty("use_bias")]
+        public bool UseBias { get; private set; }
+
+        internal Conv2D() { }
 
         public Conv2D(Shape[] inputShapes, int filters, (int, int)? kernelSize = null, bool useBias = true, string name = null) : base(inputShapes, name)
         {
