@@ -1,42 +1,50 @@
 ﻿using LillyScan.Backend.Math;
+using LillyScan.Backend.Types;
 using System.Linq;
 
 namespace LillyScan.Backend.AI.Layers
 {
-    internal class Conv2D : Layer
+    [Named("Conv2D")]
+    public class Conv2D : Layer
     {        
         readonly int Filters;
-        readonly (int Rows, int Cols) KernelSize;        
+        readonly (int Rows, int Cols) KernelSize;
         readonly bool UseBias;
 
-        public Conv2D(string name, int filters, (int, int) kernelSize, bool useBias) : base(name)
+        public Conv2D(Shape[] inputShapes, int filters, (int, int)? kernelSize = null, bool useBias = true, string name = null) : base(inputShapes, name)
         {
-            (Filters, KernelSize, UseBias) = (filters, kernelSize, useBias);            
+            Assert(() => inputShapes.Length == 1, () => inputShapes[0].Length == 4);
+            (Filters, KernelSize, UseBias) = (filters, kernelSize.HasValue ? kernelSize.Value : (1, 1), useBias);
         }
 
-        public override Tensor<float>[] Call(Tensor<float>[] inputs)
+        public Conv2D(Shape inputShape, int filters, (int, int)? kernelSize = null, bool useBias = true, string name = null)
+            : this(new[] {inputShape}, filters, kernelSize, useBias, name)
+        { }
+
+        protected override Tensor<float>[] OnCall(Tensor<float>[] inputs)
         {
-            Assert(() => inputs != null, () => inputs.Length == 1);
             var input = inputs[0];
-            Assert(() => input.Rank == 4);
-            var kernel = Context.GetWeight("kernel", (KernelSize.Rows, KernelSize.Cols, input.Shape[-1], Filters));
+            var kernel = Context.GetWeight("kernel", (KernelSize.Rows, KernelSize.Cols, input.Shape[-1], Filters), false);
 
             var output = input.Conv2D(kernel);
             if(UseBias)
             {
-                var bias = Context.GetWeight("bias", (Filters));
+                var bias = Context.GetWeight("bias", (Filters), false);
                 output = output.Add(bias);
             }
             return new[] { output };
         }
 
-        public override Shape GetOutputShape(Shape[] inputShapes)
+        public override Shape[] OnGetOutputShape(Shape[] inputShapes)
         {
-            Assert(() => inputShapes != null, () => inputShapes.Length == 1);            
-            var shape = inputShapes[0].ToArray();
-            Assert(() => shape.Length == 4);
+            var shape = inputShapes[0].ToArray();            
             shape[3] = Filters;
-            return new Shape(shape);
+            return new[] { new Shape(shape) };
+        }
+
+        public override void LoadFromConfig(TfConfig config)
+        {
+            base.LoadFromConfig(config);
         }
     }
 }

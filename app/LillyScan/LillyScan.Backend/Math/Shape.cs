@@ -18,15 +18,14 @@ namespace LillyScan.Backend.Math
             DimsCount = buffer.Length;
         }
 
-        public new int this[int index]
+        private int ResolveIndex(int index)
         {
-            get
-            {
-                if (0 <= index) return base[index];
-                if (index < -DimsCount) throw new IndexOutOfRangeException($"Cannot access dimension {index} of shape {this}");
-                return base[DimsCount + index];
-            }
+            if (index < -DimsCount || index>=DimsCount) 
+                throw new IndexOutOfRangeException($"Cannot access dimension {index} of shape {this}");
+            return index < 0 ? DimsCount + index : index;            
         }
+
+        public new int this[int index] => base[ResolveIndex(index)];        
 
         public Shape(IEnumerable<int> dims) : this(dims.ToArray()) { }
 
@@ -117,9 +116,21 @@ namespace LillyScan.Backend.Math
 
         public override int GetHashCode()
         {
-            return this.Select(_ => _.GetHashCode()).Aggregate(0, (x, y) => unchecked(x + y));            
+            return this.Select(_ => _.GetHashCode()).Aggregate(0, (x, y) => unchecked(x + y));
         }
 
+        public Shape AsPlaceholder(int axis) => new Shape(this.Select((d, i) => i == ResolveIndex(axis) ? d : -1));
+
+        public bool MatchesPlaceholder(Shape placeholder)
+        {            
+            if (placeholder.Length != this.Length)
+                return false;
+            return placeholder.Zip(this, (p, r) =>
+            {
+                if (p == -1) return true;
+                return p == r;
+            }).All(_ => _);
+        }
 
     }
 }

@@ -42,7 +42,6 @@ namespace LillyScan.Backend.Math
                 var buffer = results.Select(_ => (T)_).ToArray();
                 return new Tensor<T>(new Shape(m, p), buffer);
             }, 2);
-        }
-
+        }                
     }
 }

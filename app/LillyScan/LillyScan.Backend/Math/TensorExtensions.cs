@@ -110,6 +110,11 @@ namespace LillyScan.Backend.Math
             return new Tensor<V>(shape, buffer);
         }
 
+        public static Tensor<U> Map<T, U>(this Tensor<T> t1, Func<T, U> op)
+        {
+            return new Tensor<U>(t1.Shape, t1.Buffer.Select(op).ToArray());
+        }
+
 
         public static Tensor<V> SubDimBroadcast<T, U, V>(this Tensor<T> t1, Tensor<U> t2, Func<Tensor<T>, Tensor<U>, Tensor<V>> op, int dims)
         {
@@ -175,6 +180,11 @@ namespace LillyScan.Backend.Math
                 }
             }
             return new Tensor<T>((t.Shape[axis]), buffer);
+        }
+
+        public static Tensor<T> Squeeze<T>(this Tensor<T> t)
+        {
+            return new Tensor<T>(t.Shape.Where(d => d != 1).ToArray(), t.Buffer);
         }
 
         public static Tensor<T> Conv2D<T>(this Tensor<T> t, Tensor<T> kernel)

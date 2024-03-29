@@ -16,6 +16,6 @@ namespace LillyScan.Backend.AI.Layers
         public LayerAssertionFailedException(Expression<Func<bool>> condition) : base(condition.ToString())
         {
             Condition = condition;
-        }      
+        }        
     }
 }

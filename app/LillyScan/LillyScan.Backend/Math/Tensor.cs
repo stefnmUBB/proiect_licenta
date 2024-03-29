@@ -104,7 +104,7 @@ namespace LillyScan.Backend.Math
         {
             w = w ?? Console.Out;
             var sb = new StringBuilder();
-            var iter = new int[Shape.DimsCount];
+            var iter = new int[Shape.DimsCount];            
 
             sb.Append(message);
             sb.AppendLine($"Tensor of type {typeof(T)} and shape {Shape}:");

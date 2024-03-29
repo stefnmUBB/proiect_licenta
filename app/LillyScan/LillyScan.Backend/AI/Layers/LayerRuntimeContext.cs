@@ -12,12 +12,14 @@ namespace LillyScan.Backend.AI.Layers
         public Tensor<float> GetWeight(string name, Shape expectedShape=null, bool throwWhenNotFound=true)
         {
             if (!Weights.ContainsKey(name))
-                throw new KeyNotFoundException($"Cannot find weight `{name}` in the current context");
+            {
+                if (throwWhenNotFound)
+                    throw new KeyNotFoundException($"Cannot find weight `{name}` in the current context");
+                else return Tensors.Ones<float>(expectedShape);
+            }
             var tensor = Weights[name];
             if (expectedShape != null && !object.Equals(tensor.Shape, expectedShape))
-                if (throwWhenNotFound)
-                    throw new InvalidOperationException($"Weight `{name}` has shape {tensor.Shape}, expected {expectedShape}");
-                else return Tensors.Zeros<float>(expectedShape);
+                throw new InvalidOperationException($"Weight `{name}` has shape {tensor.Shape}, expected {expectedShape}");            
             return tensor;
         }
 
