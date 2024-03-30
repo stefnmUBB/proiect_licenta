@@ -292,9 +292,8 @@ namespace LillyScan.Backend.Math
                         var convSrc = new Tensor<T>((K1, K2, 1, f1), buff);
 
                         var x = convSrc.MatMul(kernel).Reshape((K1, K2, f2));                        
-
-                        x = x.ReduceAxis(Operations.Sum<T>(), -1);
-                        cells.Add(x);                        
+                        x = x.ReduceSum(new[] { 0, 1 });
+                        cells.Add(x);
                     }                    
                 }
             }

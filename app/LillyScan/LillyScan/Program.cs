@@ -21,16 +21,12 @@ namespace LillyScan
         [STAThread]
         static void Main()
         {
-            var a = new Tensor<int>((2, 2, 3), new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 });
-            a.Print();
 
-            a.ReduceSum(new[] {0,1}).Print();            
+            //var a = new Tensor<float>((1, 4, 4, 1), Enumerable.Range(0, 16).Select(_=>(float)_).ToArray());
+            //var up = new UpSampling2D(a.Shape, (3, 2));
+            //up.Call(a)[0].Squeeze().Print();
 
-            
-
-            //a.Print();
-
-            //ModelLoader.LoadFromStream(File.Open(@"D:\Public\model_saver\model.txt", FileMode.Open));
+            ModelLoader.LoadFromStream(File.Open(@"D:\Public\model_saver\model.txt", FileMode.Open));
             /*
             var a = Tensors.Ones<float>((1, 4, 4, 1));
 

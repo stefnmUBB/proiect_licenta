@@ -65,7 +65,7 @@ namespace LillyScan.Backend.Math
             return new Shape(this.Take(DimsCount - subDims)).IterateIndices();
         }
 
-        public int GetBufferIndex(int[] indices)
+        public int GetBufferIndex(params int[] indices)
         {
             int p = 1, result = 0;
             for (int i = DimsCount - 1; i >= 0; i--)
