@@ -22,11 +22,31 @@ namespace LillyScan
         static void Main()
         {
 
-            //var a = new Tensor<float>((1, 4, 4, 1), Enumerable.Range(0, 16).Select(_=>(float)_).ToArray());
+            var a = new Tensor<float>((1, 4, 4, 1), Enumerable.Range(1, 16).Select(_ => (float)_).ToArray());
+            var b = new Tensor<float>((1, 4, 4, 1), Enumerable.Range(2, 16).Select(_ => (float)_).ToArray());
+            a = Tensors.Concatenate(new[] { a, b });
+            var k2 = Tensors.Ones<float>((2, 2, 1, 2));
+            var k3 = Tensors.Ones<float>((3, 3, 1, 2));
+
+            a.Print();
+
+            a.Conv2DTranspose(k2, (1, 1)).Squeeze().Print("k2, (1,1)");
+            a.Conv2DTranspose(k2, (2, 2)).Squeeze().Print("k2, (2,2)");
+            a.Conv2DTranspose(k2, (2, 1)).Squeeze().Print("k2, (2,1)");
+            a.Conv2DTranspose(k2, (3, 3)).Squeeze().Print("k2, (3,3)");
+            a.Conv2DTranspose(k2, (2, 3)).Squeeze().Print("k2, (2,3)");
+            a.Conv2DTranspose(k3, (1, 1)).Squeeze().Print("k3, (1,1)");
+            a.Conv2DTranspose(k3, (2, 2)).Squeeze().Print("k3, (2,2)");
+            a.Conv2DTranspose(k3, (2, 1)).Squeeze().Print("k3, (2,1)");
+            a.Conv2DTranspose(k3, (3, 3)).Squeeze().Print("k3, (3,3)");
+            a.Conv2DTranspose(k3, (2, 3)).Squeeze().Print("k3, (2,3)");
+
+
+
             //var up = new UpSampling2D(a.Shape, (3, 2));
             //up.Call(a)[0].Squeeze().Print();
 
-            ModelLoader.LoadFromStream(File.Open(@"D:\Public\model_saver\model.txt", FileMode.Open));
+            //ModelLoader.LoadFromStream(File.Open(@"D:\Public\model_saver\model.txt", FileMode.Open));
             /*
             var a = Tensors.Ones<float>((1, 4, 4, 1));
 

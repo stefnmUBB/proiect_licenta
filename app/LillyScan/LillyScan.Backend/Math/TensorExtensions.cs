@@ -256,11 +256,7 @@ namespace LillyScan.Backend.Math
 
         public static Tensor<T> Conv2D<T>(this Tensor<T> t, Tensor<T> kernel)
         {
-            var validate_shapes = new Func<bool>(() =>
-            {
-                return t.Rank == 4 && kernel.Rank == 4 && t.Shape[3] == kernel.Shape[2];
-            });
-
+            var validate_shapes = new Func<bool>(() => t.Rank == 4 && kernel.Rank == 4 && t.Shape[3] == kernel.Shape[2]);
             if (!validate_shapes())
                 throw new ArgumentException($"Invalid input shapes for Conv2D operation: {t.Shape}, {kernel.Shape}");
 
@@ -268,8 +264,7 @@ namespace LillyScan.Backend.Math
             (int K1, int K2) = (kernel.Shape[0], kernel.Shape[1]);
             (int f1, int f2) = (t.Shape[3], kernel.Shape[3]);
 
-            var outShape = new Shape(B, n, m, f2);
-            var buffer = new dynamic[outShape.ElementsCount];
+            var outShape = new Shape(B, n, m, f2);            
 
             var cells = new List<Tensor<T>>();
 
@@ -296,10 +291,61 @@ namespace LillyScan.Backend.Math
                         cells.Add(x);
                     }                    
                 }
-            }
-            
-
+            }           
             return Tensors.Stack(cells).Reshape((B, n, m, f2));
+        }
+
+
+        public static Tensor<T> Conv2DTranspose<T>(this Tensor<T> t, Tensor<T> kernel, (int Rows, int Cols)? strides = null)
+        {
+            (var strideRows, var strideCols) = strides ?? (1, 1);            
+            var validate_shapes = new Func<bool>(() => t.Rank == 4 && kernel.Rank == 4 && t.Shape[3] == kernel.Shape[3]);
+
+            if (!validate_shapes())
+                throw new ArgumentException($"Invalid input shapes for Conv2DTranspose operation: {t.Shape}, {kernel.Shape}");
+
+            (int B, int n, int m) = (t.Shape[0], t.Shape[1], t.Shape[2]);
+            (int K1, int K2) = (kernel.Shape[0], kernel.Shape[1]);
+            (int f1, int f2) = (kernel.Shape[3], kernel.Shape[2]);
+
+            var outH = strideRows * n;
+            var outW = strideCols * m;            
+
+            t = t.SubDimMap(x => 
+            {                
+
+                var shape = new Shape(outH, outW, f2);
+                var buffer = new T[shape.ElementsCount];
+                for(int i=0;i<n;i++)
+                {
+                    for(int j=0;j<m;j++)
+                    {
+                        var channels = x.GetFromBatches(new[] { i, j }).Reshape((f1, 1));
+                        var mat = kernel.MatMul(channels).Reshape((K1, K2, f2));
+                        //mat.Print();
+
+                        for(int k1=0;k1<K1;k1++)
+                        {
+                            for(int k2=0;k2<K2;k2++)
+                            {
+                                int ii = (i * strideRows + k1 - (K1 - strideRows) / 2);
+                                int jj = (j * strideCols + k2 - (K2 - strideCols) / 2);
+                                if (ii < 0 || jj < 0 || ii >= outH || jj >= outW)
+                                    continue;
+                                for (int c = 0; c < f2; c++)
+                                {
+                                    var index = shape.GetBufferIndex(ii, jj, c);
+                                    buffer[index] = (dynamic)buffer[index] + mat.GetValueAt(k1, k2, c);
+                                }
+                            }
+                        }
+                    }
+                }
+                return new Tensor<T>(shape, buffer);
+            }, 3);
+
+            return t;
+            //return new Tensor<T>(outShape, buffer);
         }
 
 

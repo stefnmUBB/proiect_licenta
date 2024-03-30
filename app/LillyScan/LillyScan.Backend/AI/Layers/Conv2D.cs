@@ -22,7 +22,13 @@ namespace LillyScan.Backend.AI.Layers
         public Conv2D(Shape[] inputShapes, int filters, (int, int)? kernelSize = null, bool useBias = true, string name = null) : base(inputShapes, name)
         {
             Assert(() => inputShapes.Length == 1, () => inputShapes[0].Length == 4);
-            (Filters, KernelSize, UseBias) = (filters, kernelSize.HasValue ? kernelSize.Value : (1, 1), useBias);
+            (Filters, KernelSize, UseBias) = (filters, kernelSize ?? (1, 1), useBias);
+
+            Context.Weights["kernel"] = Tensors.Ones<float>((KernelSize.Rows, KernelSize.Cols, InputShapes[0][-1], Filters));
+            if(UseBias)
+            {
+                Context.Weights["bias"] = Tensors.Zeros<float>((Filters));
+            }
         }
 
         public Conv2D(Shape inputShape, int filters, (int, int)? kernelSize = null, bool useBias = true, string name = null)
