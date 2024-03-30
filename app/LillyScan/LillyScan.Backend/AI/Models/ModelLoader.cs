@@ -140,7 +140,39 @@ namespace LillyScan.Backend.AI.Models
             foreach (var output in outputs)
                 output.IsOutput = true;
 
-            foreach (var layer in layers)
+
+            var solvedLayers = new Dictionary<LayerInfo, Layer>();            
+            var queue = new Queue<LayerInfo>(layers.ToArray());
+            var inputs = layers.Where(li => li.Type == "InputLayer")
+                .Select(li => solvedLayers[li] = li.ToLayer(null))
+                .ToArray();
+            Dictionary<Layer, Layer[]> layerInputs=new Dictionary<Layer, Layer[]>();
+            while (queue.Count>0)
+            {
+                var li = queue.Dequeue();
+                Console.WriteLine($"Dequeued {li.Name}");
+                if (solvedLayers.ContainsKey(li))
+                    continue;
+                if(li.Inputs.Any(_=>!solvedLayers.ContainsKey(_)))
+                {
+                    Console.WriteLine($"Enqueued {li.Name}");
+                    queue.Enqueue(li);
+                    continue;
+                }
+                var lInputs = li.Inputs.Select(_ => solvedLayers[_]).ToArray();
+                var inputShapes = lInputs.SelectMany(_ => _.GetOutputShapes()).ToArray();
+                inputShapes.DeepPrint();
+                var layer = li.ToLayer(inputShapes);
+                layerInputs[layer] = lInputs;
+                solvedLayers[li] = layer;
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"Layer {layer} outputs {layer.GetOutputShapes().JoinToString(", ")}");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+
+
+
+            /*foreach (var layer in layers)
             {
                 Console.WriteLine(layer);
                 try
@@ -155,7 +187,7 @@ namespace LillyScan.Backend.AI.Models
                     Console.WriteLine(e.Message);
                     Console.ForegroundColor = ConsoleColor.White;
                 }
-            }            
+            } */
 
 
         }

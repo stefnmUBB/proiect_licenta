@@ -8,6 +8,11 @@ namespace LillyScan.Backend.AI
     {
         public Dictionary<string, object> Properties { get; } = new Dictionary<string, object>();
 
+        public TfConfig(Dictionary<string, object> config)
+        {
+            Properties = config;
+        }
+
         public TfConfig(string config)
         {
             Properties = PythonDictionaryParser.Parse(config);

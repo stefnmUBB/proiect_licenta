@@ -88,5 +88,14 @@ namespace LillyScan.Backend.AI.Layers
             return $"{GetType().Name}({propsStr})";
         }
 
+        public virtual void OnBuild() { }        
+
+        public void Build()
+        {
+            ValidateInputShapes(InputShapes);
+            OnBuild();
+        }
+
+        public virtual void LoadWeights(Tensor<float>[] weights) { }
     }
 }

@@ -47,6 +47,8 @@ namespace LillyScan.Backend.AI.Layers
         public override Shape[] OnGetOutputShape(Shape[] inputShapes)
         {
             var shape = inputShapes[0].ToArray();
+            shape[1] *= Strides.Rows;
+            shape[2] *= Strides.Cols;
             shape[3] = Filters;
             return new[] { new Shape(shape) };
         }

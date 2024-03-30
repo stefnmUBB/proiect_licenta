@@ -22,41 +22,12 @@ namespace LillyScan
         static void Main()
         {
 
-            var a = new Tensor<float>((1, 4, 4, 1), Enumerable.Range(1, 16).Select(_ => (float)_).ToArray());
-            var b = new Tensor<float>((1, 4, 4, 1), Enumerable.Range(2, 16).Select(_ => (float)_).ToArray());
-            a = Tensors.Concatenate(new[] { a, b });
-            var k2 = Tensors.Ones<float>((2, 2, 1, 2));
-            var k3 = Tensors.Ones<float>((3, 3, 1, 2));
+            var cell = new LSTM((1, 10, 256), 256, useBias: true);
 
-            a.Print();
+            cell.Call(Tensors.Zeros<float>(cell.InputShapes[0]))[0].Print();
 
-            a.Conv2DTranspose(k2, (1, 1)).Squeeze().Print("k2, (1,1)");
-            a.Conv2DTranspose(k2, (2, 2)).Squeeze().Print("k2, (2,2)");
-            a.Conv2DTranspose(k2, (2, 1)).Squeeze().Print("k2, (2,1)");
-            a.Conv2DTranspose(k2, (3, 3)).Squeeze().Print("k2, (3,3)");
-            a.Conv2DTranspose(k2, (2, 3)).Squeeze().Print("k2, (2,3)");
-            a.Conv2DTranspose(k3, (1, 1)).Squeeze().Print("k3, (1,1)");
-            a.Conv2DTranspose(k3, (2, 2)).Squeeze().Print("k3, (2,2)");
-            a.Conv2DTranspose(k3, (2, 1)).Squeeze().Print("k3, (2,1)");
-            a.Conv2DTranspose(k3, (3, 3)).Squeeze().Print("k3, (3,3)");
-            a.Conv2DTranspose(k3, (2, 3)).Squeeze().Print("k3, (2,3)");
+            ModelLoader.LoadFromStream(File.Open(@"D:\Public\model_saver\model.txt", FileMode.Open));           
 
-
-
-            //var up = new UpSampling2D(a.Shape, (3, 2));
-            //up.Call(a)[0].Squeeze().Print();
-
-            //ModelLoader.LoadFromStream(File.Open(@"D:\Public\model_saver\model.txt", FileMode.Open));
-            /*
-            var a = Tensors.Ones<float>((1, 4, 4, 1));
-
-            var l0 = new InputLayer(a.Shape.AsPlaceholder(axis: 0));
-            var l1 = new Conv2D(l0.GetOutputShapes(), 1, kernelSize: (5, 1), useBias: true);
-
-            var b = l0.Call(a);
-            b = l1.Call(b);
-
-            b[0].Squeeze().Print();    */
 
             Console.WriteLine("Done");
             Console.ReadLine();

@@ -3,6 +3,7 @@ using LillyScan.Backend.Math;
 using LillyScan.Backend.Types;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -16,18 +17,20 @@ namespace LillyScan.Backend.AI.Layers
 
         public override Shape[] OnGetOutputShape(Shape[] inputShapes)
         {
-            return new[] { TargetShape };
+            return new[] { inputShapes[0][0] + TargetShape };
         }
 
         protected override Tensor<float>[] OnCall(Tensor<float>[] inputs)
         {
-            return new[] { inputs[0].Reshape(TargetShape) };
+            var output = inputs[0].SubDimMap(x => x.Reshape(TargetShape), inputs[0].Rank - 1);
+            return new[] { output };
         }
 
         protected override void OnValidateInputShapes(Shape[] inputShapes)
         {
             base.OnValidateInputShapes(inputShapes);
-            Assert(() => inputShapes.Length == 1, () => inputShapes[0].ElementsCount == TargetShape.ElementsCount);            
+            var itemShape = new Shape(inputShapes[0].Skip(1).ToArray());
+            Assert(() => inputShapes.Length == 1, () => itemShape.ElementsCount == TargetShape.ElementsCount);
         }
     }
 }
