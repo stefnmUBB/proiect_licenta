@@ -14,6 +14,9 @@ namespace LillyScan.Backend.Math
     {
         public static Tensor<T> Reshape<T>(this Tensor<T> tensor, Shape newShape)
         {
+            if (tensor.IsScalar && newShape.Length == 1 && newShape[0] == 1)
+                return new Tensor<T>(newShape, tensor.Buffer);
+
             if (tensor.Shape.ElementsCount != newShape.ElementsCount)
                 throw new InvalidOperationException($"Cannot reshape tensor of shape {tensor.Shape} to {newShape}");
             return new Tensor<T>(newShape, tensor.Buffer);
@@ -87,6 +90,20 @@ namespace LillyScan.Backend.Math
 
         public static Tensor<V> PerformElementWiseBinaryOperation<T, U, V>(this Tensor<T> t1, Tensor<U> t2, Func<T, U, V> op)
         {
+            if(t1.Rank==0 && t2.Rank==0)
+            {
+                return new Tensor<V>(0, new[] { op(t1.Buffer[0], t2.Buffer[0])});                
+            }
+            if (t2.Rank == 0)
+                return PerformElementWiseBinaryOperation(t2, t1, (x, y) => op(y, x));
+            if(t1.Rank==0)
+            {
+                var scalar = t1.Buffer[0];
+                var buff = t2.Buffer.Select(_ => op(scalar,_)).ToArray();
+                return new Tensor<V>(t2.Shape, buff);
+            }
+
+
             if (t1.Rank < t2.Rank)
                 t1 = t1.Reshape(Enumerable.Repeat(1, t2.Rank - t1.Rank).Concat(t1.Shape).ToArray());
             else if (t2.Rank < t1.Rank)
@@ -160,27 +177,77 @@ namespace LillyScan.Backend.Math
             return new Tensor<V>(resultShape, buffer);
         }
 
-        public static Tensor<T> ReduceAxis<T>(this Tensor<T> t, int axis, Func<T, T, T> op)
+        public static Tensor<U> SubDimMap<T, U>(this Tensor<T> t1, Func<Tensor<T>, Tensor<U>> op, int dims)
         {
-            if (axis < 0) axis = t.Rank + axis;
+            if (t1.Rank == dims)
+                return op(t1);
 
-            var buffer = new T[t.Shape[axis]];
-            var isSet = new bool[t.Shape[axis]];
+            var newDims = t1.Shape.Take(t1.Rank - dims).ToArray();            
+            var iterShape = new Shape(newDims);            
 
-            foreach (var it in t.Shape.IterateIndices()) 
+            var results = new List<Tensor<U>>();
+            Shape resultShape = null;
+
+            foreach (var it in iterShape.IterateIndices())
             {
-                if (!isSet[it[axis]])
+                var ita = it.Select((_, i) => System.Math.Min(_, t1.Shape[i] - 1)).ToArray();                
+                var a = t1.GetFromBatches(ita);                
+                var r = op(a);
+                if (resultShape == null)
                 {
-                    buffer[it[axis]] = t.GetValueAt(it);
-                    isSet[it[axis]] = true;
+                    results.Add(r);
+                    resultShape = r.Shape;
                 }
                 else
                 {
-                    buffer[it[axis]] = op(buffer[it[axis]], t.GetValueAt(it));
+                    if (!r.Shape.Equals(resultShape))
+                        throw new InvalidOperationException("SubDimMap operation outputs must have same shape");
+                    results.Add(r);
                 }
             }
-            return new Tensor<T>((t.Shape[axis]), buffer);
+            resultShape = new Shape(iterShape.Concat(resultShape).ToArray());
+            var buffer = results.SelectMany(_ => _.Buffer).ToArray();
+            return new Tensor<U>(resultShape, buffer);
         }
+
+        public static Tensor<T>[] Unstack<T>(this Tensor<T> t, int axis = 0)
+        {
+            axis = Shape.ResolveIndex(t.Rank, axis);
+            var accessors = new ISequenceAccessor[t.Rank];
+
+            var tensors = new Tensor<T>[t.Shape[axis]];
+            for(int i = 0; i < tensors.Length; i++)
+            {
+                accessors[axis] = new IndexAccessor(i);
+                tensors[i] = t[accessors];
+            }
+            return tensors;
+        }
+
+        private static Tensor<T> ReduceAxis<T>(this Tensor<T> t, Func<T, T, T> op, int axis, bool keepDimensions)
+        {
+            axis = Shape.ResolveIndex(t.Rank, axis);
+            return t.SubDimMap(x =>
+            {
+                var tensors = x.Unstack(axis: 0);
+                var r = tensors[0];                
+                for (int i = 1; i < tensors.Length; i++)
+                    r = r.PerformElementWiseBinaryOperation(tensors[i], op);
+                if (keepDimensions)
+                    r = r.Reshape(1 + r.Shape);
+                return r;
+            }, t.Rank - axis);
+        }
+
+        public static Tensor<T> ReduceAxis<T>(this Tensor<T> t, Func<T, T, T> op, AxisCollection axis = null, bool keepDimensions = false)
+        {
+            axis = axis ?? AxisCollection.AllAxis;
+            var axisArr = axis.Resolve(t.Rank);
+            for (int i = axisArr.Length - 1; i >= 0; i--)
+                t = t.ReduceAxis(op, axisArr[i], keepDimensions);
+
+            return t;
+        }  
 
         public static Tensor<T> Squeeze<T>(this Tensor<T> t)
         {
@@ -226,7 +293,7 @@ namespace LillyScan.Backend.Math
 
                         var x = convSrc.MatMul(kernel).Reshape((K1, K2, f2));                        
 
-                        x = x.ReduceAxis(-1, Operations.Sum<T>());
+                        x = x.ReduceAxis(Operations.Sum<T>(), -1);
                         cells.Add(x);                        
                     }                    
                 }

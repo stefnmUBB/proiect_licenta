@@ -20,8 +20,17 @@ namespace LillyScan
         /// </summary>
         [STAThread]
         static void Main()
-        {            
-            ModelLoader.LoadFromStream(File.Open(@"D:\Public\model_saver\model.txt", FileMode.Open));
+        {
+            var a = new Tensor<int>((2, 2, 3), new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 });
+            a.Print();
+
+            a.ReduceSum(new[] {0,1}).Print();            
+
+            
+
+            //a.Print();
+
+            //ModelLoader.LoadFromStream(File.Open(@"D:\Public\model_saver\model.txt", FileMode.Open));
             /*
             var a = Tensors.Ones<float>((1, 4, 4, 1));
 

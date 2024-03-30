@@ -29,7 +29,7 @@ namespace LillyScan.Backend.Math
 
         public Shape(IEnumerable<int> dims) : this(dims.ToArray()) { }
 
-        public static implicit operator Shape(int v) => new Shape(v); 
+        public static implicit operator Shape(int v) => new Shape(v == 0 ? new int[0] : new int[] { v });
         public static implicit operator Shape(ValueTuple<int> vt) => new Shape(vt.Item1); 
         public static implicit operator Shape(ValueTuple<int,int> vt) => new Shape(vt.Item1, vt.Item2); 
         public static implicit operator Shape(ValueTuple<int,int,int> vt) => new Shape(vt.Item1, vt.Item2, vt.Item3);
@@ -131,6 +131,9 @@ namespace LillyScan.Backend.Math
                 return p == r;
             }).All(_ => _);
         }
+
+        public static Shape operator +(Shape s1, Shape s2) => new Shape(s1.Concat(s2));
+
 
     }
 }

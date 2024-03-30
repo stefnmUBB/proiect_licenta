@@ -6,7 +6,7 @@ using System.Linq;
 namespace LillyScan.Backend.AI.Layers
 {
     [Named("Conv2D")]
-    public class Conv2D : Layer
+    public class Conv2D : FeatureMap2DLayer
     {
         [TfConfigProperty("filters")]
         public int Filters { get; private set; }
@@ -53,6 +53,6 @@ namespace LillyScan.Backend.AI.Layers
         public override void LoadFromConfig(TfConfig config)
         {
             base.LoadFromConfig(config);
-        }
+        }        
     }
 }

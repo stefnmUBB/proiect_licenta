@@ -13,6 +13,10 @@ namespace LillyScan.Backend.Math
 
         public static Tensor<T> Constant<T>(Shape shape, T constant)
         {            
+            if(shape.DimsCount==0) // scalar
+            {
+                return new Tensor<T>(shape, new[] { constant });
+            }
             T[] buffer = new T[shape.ElementsCount];
             for (int i = 0; i < buffer.Length; i++) buffer[i] = constant;
             return new Tensor<T>(shape, buffer);

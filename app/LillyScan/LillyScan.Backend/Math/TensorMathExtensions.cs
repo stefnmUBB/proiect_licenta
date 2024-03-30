@@ -20,6 +20,9 @@ namespace LillyScan.Backend.Math
             => t1.PerformElementWiseBinaryOperation(t2, (x, y) => x * y);
 
 
+        public static Tensor<T> ReduceSum<T>(this Tensor<T> t, AxisCollection axis = null, bool keepDimensions=false)
+            => t.ReduceAxis((x, y) => (dynamic)x + y, axis, keepDimensions);
+
         public static Tensor<T> MatMul<T>(this Tensor<T> t1, Tensor<T> t2)
         {
             if (t1.Rank < 2 || t2.Rank < 2)

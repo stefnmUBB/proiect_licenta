@@ -11,9 +11,16 @@ namespace LillyScan.Backend.Math
     {
         public Shape Shape { get; }
         public ImmutableArray<T> Buffer { get; }
+        public bool IsShapeless => Rank == 0;
+        public bool IsScalar => Rank == 0;
 
         public Tensor(Shape shape, ImmutableArray<T> buffer)
         {
+            if(shape.DimsCount==0 && buffer.Length==1)
+            {
+                (Shape, Buffer) = (shape, buffer);
+                return;
+            }
             if (buffer.Length != shape.ElementsCount)
                 throw new ArgumentException($"Elements count ({buffer.Length}) does not match shape {Shape}");
             (Shape, Buffer) = (shape, buffer);
@@ -108,36 +115,60 @@ namespace LillyScan.Backend.Math
 
             sb.Append(message);
             sb.AppendLine($"Tensor of type {typeof(T)} and shape {Shape}:");
-            sb.Append(new string('[', Shape.DimsCount));
-            while (iter[0] < Shape[0])
+            if (IsScalar)
             {
-                var elem = Buffer[Shape.GetBufferIndex(iter)];
-                sb.Append(elem);                
-                //Console.WriteLine(iter.JoinToString(" "));
-                int b = 0;
-                for (int i = Shape.DimsCount - 1, c = 1; i >= 0 && c > 0; i--) 
-                {
-                    iter[i]++;
-                    c = 0;
-                    if (i > 0 && iter[i] == Shape[i])
-                    {
-                        iter[i] = 0;
-                        c = 1;
-                        b++;
-                        sb.Append("]");
-                    }                    
-                }
-                if(b==0)
-                    sb.Append(" ");
-                if (b > 0 && iter[0] < Shape[0]) 
-                    sb.Append("\n" + new string('[', b));
+                sb.Append(Buffer[0]);
             }
-            sb.Append(']');
-            w.WriteLine(sb);
+            else
+            {
 
+                sb.Append(new string('[', Shape.DimsCount));
+                while (iter[0] < Shape[0])
+                {
+                    var elem = Buffer[Shape.GetBufferIndex(iter)];
+                    sb.Append(elem);
+                    //Console.WriteLine(iter.JoinToString(" "));
+                    int b = 0;
+                    for (int i = Shape.DimsCount - 1, c = 1; i >= 0 && c > 0; i--)
+                    {
+                        iter[i]++;
+                        c = 0;
+                        if (i > 0 && iter[i] == Shape[i])
+                        {
+                            iter[i] = 0;
+                            c = 1;
+                            b++;
+                            sb.Append("]");
+                        }
+                    }
+                    if (b == 0)
+                        sb.Append(" ");
+                    if (b > 0 && iter[0] < Shape[0])
+                        sb.Append("\n" + new string('[', b));
+                }
+                sb.Append(']');
+            }
+            w.WriteLine(sb);
             return this;
-        }        
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Tensor<T> tensor &&
+                   EqualityComparer<Shape>.Default.Equals(Shape, tensor.Shape) &&
+                   EqualityComparer<ImmutableArray<T>>.Default.Equals(Buffer, tensor.Buffer);
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 795993937;
+            hashCode = hashCode * -1521134295 + EqualityComparer<Shape>.Default.GetHashCode(Shape);
+            hashCode = hashCode * -1521134295 + Buffer.Select(_ => _.GetHashCode()).Aggregate(0, (x, y) => unchecked(x + y));
+            return hashCode;
+        }
 
         public int Rank => Shape.DimsCount;                
+
+
     }    
 }

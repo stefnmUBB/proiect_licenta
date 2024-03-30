@@ -45,5 +45,19 @@ namespace LillyScan.Backend.Utils
         {
             Array.Copy(Buffer, sourceIndex, destinationArray, destinationIndex, length);
         }
+
+        public override bool Equals(object obj)
+        {
+            return obj is ImmutableArray<T> array &&
+                   Length == array.Length &&
+                   Buffer.SequenceEqual(array.Buffer);                   
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 1896606984;
+            hashCode = hashCode * -1521134295 + Buffer.Select(_ => _.GetHashCode()).Aggregate(0, (x, y) => unchecked(x + y));
+            return hashCode;
+        }
     }
 }
