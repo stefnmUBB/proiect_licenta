@@ -48,7 +48,7 @@ namespace LillyScan.Backend.AI.Layers
             x = x.Reshape(1 + x.Shape);
 
             var W = Context.GetWeight("W");
-            var U = Context.GetWeight("U");            
+            var U = Context.GetWeight("U");
 
             var t = x.MatMul(W).Add(h.MatMul(U));
             if (UseBias)

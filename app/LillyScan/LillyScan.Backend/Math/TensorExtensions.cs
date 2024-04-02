@@ -1,4 +1,5 @@
-﻿using LillyScan.Backend.Utils;
+﻿using LillyScan.Backend.AI.Layers;
+using LillyScan.Backend.Utils;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -270,7 +271,7 @@ namespace LillyScan.Backend.Math
             fixed (float* tbuff = &t.Buffer.Buffer[0])
             fixed (float* kbuff = &kernel.Buffer.Buffer[0])
             fixed (float* rbuff = &result[0])
-                Convolutions.Conv2D(tbuff, kbuff, rbuff, B, n, m, C, K1, K2, F);
+                UnsafeOperations.Conv2D(tbuff, kbuff, rbuff, B, n, m, C, K1, K2, F);
 
             return new Tensor<float>((B, n, m, F), result);            
         }        
@@ -295,7 +296,7 @@ namespace LillyScan.Backend.Math
             fixed (float* tbuff = &t.Buffer.Buffer[0])
             fixed (float* kbuff = &kernel.Buffer.Buffer[0])
             fixed (float* rbuff = &result[0])
-                Convolutions.Conv2DTranspose(tbuff, kbuff, rbuff, B, n, m, C, K1, K2, F, strideRows, strideCols);
+                UnsafeOperations.Conv2DTranspose(tbuff, kbuff, rbuff, B, n, m, C, K1, K2, F, strideRows, strideCols);
 
             return new Tensor<float>((B, outH, outW, F), result);            
         }

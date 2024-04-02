@@ -25,7 +25,7 @@ namespace LillyScan.Backend.AI.Layers
             return new[] { new Shape(shape[0], Size.Rows * shape[1], Size.Cols * shape[2], shape[3]) };
         }
 
-        protected override Tensor<float>[] OnCall(Tensor<float>[] inputs)
+        protected override unsafe Tensor<float>[] OnCall(Tensor<float>[] inputs)
         {
             var input = inputs[0];
             (int batchSize, int height, int width, int channels) = (input.Shape[0], input.Shape[1], input.Shape[2], input.Shape[3]);
@@ -33,7 +33,13 @@ namespace LillyScan.Backend.AI.Layers
             var outputShape = new Shape(batchSize, Size.Rows * height, Size.Cols * width, channels);
             var buffer = new float[outputShape.ElementsCount];
 
-            foreach(var ix in input.Shape.IterateIndices())
+            fixed(float* tbuf = &input.Buffer.Buffer[0])
+            fixed(float* rbuf = &buffer[0])
+            {
+                UnsafeOperations.UpSampling2D(tbuf, rbuf, batchSize, height, width, channels, Size.Rows, Size.Cols);
+            }
+
+            /*foreach(var ix in input.Shape.IterateIndices())
             {
                 (int b, int i, int j, int c) = (ix[0], ix[1], ix[2], ix[3]);
 
@@ -45,7 +51,7 @@ namespace LillyScan.Backend.AI.Layers
                         buffer[index] = input.GetValueAt(ix);
                     }
                 }
-            }                      
+            }*/
             return new[] { new Tensor<float>(outputShape, buffer) };
         }
     }

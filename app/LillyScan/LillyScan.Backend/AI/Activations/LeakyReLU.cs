@@ -16,7 +16,7 @@ namespace LillyScan.Backend.AI.Activations
         public LeakyReLU() : this(0.2f) { }
 
         public override Tensor<float> Call(Tensor<float> input)
-        {
+        {                        
             return input.Map(x => x < 0 ? NegativeSlope * x : x);
         }
     }

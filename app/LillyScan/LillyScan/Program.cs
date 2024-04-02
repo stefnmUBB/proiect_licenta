@@ -8,14 +8,18 @@ using LillyScan.Backend.Math.Arithmetics.BuiltInTypeWrappers;
 using LillyScan.Backend.Types;
 using LillyScan.Backend.Utils;
 using LillyScan.BackendWinforms.Utils;
+using LillyScan.Properties;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
@@ -40,8 +44,10 @@ namespace LillyScan
         /// </summary>
         [STAThread]
         static void Main()
-        {          
-            var model = ModelLoader.LoadFromStream(File.Open(@"D:\Public\model_saver\model.txt", FileMode.Open));
+        {
+            Backend.Initializer.Initialize();
+            //var model = ModelLoader.LoadFromStream(File.Open(@"D:\Public\model_saver\model.txt", FileMode.Open));            
+            var model = ModelLoader.LoadFromStream(new MemoryStream(Encoding.UTF8.GetBytes(Resources.model_segm)));
             Console.WriteLine(model.Inputs.JoinToString(", "));
             Console.WriteLine(model.Outputs.JoinToString(", "));
 
@@ -54,20 +60,16 @@ namespace LillyScan
                 .Select(s => Tensors.Zeros<float>(s)).ToArray();
             var sw = new Stopwatch();
             sw.Start();
-            //var o = model.Call(input);
-            var o = model.Call(new[] { new Tensor<float>((1, 256, 256, 1), img) })[0];
-            //o = new Softmax().Call(o);
+            
+            var o = model.Call(new[] { new Tensor<float>((1, 256, 256, 1), img) })[0];            
 
             var ocolors = o.Buffer.GroupChunks(3).Select(x => new ColorRGB(x[0], x[1], x[2])).ToArray();
             var oimg = new ImageRGB(new Matrix<ColorRGB>(256, 256, ocolors));
             oimg.ToBitmap().Save("holy2.png");
 
-            sw.Stop();
-            //o.ForEach(_ => _.Print());
+            sw.Stop();            
             Console.WriteLine(sw.ElapsedTicks);
             Console.WriteLine(sw.ElapsedMilliseconds);
-
-
 
             Console.WriteLine("Done");
             Console.ReadLine();

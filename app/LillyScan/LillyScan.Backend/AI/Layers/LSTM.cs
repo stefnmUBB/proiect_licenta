@@ -65,14 +65,10 @@ namespace LillyScan.Backend.AI.Layers
                     var x = t.GetFromBatches(new[] { i });
                     var cellOutput = Cell.Call(c, h, x);
                     c = cellOutput[0];
-                    h = cellOutput[1];
-                    //c.Print();
-                    //h.Print();
+                    h = cellOutput[1];                    
                     cs.Add(c);
-
                 }
-                return Tensors.Stack(cs);
-                //return c;
+                return Tensors.Stack(cs);                
             }, 2);
             return new[] { output };
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LillyScan.Backend.AI.Layers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,14 +46,14 @@ namespace LillyScan.Backend.Math
             return new Tensor<T>(new Shape(m, p), buffer);
         }
 
-        private static Tensor<float> MatMul2Float32(this Tensor<float> a, Tensor<float> b)
+        private static unsafe Tensor<float> MatMul2Float32(this Tensor<float> a, Tensor<float> b)
         {
-            int m = a.Shape[-2], n = a.Shape[-1], p = b.Shape[-1];
+            int m= a.Shape[-2], n = a.Shape[-1], p = b.Shape[-1];
             var results = new float[m * p];
-            for (int i = 0; i < m; i++)
-                for (int j = 0; j < p; j++)
-                    for (int k = 0; k < n; k++)
-                        results[i * p + j] += a.Buffer[i * n + k] * b.Buffer[k * p + j];
+            fixed (float* abuf = &a.Buffer.Buffer[0])
+            fixed (float* bbuf = &b.Buffer.Buffer[0])
+            fixed (float* rbuf = &results[0])
+                UnsafeOperations.MatMul(abuf, bbuf, rbuf, m, n, p);
             return new Tensor<float>(new Shape(m, p), results);
         }
 
