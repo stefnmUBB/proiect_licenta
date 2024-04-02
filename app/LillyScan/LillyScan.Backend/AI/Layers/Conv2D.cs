@@ -17,22 +17,26 @@ namespace LillyScan.Backend.AI.Layers
         [TfConfigProperty("use_bias")]
         public bool UseBias { get; private set; }
 
+        [TfConfigProperty("activation",converter:typeof(ActivationFunctionConverter))]
+        public Activations.Activation Activation { get; private set; }
+
         internal Conv2D() { }
 
-        public Conv2D(Shape[] inputShapes, int filters, (int, int)? kernelSize = null, bool useBias = true, string name = null) : base(inputShapes, name)
+        public Conv2D(Shape[] inputShapes, int filters, (int, int)? kernelSize = null, bool useBias = true, string name = null, Activations.Activation activation = null) : base(inputShapes, name)
         {
             Assert(() => inputShapes.Length == 1, () => inputShapes[0].Length == 4);
             (Filters, KernelSize, UseBias) = (filters, kernelSize ?? (1, 1), useBias);
 
             Context.Weights["kernel"] = Tensors.Ones<float>((KernelSize.Rows, KernelSize.Cols, InputShapes[0][-1], Filters));
-            if(UseBias)
+            if (UseBias)
             {
                 Context.Weights["bias"] = Tensors.Zeros<float>((Filters));
             }
+            Activation = activation;
         }
 
-        public Conv2D(Shape inputShape, int filters, (int, int)? kernelSize = null, bool useBias = true, string name = null)
-            : this(new[] {inputShape}, filters, kernelSize, useBias, name)
+        public Conv2D(Shape inputShape, int filters, (int, int)? kernelSize = null, bool useBias = true, string name = null, Activations.Activation activation = null)
+            : this(new[] { inputShape }, filters, kernelSize, useBias, name, activation)
         { }
 
         protected override Tensor<float>[] OnCall(Tensor<float>[] inputs)
@@ -46,6 +50,12 @@ namespace LillyScan.Backend.AI.Layers
                 var bias = Context.GetWeight("bias", (Filters), false);
                 output = output.Add(bias);
             }
+
+            if(Activation != null)
+            {
+                output = Activation.Call(output);
+            }
+
             return new[] { output };
         }
 

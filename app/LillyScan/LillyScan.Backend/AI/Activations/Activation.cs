@@ -10,7 +10,7 @@ namespace LillyScan.Backend.AI.Activations
         public abstract Tensor<float> Call(Tensor<float> input);
 
         public static implicit operator Activation(string activationName)
-        {
+        {            
             return NameSolver.GetType(activationName, typeof(Activation)) is Type type
                 ? Activator.CreateInstance(type) as Activation
                 : throw new InvalidOperationException($"No activation function named `{activationName}`");

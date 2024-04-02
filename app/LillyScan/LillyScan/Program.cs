@@ -1,4 +1,5 @@
-﻿using LillyScan.Backend.AI.Layers;
+﻿using LillyScan.Backend.AI.Activations;
+using LillyScan.Backend.AI.Layers;
 using LillyScan.Backend.AI.Models;
 using LillyScan.Backend.API;
 using LillyScan.Backend.Imaging;
@@ -39,40 +40,7 @@ namespace LillyScan
         /// </summary>
         [STAThread]
         static void Main()
-        {
-            /*var outD = "p/";
-            ImageRGB img;
-            var c = new HTRClient();
-            foreach (var f in Directory.GetFiles("D:\\Users\\Stefan\\Datasets\\JL"))
-            {
-                var name = Path.GetFileNameWithoutExtension(f);
-                Console.WriteLine(f);                
-                using (var bmp = new Bitmap(f))
-                {
-                    using (var r = new Bitmap(bmp, new Size(256, 256)))
-                        img = ImageRGBIO.FromBitmap(r);
-                }
-                //img = c.Segment(img);
-                img.ToBitmap().Save(outD + name + ".png");
-            }*/
-            
-            /*using (var bmp = new Bitmap(@"D:\\Users\\Stefan\\Datasets\\reteta.png"))
-            {
-                using (var r = new Bitmap(bmp, new Size(256, 256)))
-                    img = ImageRGBIO.FromBitmap(r);
-            }/*
-
-            
-            
-
-            Console.WriteLine("Done");
-            Console.ReadLine();            
-
-            return;
-            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
-            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
-            /*var cell = new LSTM((1, 10, 256), 256, useBias: true);
-            cell.Call(Tensors.Zeros<float>(cell.InputShapes[0]))[0].Print();*/
+        {          
             var model = ModelLoader.LoadFromStream(File.Open(@"D:\Public\model_saver\model.txt", FileMode.Open));
             Console.WriteLine(model.Inputs.JoinToString(", "));
             Console.WriteLine(model.Outputs.JoinToString(", "));
@@ -88,6 +56,8 @@ namespace LillyScan
             sw.Start();
             //var o = model.Call(input);
             var o = model.Call(new[] { new Tensor<float>((1, 256, 256, 1), img) })[0];
+            //o = new Softmax().Call(o);
+
             var ocolors = o.Buffer.GroupChunks(3).Select(x => new ColorRGB(x[0], x[1], x[2])).ToArray();
             var oimg = new ImageRGB(new Matrix<ColorRGB>(256, 256, ocolors));
             oimg.ToBitmap().Save("holy2.png");
