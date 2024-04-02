@@ -59,6 +59,13 @@ namespace LillyScan.Backend.AI.Layers
         public override void LoadFromConfig(TfConfig config)
         {
             base.LoadFromConfig(config);
-        }        
+        }
+
+        public override void LoadWeights(Tensor<float>[] weights)
+        {
+            Context.Weights["kernel"] = weights[0];
+            if (UseBias)
+                Context.Weights["bias"] = weights[1];
+        }
     }
 }

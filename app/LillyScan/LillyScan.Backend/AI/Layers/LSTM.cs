@@ -53,9 +53,10 @@ namespace LillyScan.Backend.AI.Layers
 
         protected override Tensor<float>[] OnCall(Tensor<float>[] inputs)
         {
-            var input = inputs[0];
+            var input = inputs[0];            
             var output = input.SubDimMap(t =>
             {
+                var cs = new List<Tensor<float>>();
                 var c = Tensors.Zeros<float>(Units);
                 var h = Tensors.Zeros<float>(Units);
 
@@ -65,11 +66,13 @@ namespace LillyScan.Backend.AI.Layers
                     var cellOutput = Cell.Call(c, h, x);
                     c = cellOutput[0];
                     h = cellOutput[1];
-                    c.Print();
-                    h.Print();
+                    //c.Print();
+                    //h.Print();
+                    cs.Add(c);
 
                 }
-                return c;
+                return Tensors.Stack(cs);
+                //return c;
             }, 2);
             return new[] { output };
         }

@@ -9,5 +9,6 @@ namespace LillyScan.Backend
         public string Predict(ImageRGB image) => Predict(ToGrayscaleDefault(image));
         private static Matrix<double> ToGrayscaleDefault(ImageRGB img)
             => Matrices.DoEachItem(img, x => (x.R.Value + x.G.Value + x.B.Value) / 3);
+        public abstract byte[] Segment(byte[] image);        
     }
 }

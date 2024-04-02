@@ -15,7 +15,11 @@ namespace LillyScan.Backend.AI.Layers
             {
                 if (throwWhenNotFound)
                     throw new KeyNotFoundException($"Cannot find weight `{name}` in the current context");
-                else return Tensors.Ones<float>(expectedShape);
+                else
+                {
+                    Console.WriteLine($"Creating default weights `{name}` ({expectedShape})");
+                    return Tensors.Ones<float>(expectedShape);
+                }
             }
             var tensor = Weights[name];
             if (expectedShape != null && !object.Equals(tensor.Shape, expectedShape))

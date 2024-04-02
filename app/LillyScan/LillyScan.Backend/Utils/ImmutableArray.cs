@@ -8,13 +8,11 @@ namespace LillyScan.Backend.Utils
 {
     public class ImmutableArray<T> : IEnumerable<T>
     {
-        private readonly T[] Buffer;        
+        internal readonly T[] Buffer;        
 
-        public ImmutableArray(params T[] buffer)
+        public ImmutableArray(T[] buffer)
         {
-            if (buffer == null)
-                throw new ArgumentNullException();
-            Buffer = buffer.ToArray();
+            Buffer = buffer ?? throw new ArgumentNullException();
         }
 
         public ImmutableArray(IEnumerable<T> buffer)

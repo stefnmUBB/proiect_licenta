@@ -13,6 +13,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LillyScan.Frontend", "Lilly
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LillyScan.Backend.Tests", "LillyScan.Backend.Tests\LillyScan.Backend.Tests.csproj", "{05A16D01-9211-4A58-BF6A-D69BA2920D37}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LillyScan.Backend.AI", "LillyScan.Backend.AI\LillyScan.Backend.AI.csproj", "{D81C74C9-85D8-4B34-9FCD-686A36B8D17E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LillyScan.AITest", "LillyScan.AITest\LillyScan.AITest.csproj", "{82C93354-B9C4-4724-A3EA-05B78B8863DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +45,14 @@ Global
 		{05A16D01-9211-4A58-BF6A-D69BA2920D37}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05A16D01-9211-4A58-BF6A-D69BA2920D37}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{05A16D01-9211-4A58-BF6A-D69BA2920D37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D81C74C9-85D8-4B34-9FCD-686A36B8D17E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D81C74C9-85D8-4B34-9FCD-686A36B8D17E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D81C74C9-85D8-4B34-9FCD-686A36B8D17E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D81C74C9-85D8-4B34-9FCD-686A36B8D17E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82C93354-B9C4-4724-A3EA-05B78B8863DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82C93354-B9C4-4724-A3EA-05B78B8863DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82C93354-B9C4-4724-A3EA-05B78B8863DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82C93354-B9C4-4724-A3EA-05B78B8863DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

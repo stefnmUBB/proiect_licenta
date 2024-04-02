@@ -9,7 +9,10 @@ public partial class CameraPreview : ContentView
 	{
 		InitializeComponent();
         CameraView.CamerasLoaded += CameraView_CamerasLoaded;        
-    }    
+        
+    }
+
+    public bool AreCamerasLoaded { get; private set; } = false;
 
     private void CameraView_CamerasLoaded(object? sender, EventArgs e)
     {
@@ -48,6 +51,10 @@ public partial class CameraPreview : ContentView
                     CameraView.ForceAutoFocus();
                 }                
             });
-        }
+            lock (this)
+                AreCamerasLoaded = true;
+        }        
     }
+
+    public ImageSource GetSnapshot() => CameraView.GetSnapShot();
 }

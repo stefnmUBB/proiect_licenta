@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -252,9 +253,9 @@ namespace LillyScan.Backend.Math
         public static Tensor<T> Squeeze<T>(this Tensor<T> t)
         {
             return new Tensor<T>(t.Shape.Where(d => d != 1).ToArray(), t.Buffer);
-        }        
+        }
 
-        public static Tensor<T> Conv2D<T>(this Tensor<T> t, Tensor<T> kernel)
+        public static unsafe Tensor<float> Conv2D(this Tensor<float> t, Tensor<float> kernel)
         {
             var validate_shapes = new Func<bool>(() => t.Rank == 4 && kernel.Rank == 4 && t.Shape[3] == kernel.Shape[2]);
             if (!validate_shapes())
@@ -262,43 +263,21 @@ namespace LillyScan.Backend.Math
 
             (int B, int n, int m) = (t.Shape[0], t.Shape[1], t.Shape[2]);
             (int K1, int K2) = (kernel.Shape[0], kernel.Shape[1]);
-            (int f1, int f2) = (t.Shape[3], kernel.Shape[3]);
+            (int C, int F) = (t.Shape[3], kernel.Shape[3]);
 
-            var outShape = new Shape(B, n, m, f2);            
+            var result = new float[B * n * m * F];
 
-            var cells = new List<Tensor<T>>();
+            fixed (float* tbuff = &t.Buffer.Buffer[0])
+            fixed (float* kbuff = &kernel.Buffer.Buffer[0])
+            fixed (float* rbuff = &result[0])
+                Convolutions.Conv2D(tbuff, kbuff, rbuff, B, n, m, C, K1, K2, F);
 
-            for (int b = 0; b < B; b++)
-            {
-                for (int i = 0; i < n; i++)
-                {
-                    for (int j = 0; j < m; j++)
-                    {
-                        var channelsList = new List<Tensor<T>>();
-                        for (int k1 = -K1 / 2 + (1 - K1 % 2); k1 <= K1 / 2; k1++)
-                        {
-                            for (int k2 = -K2 / 2 + (1 - K2 % 2); k2 <= K2 / 2; k2++)
-                            {
-                                var c = t.GetFromBatches(new[] { b, (i + k1).Clamp(0, n - 1), (j + k2).Clamp(0, m - 1) });
-                                channelsList.Add(c);                                
-                            }
-                        }
-                        var buff = channelsList.SelectMany(_ => _.Buffer).ToArray();                        
-                        var convSrc = new Tensor<T>((K1, K2, 1, f1), buff);
+            return new Tensor<float>((B, n, m, F), result);            
+        }        
 
-                        var x = convSrc.MatMul(kernel).Reshape((K1, K2, f2));                        
-                        x = x.ReduceSum(new[] { 0, 1 });
-                        cells.Add(x);
-                    }                    
-                }
-            }           
-            return Tensors.Stack(cells).Reshape((B, n, m, f2));
-        }
-
-
-        public static Tensor<T> Conv2DTranspose<T>(this Tensor<T> t, Tensor<T> kernel, (int Rows, int Cols)? strides = null)
+        public static unsafe Tensor<float> Conv2DTransposeFloat32(this Tensor<float> t, Tensor<float> kernel, (int Rows, int Cols)? strides = null)
         {
-            (var strideRows, var strideCols) = strides ?? (1, 1);            
+            (var strideRows, var strideCols) = strides ?? (1, 1);
             var validate_shapes = new Func<bool>(() => t.Rank == 4 && kernel.Rank == 4 && t.Shape[3] == kernel.Shape[3]);
 
             if (!validate_shapes())
@@ -306,46 +285,19 @@ namespace LillyScan.Backend.Math
 
             (int B, int n, int m) = (t.Shape[0], t.Shape[1], t.Shape[2]);
             (int K1, int K2) = (kernel.Shape[0], kernel.Shape[1]);
-            (int f1, int f2) = (kernel.Shape[3], kernel.Shape[2]);
+            (int C, int F) = (kernel.Shape[3], kernel.Shape[2]);
 
             var outH = strideRows * n;
-            var outW = strideCols * m;            
+            var outW = strideCols * m;
 
-            t = t.SubDimMap(x => 
-            {                
+            var result = new float[B * outH * outW * F];
 
-                var shape = new Shape(outH, outW, f2);
-                var buffer = new T[shape.ElementsCount];
-                for(int i=0;i<n;i++)
-                {
-                    for(int j=0;j<m;j++)
-                    {
-                        var channels = x.GetFromBatches(new[] { i, j }).Reshape((f1, 1));
-                        var mat = kernel.MatMul(channels).Reshape((K1, K2, f2));
-                        //mat.Print();
+            fixed (float* tbuff = &t.Buffer.Buffer[0])
+            fixed (float* kbuff = &kernel.Buffer.Buffer[0])
+            fixed (float* rbuff = &result[0])
+                Convolutions.Conv2DTranspose(tbuff, kbuff, rbuff, B, n, m, C, K1, K2, F, strideRows, strideCols);
 
-                        for(int k1=0;k1<K1;k1++)
-                        {
-                            for(int k2=0;k2<K2;k2++)
-                            {
-                                int ii = (i * strideRows + k1 - (K1 - strideRows) / 2);
-                                int jj = (j * strideCols + k2 - (K2 - strideCols) / 2);
-                                if (ii < 0 || jj < 0 || ii >= outH || jj >= outW)
-                                    continue;
-                                for (int c = 0; c < f2; c++)
-                                {
-                                    var index = shape.GetBufferIndex(ii, jj, c);
-                                    buffer[index] = (dynamic)buffer[index] + mat.GetValueAt(k1, k2, c);
-                                }
-                            }
-                        }
-                    }
-                }
-                return new Tensor<T>(shape, buffer);
-            }, 3);
-
-            return t;
-            //return new Tensor<T>(outShape, buffer);
+            return new Tensor<float>((B, outH, outW, F), result);            
         }
 
 

@@ -8,5 +8,5 @@ namespace LillyScan.Backend.Utils
     { 
         bool DimReduce { get; }
         int[] GetIndices(int length);
-    }    
+    }   
 }

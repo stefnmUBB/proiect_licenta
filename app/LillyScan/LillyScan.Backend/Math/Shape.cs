@@ -1,5 +1,6 @@
 ﻿using LillyScan.Backend.Utils;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
@@ -39,12 +40,12 @@ namespace LillyScan.Backend.Math
         public override string ToString() => base.ToString();
 
 
-        public IEnumerable<ImmutableArray<int>> IterateIndices()
+        public IEnumerable<int[]> IterateIndices()
         {
             var iter = new int[DimsCount];
             while (iter[0] < this[0])
             {
-                yield return new ImmutableArray<int>(iter);
+                yield return iter; // new ImmutableArray<int>(iter);
                 for (int i = DimsCount - 1, c = 1; i >= 0 && c > 0; i--) 
                 {
                     iter[i]++;
@@ -58,7 +59,7 @@ namespace LillyScan.Backend.Math
             }
         }
 
-        public IEnumerable<ImmutableArray<int>> IterateSubDimsIndices(int subDims)
+        public IEnumerable<int[]> IterateSubDimsIndices(int subDims)
         {
             if (subDims >= DimsCount)
                 throw new InvalidOperationException("Too many dimensions");
@@ -132,8 +133,6 @@ namespace LillyScan.Backend.Math
             }).All(_ => _);
         }
 
-        public static Shape operator +(Shape s1, Shape s2) => new Shape(s1.Concat(s2));
-
-
+        public static Shape operator +(Shape s1, Shape s2) => new Shape(s1.Concat(s2));        
     }
 }

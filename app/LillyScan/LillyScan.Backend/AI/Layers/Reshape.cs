@@ -1,5 +1,6 @@
 ﻿using LillyScan.Backend.AI.Layers.TfConfigConverters;
 using LillyScan.Backend.Math;
+using LillyScan.Backend.Parsers;
 using LillyScan.Backend.Types;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,9 @@ namespace LillyScan.Backend.AI.Layers
 
         protected override Tensor<float>[] OnCall(Tensor<float>[] inputs)
         {
+            Console.WriteLine("Reshape in: " + inputs.SelectShapes().JoinToString(", "));
             var output = inputs[0].SubDimMap(x => x.Reshape(TargetShape), inputs[0].Rank - 1);
+            Console.WriteLine("Reshape out: " + output.Shape);
             return new[] { output };
         }
 

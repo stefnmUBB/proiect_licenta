@@ -1,32 +1,102 @@
 ﻿using LillyScan.Backend.AI.Layers;
 using LillyScan.Backend.AI.Models;
+using LillyScan.Backend.API;
+using LillyScan.Backend.Imaging;
 using LillyScan.Backend.Math;
+using LillyScan.Backend.Math.Arithmetics.BuiltInTypeWrappers;
 using LillyScan.Backend.Types;
 using LillyScan.Backend.Utils;
+using LillyScan.BackendWinforms.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace LillyScan
-{
+{ 
     internal static class Program
     {
+        static void Measure(Action a)
+        {
+            var sw = new Stopwatch();
+            sw.Start();
+            a();
+            sw.Stop();
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine($"Measured time: {sw.Elapsed} | {sw.ElapsedMilliseconds}ms");
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
         static void Main()
         {
+            /*var outD = "p/";
+            ImageRGB img;
+            var c = new HTRClient();
+            foreach (var f in Directory.GetFiles("D:\\Users\\Stefan\\Datasets\\JL"))
+            {
+                var name = Path.GetFileNameWithoutExtension(f);
+                Console.WriteLine(f);                
+                using (var bmp = new Bitmap(f))
+                {
+                    using (var r = new Bitmap(bmp, new Size(256, 256)))
+                        img = ImageRGBIO.FromBitmap(r);
+                }
+                //img = c.Segment(img);
+                img.ToBitmap().Save(outD + name + ".png");
+            }*/
+            
+            /*using (var bmp = new Bitmap(@"D:\\Users\\Stefan\\Datasets\\reteta.png"))
+            {
+                using (var r = new Bitmap(bmp, new Size(256, 256)))
+                    img = ImageRGBIO.FromBitmap(r);
+            }/*
 
-            var cell = new LSTM((1, 10, 256), 256, useBias: true);
+            
+            
 
-            cell.Call(Tensors.Zeros<float>(cell.InputShapes[0]))[0].Print();
+            Console.WriteLine("Done");
+            Console.ReadLine();            
 
-            ModelLoader.LoadFromStream(File.Open(@"D:\Public\model_saver\model.txt", FileMode.Open));           
+            return;
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+            /*var cell = new LSTM((1, 10, 256), 256, useBias: true);
+            cell.Call(Tensors.Zeros<float>(cell.InputShapes[0]))[0].Print();*/
+            var model = ModelLoader.LoadFromStream(File.Open(@"D:\Public\model_saver\model.txt", FileMode.Open));
+            Console.WriteLine(model.Inputs.JoinToString(", "));
+            Console.WriteLine(model.Outputs.JoinToString(", "));
+
+            var img = ImageRGBIO.FromBitmap(new Bitmap(new Bitmap(@"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\tmp\tmp_002_buruianasergiu_ofaptabuna.jpg"), new Size(256, 256)))
+                .Select(x => (float)((x.R.Value + x.G.Value + x.B.Value) / 3)).Items;
+
+            var input = model.Inputs.SelectMany(_ => _.GetOutputShapes())
+                .Peek(_ => Console.WriteLine(_))
+                .Select(s => 1 + new Shape(s.Skip(1).ToArray()))
+                .Select(s => Tensors.Zeros<float>(s)).ToArray();
+            var sw = new Stopwatch();
+            sw.Start();
+            //var o = model.Call(input);
+            var o = model.Call(new[] { new Tensor<float>((1, 256, 256, 1), img) })[0];
+            var ocolors = o.Buffer.GroupChunks(3).Select(x => new ColorRGB(x[0], x[1], x[2])).ToArray();
+            var oimg = new ImageRGB(new Matrix<ColorRGB>(256, 256, ocolors));
+            oimg.ToBitmap().Save("holy2.png");
+
+            sw.Stop();
+            //o.ForEach(_ => _.Print());
+            Console.WriteLine(sw.ElapsedTicks);
+            Console.WriteLine(sw.ElapsedMilliseconds);
+
 
 
             Console.WriteLine("Done");

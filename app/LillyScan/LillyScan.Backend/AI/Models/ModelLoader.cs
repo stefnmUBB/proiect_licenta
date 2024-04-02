@@ -12,8 +12,8 @@ using System.Text;
 namespace LillyScan.Backend.AI.Models
 {
     public static class ModelLoader
-    {       
-        public static void LoadFromStream(Stream stream)
+    {
+        public static Model LoadFromStream(Stream stream)
         {
             var layers = new List<LayerInfo>();
             LayerInfo currentLayer = null;
@@ -140,20 +140,19 @@ namespace LillyScan.Backend.AI.Models
             foreach (var output in outputs)
                 output.IsOutput = true;
 
-
             var solvedLayers = new Dictionary<LayerInfo, Layer>();            
             var queue = new Queue<LayerInfo>(layers.ToArray());
             var inputs = layers.Where(li => li.Type == "InputLayer")
                 .Select(li => solvedLayers[li] = li.ToLayer(null))
                 .ToArray();
             Dictionary<Layer, Layer[]> layerInputs=new Dictionary<Layer, Layer[]>();
-            while (queue.Count>0)
+            while (queue.Count > 0)
             {
                 var li = queue.Dequeue();
                 Console.WriteLine($"Dequeued {li.Name}");
                 if (solvedLayers.ContainsKey(li))
                     continue;
-                if(li.Inputs.Any(_=>!solvedLayers.ContainsKey(_)))
+                if (li.Inputs.Any(_ => !solvedLayers.ContainsKey(_)))
                 {
                     Console.WriteLine($"Enqueued {li.Name}");
                     queue.Enqueue(li);
@@ -170,25 +169,7 @@ namespace LillyScan.Backend.AI.Models
                 Console.ForegroundColor = ConsoleColor.White;
             }
 
-
-
-            /*foreach (var layer in layers)
-            {
-                Console.WriteLine(layer);
-                try
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine(layer.ToLayer(null));
-                    Console.ForegroundColor = ConsoleColor.White;
-                }
-                catch(Exception e)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(e.Message);
-                    Console.ForegroundColor = ConsoleColor.White;
-                }
-            } */
-
+            return new Model(inputs, outputs.Select(_ => solvedLayers[_]).ToArray(), layerInputs);
 
         }
 

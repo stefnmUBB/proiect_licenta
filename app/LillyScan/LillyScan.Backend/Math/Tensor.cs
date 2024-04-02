@@ -1,6 +1,7 @@
 ﻿using LillyScan.Backend.Utils;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,8 @@ namespace LillyScan.Backend.Math
 {
     public class Tensor<T>
     {
-        public Shape Shape { get; }
+        public Shape Shape { get; }        
+
         public ImmutableArray<T> Buffer { get; }
         public bool IsShapeless => Rank == 0;
         public bool IsScalar => Rank == 0;

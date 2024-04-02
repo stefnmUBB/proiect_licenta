@@ -59,14 +59,21 @@ namespace LillyScan.Backend.AI.Layers
             if (Padding == Padding.Valid)
                 throw new NotImplementedException("Padding.Valid is not implemented. Use Padding.Same");
             var input = inputs[0];            
-            var kernel = Context.GetWeight("kernel", KernelShape, false);
-            var output = input.Conv2DTranspose(kernel, Strides);
+            var kernel = Context.GetWeight("kernel", KernelShape, false);            
+
+            var output = input.Conv2DTransposeFloat32(kernel, Strides);
             if (UseBias)
             {
                 var bias = Context.GetWeight("bias", BiasShape, false);
                 output = output.Add(bias);
             }
             return new[] { output };            
+        }
+        public override void LoadWeights(Tensor<float>[] weights)
+        {
+            Context.Weights["kernel"] = weights[0];
+            if (UseBias)
+                Context.Weights["bias"] = weights[1];
         }
     }
 }
