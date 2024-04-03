@@ -9,6 +9,11 @@ namespace LillyScan.Backend.API
     {
         private readonly Model SegmentationModel = ModelLoader.LoadFromString(Properties.Resources.model_segm);
 
+        public DefaultHTREngine()
+        {
+            Console.WriteLine("Loading DefaultHTREngine");
+        }
+
         public override string Predict(IReadMatrix<double> image)
         {
             throw new NotImplementedException();

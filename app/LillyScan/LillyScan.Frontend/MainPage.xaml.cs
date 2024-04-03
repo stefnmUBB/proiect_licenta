@@ -1,4 +1,5 @@
 ﻿using Camera.MAUI;
+using LillyScan.Backend;
 using LillyScan.Backend.API;
 using LillyScan.Backend.Imaging;
 using Microsoft.Maui.Controls;
@@ -17,11 +18,10 @@ namespace LillyScan.Frontend
             Loaded += MainPage_Loaded;
         }
 
-#if ANDROID
-        HTRClient API = new HTRClient("http://192.168.43.243:8000", new Xamarin.Android.Net.AndroidMessageHandler());
-#else
-        HTRClient API = new HTRClient("http://192.168.43.243:8000");
-#endif
+
+        //readonly DefaultHTREngine API = new DefaultHTREngine();
+
+
         private bool IsLiveSegmentationActive = true;
         private Task? LiveSegmentationTask;
 
@@ -51,7 +51,12 @@ namespace LillyScan.Frontend
 
                     try
                     {
-                        var segm = API.Segment(imageRGB);
+                        var sw = new Stopwatch();
+                        sw.Start();
+                        //var segm = API.Segment(imageRGB);
+                        sw.Stop();
+                        Console.WriteLine("________________________________________________________");
+                        Console.WriteLine($"Elapsed {sw.Elapsed} | {sw.ElapsedMilliseconds}ms");
                     }
                     catch(AggregateException e)
                     {
