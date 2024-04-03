@@ -13,7 +13,7 @@ namespace LillyScan.Backend.AI.Models
 {
     public static class ModelLoader
     {
-        public static Model LoadFromStream(Stream stream)
+        private static void LoadFromStream(Stream stream, out Layer[] inputs, out Layer[] outputs, out Dictionary<Layer, Layer[]> layerInputs)
         {
             var layers = new List<LayerInfo>();
             LayerInfo currentLayer = null;
@@ -22,11 +22,11 @@ namespace LillyScan.Backend.AI.Models
             string[] outputLayers = null;
             var inputFlow = new Dictionary<string, string[]>();
 
-            using(TextReader r =new StreamReader(stream))
-            {                
-                for(string line; (line = r.ReadLine()?.Trim())!=null;)
-                {                    
-                    if(line.StartsWith("[["))
+            using (TextReader r = new StreamReader(stream))
+            {
+                for (string line; (line = r.ReadLine()?.Trim()) != null;)
+                {
+                    if (line.StartsWith("[["))
                     {
                         if (currentLayer != null)
                         {
@@ -45,7 +45,7 @@ namespace LillyScan.Backend.AI.Models
                                 throw new InvalidOperationException("Current layer weights count don't match shapes");
 
                             currentLayer.Weights = new Tensor<float>[currentLayer.WeightShapes.Length];
-                            for (int i = 0, k = 0; i < currentLayer.Weights.Length; i++) 
+                            for (int i = 0, k = 0; i < currentLayer.Weights.Length; i++)
                             {
                                 var buffer = new float[currentLayer.WeightShapes[i].ElementsCount];
                                 Array.Copy(currentWeights, k, buffer, 0, buffer.Length);
@@ -62,7 +62,7 @@ namespace LillyScan.Backend.AI.Models
                             currentInputs = null;
                             continue;
                         }
-                        if (line == "[[Outputs]]") 
+                        if (line == "[[Outputs]]")
                         {
                             line = r.ReadLine().Trim();
                             outputLayers = line.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
@@ -74,24 +74,24 @@ namespace LillyScan.Backend.AI.Models
                     var key = line.Substring(1, line.Length - 2);
                     var valueStr = r.ReadLine().Trim();
 
-                    if(key=="type")
+                    if (key == "type")
                     {
                         currentLayer.Type = valueStr;
                         continue;
                     }
-                    if(key=="name")
+                    if (key == "name")
                     {
                         currentLayer.Name = valueStr;
                         continue;
                     }
-                    if(key=="inputs")
+                    if (key == "inputs")
                     {
                         currentInputs = valueStr.Split(';');
                         continue;
                     }
-                    if(key=="weight_shapes")
+                    if (key == "weight_shapes")
                     {
-                        if(valueStr=="0")
+                        if (valueStr == "0")
                         {
                             currentLayer.WeightShapes = new Shape[0];
                         }
@@ -103,19 +103,19 @@ namespace LillyScan.Backend.AI.Models
                         }
                         continue;
                     }
-                    if(key=="weights")
+                    if (key == "weights")
                     {
                         currentWeights = valueStr.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
-                            .Select(_ => 
+                            .Select(_ =>
                             {
                                 uint num = uint.Parse(_, NumberStyles.AllowHexSpecifier);
                                 byte[] floatVals = BitConverter.GetBytes(num);
                                 return BitConverter.ToSingle(floatVals, 0);
                             })
-                            .ToArray();                        
+                            .ToArray();
                         continue;
                     }
-                    if(key=="config")
+                    if (key == "config")
                     {
                         currentLayer.Config = new TfConfig(valueStr);
                         continue;
@@ -129,23 +129,23 @@ namespace LillyScan.Backend.AI.Models
                 layer.Inputs = inputFlow.GetOrDefault(layer.Name, _ => new string[0])
                     .Select(_ => layers.Where(l => l.Name == _).FirstOrDefault()
                         ?? throw new InvalidOperationException($"No layer named `{_}` has been found."))
-                    .ToArray();                
+                    .ToArray();
             }
 
             if (outputLayers == null)
                 throw new InvalidOperationException("Outputs note specified");
-            var outputs = outputLayers.Select(_ => layers.Where(l => l.Name == _).FirstOrDefault()
+            var _outputs = outputLayers.Select(_ => layers.Where(l => l.Name == _).FirstOrDefault()
                         ?? throw new InvalidOperationException($"No layer named `{_}` has been found."))
                     .ToArray();
-            foreach (var output in outputs)
+            foreach (var output in _outputs)
                 output.IsOutput = true;
 
-            var solvedLayers = new Dictionary<LayerInfo, Layer>();            
+            var solvedLayers = new Dictionary<LayerInfo, Layer>();
             var queue = new Queue<LayerInfo>(layers.ToArray());
-            var inputs = layers.Where(li => li.Type == "InputLayer")
+            var _inputs = layers.Where(li => li.Type == "InputLayer")
                 .Select(li => solvedLayers[li] = li.ToLayer(null))
                 .ToArray();
-            Dictionary<Layer, Layer[]> layerInputs=new Dictionary<Layer, Layer[]>();
+            Dictionary<Layer, Layer[]> _layerInputs = new Dictionary<Layer, Layer[]>();
             while (queue.Count > 0)
             {
                 var li = queue.Dequeue();
@@ -162,16 +162,30 @@ namespace LillyScan.Backend.AI.Models
                 var inputShapes = lInputs.SelectMany(_ => _.GetOutputShapes()).ToArray();
                 inputShapes.DeepPrint();
                 var layer = li.ToLayer(inputShapes);
-                layerInputs[layer] = lInputs;
+                _layerInputs[layer] = lInputs;
                 solvedLayers[li] = layer;
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"Layer {layer} outputs {layer.GetOutputShapes().JoinToString(", ")}");
                 Console.ForegroundColor = ConsoleColor.White;
             }
 
-            return new Model(inputs, outputs.Select(_ => solvedLayers[_]).ToArray(), layerInputs);
-
+            inputs = _inputs;
+            outputs = _outputs.Select(_ => solvedLayers[_]).ToArray();
+            layerInputs = _layerInputs;            
         }
 
+        public static Model LoadFromStream(Stream stream)
+        {
+            LoadFromStream(stream, out var inputs, out var outputs, out var layerInputs);
+            return new Model(inputs, outputs, layerInputs);
+        }
+
+        public static Model LoadFromString(string plainText)
+        {
+            using(var ms=new MemoryStream(Encoding.UTF8.GetBytes(plainText)))
+            {
+                return LoadFromStream(ms);
+            }
+        }
     }
 }

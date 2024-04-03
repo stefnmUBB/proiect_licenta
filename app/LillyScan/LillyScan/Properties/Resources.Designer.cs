@@ -59,33 +59,5 @@ namespace LillyScan.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to [[Layer]]
-        ///[type]
-        ///InputLayer
-        ///[name]
-        ///input_1
-        ///[config]
-        ///{&apos;batch_input_shape&apos;: (None, 256, 256, 1), &apos;dtype&apos;: &apos;float64&apos;, &apos;sparse&apos;: False, &apos;ragged&apos;: False, &apos;name&apos;: &apos;input_1&apos;}
-        ///[weight_shapes]
-        ///0
-        ///[[Layer]]
-        ///[type]
-        ///Conv2D
-        ///[name]
-        ///conv2d
-        ///[config]
-        ///{&apos;name&apos;: &apos;conv2d&apos;, &apos;dtype&apos;: &apos;float64&apos;, &apos;filters&apos;: 16, &apos;kernel_size&apos;: (3, 3), &apos;strides&apos;: (1, 1), &apos;padding&apos;: &apos;same&apos;, &apos;data_format&apos;: &apos;channels_last&apos;, &apos;dilation_rate&apos;: (1, 1), &apos;groups&apos;: 1, &apos;activation&apos;: &apos;linear&apos;, &apos;use_bias&apos;: True}
-        ///[inputs]
-        ///input_1
-        ///[weight_shapes]
-        /// [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string model_segm {
-            get {
-                return ResourceManager.GetString("model_segm", resourceCulture);
-            }
-        }
     }
 }

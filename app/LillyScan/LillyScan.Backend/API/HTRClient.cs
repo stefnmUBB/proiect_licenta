@@ -30,6 +30,8 @@ namespace LillyScan.Backend.API
             throw new NotImplementedException();
         }
 
+        public override float[] Segment(float[] image) { throw new NotImplementedException(); }
+
         public override byte[] Segment(byte[] image)
         {            
             var enc = Base64.Encode(image);

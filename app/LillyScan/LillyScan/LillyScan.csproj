@@ -91,9 +91,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\model.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\model_segm.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

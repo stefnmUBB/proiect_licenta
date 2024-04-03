@@ -37,21 +37,7 @@ namespace LillyScan.Backend.AI.Layers
             fixed(float* rbuf = &buffer[0])
             {
                 UnsafeOperations.UpSampling2D(tbuf, rbuf, batchSize, height, width, channels, Size.Rows, Size.Cols);
-            }
-
-            /*foreach(var ix in input.Shape.IterateIndices())
-            {
-                (int b, int i, int j, int c) = (ix[0], ix[1], ix[2], ix[3]);
-
-                for(int p=0;p<Size.Rows;p++)
-                {
-                    for(int q=0;q<Size.Cols;q++)
-                    {
-                        var index = outputShape.GetBufferIndex(b, i * Size.Rows + p, j * Size.Cols + q, c);
-                        buffer[index] = input.GetValueAt(ix);
-                    }
-                }
-            }*/
+            }         
             return new[] { new Tensor<float>(outputShape, buffer) };
         }
     }
