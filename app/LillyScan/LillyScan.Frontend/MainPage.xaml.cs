@@ -5,6 +5,8 @@ using LillyScan.Backend.Imaging;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics.Platform;
 using System.Diagnostics;
+using System.Runtime;
+using System.Runtime.CompilerServices;
 
 namespace LillyScan.Frontend
 {
@@ -12,23 +14,50 @@ namespace LillyScan.Frontend
     {
         int count = 0;
 
-        public MainPage()
+        static void Measure(string message, Action a)
         {
+            Console.WriteLine($"Starting {message}");
+            var sw = new Stopwatch();
+            sw.Start();
+            a();
+            sw.Stop();
+            Console.WriteLine($"Finished {message}: {sw.Elapsed} | {sw.ElapsedMilliseconds}ms");
+        }
+
+        public MainPage()
+        {            
             InitializeComponent();
+
+            Console.WriteLine("HERE!!!!");
+            Measure("DefaultHTREngine", () =>
+            {
+                try
+                {
+
+                    API = new DefaultHTREngine();
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine($"e: {e.GetType()}: {e.Message} | {e.StackTrace}");
+                    e = e.InnerException;
+                    if (e == null) return;
+                    Console.WriteLine($"i: {e.GetType()}: {e.Message} | {e.StackTrace}");
+                }
+            });
             Loaded += MainPage_Loaded;
         }
 
 
-        //readonly DefaultHTREngine API = new DefaultHTREngine();
+        DefaultHTREngine API; //= new DefaultHTREngine();
 
 
         private bool IsLiveSegmentationActive = true;
-        private Task? LiveSegmentationTask;
+        private Task LiveSegmentationTask;
 
         private async void LiveSegmentation()
         {
             Thread.Sleep(5000);
-            while(IsLiveSegmentationActive)
+            while (IsLiveSegmentationActive)
             {
                 Thread.Sleep(200);
                 if (cameraView == null) continue;
@@ -42,10 +71,10 @@ namespace LillyScan.Frontend
                     Console.WriteLine($"Image {image.Width}x{image.Height}");
 
                     using var cropped = image.CropCentered(70, 70);
-                    using var resized = cropped.Resize(256, 256, ResizeMode.Stretch);                    
+                    using var resized = cropped.Resize(256, 256, ResizeMode.Stretch);
 
                     Console.WriteLine($"Resized");
-                    var imageRGB = resized.ToBytesRGB();                    
+                    var imageRGB = resized.ToBytesRGB();
 
                     if (imageRGB == null) continue;
 
@@ -53,24 +82,24 @@ namespace LillyScan.Frontend
                     {
                         var sw = new Stopwatch();
                         sw.Start();
-                        //var segm = API.Segment(imageRGB);
+                        var segm = API.Segment(imageRGB);
                         sw.Stop();
                         Console.WriteLine("________________________________________________________");
                         Console.WriteLine($"Elapsed {sw.Elapsed} | {sw.ElapsedMilliseconds}ms");
                     }
-                    catch(AggregateException e)
+                    catch (AggregateException e)
                     {
                         foreach (var ex in e.Flatten().InnerExceptions)
                         {
                             Console.WriteLine(ex.GetType());
                             Console.WriteLine(ex.Message);
                         }
-                    }                    
-                }                                
-            }                       
+                    }
+                }
+            }
         }
 
-        private void MainPage_Loaded(object? sender, EventArgs e)
+        private void MainPage_Loaded(object sender, EventArgs e)
         {
             LiveSegmentationTask = Task.Run(LiveSegmentation);
         }

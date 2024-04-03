@@ -14,7 +14,7 @@ public partial class CameraPreview : ContentView
 
     public bool AreCamerasLoaded { get; private set; } = false;
 
-    private void CameraView_CamerasLoaded(object? sender, EventArgs e)
+    private void CameraView_CamerasLoaded(object sender, EventArgs e)
     {
         Debug.WriteLine("Logging works???");
         Debug.WriteLine($"Cameras detected: {CameraView.NumCamerasDetected}");

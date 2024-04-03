@@ -1,6 +1,7 @@
 ﻿using LillyScan.Backend.Math;
 using LillyScan.Backend.Parsers;
 using LillyScan.Backend.Utils;
+using System.IO;
 using System.Linq;
 
 namespace LillyScan.Backend.AI.Layers
@@ -16,7 +17,7 @@ namespace LillyScan.Backend.AI.Layers
 
         public override string ToString() => $"LayerInfo(type={Type};" +
             $"name={Name};" +
-            $"inputs={Inputs.Select(_ => _.Name).JoinToString(",")};" +
+            $"inputs={Inputs?.Select(_ => _.Name)?.JoinToString(",")};" +
             $"weight_shapes={WeightShapes.JoinToString(",")};" +
             $"output={IsOutput})";
 
@@ -25,6 +26,6 @@ namespace LillyScan.Backend.AI.Layers
         public Layer ToLayer(Shape[] inputShapes)
         {
             return LayerDecoder.Decode(Type, inputShapes, Name, Config, Weights);
-        }
+        }                
     }
 }

@@ -3,6 +3,7 @@ using LillyScan.Backend.Math;
 using LillyScan.Backend.Parsers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -25,16 +26,16 @@ namespace LillyScan.Backend.AI.Models
         public Tensor<float>[] Call(Tensor<float>[] inputs)
         {
             var solvedValues = new Dictionary<Layer, Tensor<float>[]>();
-            for (int i=0;i<inputs.Length;i++)
-                solvedValues[Inputs[i]]= Inputs[i].Call(inputs[i]);
+            for (int i = 0; i < inputs.Length; i++)
+                solvedValues[Inputs[i]] = Inputs[i].Call(inputs[i]);
             var queue = new Queue<Layer>(InputFlow.Keys.ToArray());
-            while(queue.Count > 0)
+            while (queue.Count > 0)
             {
                 var layer = queue.Dequeue();
                 Console.WriteLine($"Dequeued {layer}");
                 var inputLayers = InputFlow[layer];
-                if(inputLayers.Any(_=>!solvedValues.ContainsKey(_)))
-                {                    
+                if (inputLayers.Any(_ => !solvedValues.ContainsKey(_)))
+                {
                     queue.Enqueue(layer);
                     Console.WriteLine($"Enqueued {layer}");
                     continue;
@@ -48,5 +49,6 @@ namespace LillyScan.Backend.AI.Models
             }
             return Outputs.SelectMany(_ => solvedValues[_]).ToArray();
         }
+
     }
 }

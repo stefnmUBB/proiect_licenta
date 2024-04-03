@@ -18,7 +18,7 @@ namespace LillyScan.Backend.AI.Layers.TfConfigConverters
             }
             catch(Exception e)
             {
-                throw new TfConfigConverterFailedException($"Failed creating activation function `{name}`");
+                throw new TfConfigConverterFailedException($"Failed creating activation function `{name}`: {e}");
             }
         }
     }

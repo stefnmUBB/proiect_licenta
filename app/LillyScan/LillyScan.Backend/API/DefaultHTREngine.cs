@@ -1,17 +1,19 @@
 ﻿using LillyScan.Backend.AI.Models;
 using LillyScan.Backend.Math;
+using LillyScan.Backend.Properties;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace LillyScan.Backend.API
 {
     public class DefaultHTREngine : HTREngine
     {
-        private readonly Model SegmentationModel = ModelLoader.LoadFromString(Properties.Resources.model_segm);
+        private readonly Model SegmentationModel = ModelLoader.LoadFromBytes(Resources.seg_model);
 
         public DefaultHTREngine()
         {
-            Console.WriteLine("Loading DefaultHTREngine");
+            Debug.WriteLine("Loaded DefaultHTREngine");
         }
 
         public override string Predict(IReadMatrix<double> image)
