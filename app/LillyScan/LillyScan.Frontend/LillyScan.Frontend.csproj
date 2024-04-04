@@ -42,7 +42,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android|AnyCPU'">
     <AndroidEnableSGenConcurrent>False</AndroidEnableSGenConcurrent>
     <RunAOTCompilation>True</RunAOTCompilation>
-    <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
+    <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android|AnyCPU'">
@@ -75,6 +75,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LillyScan.Backend.MAUI\LillyScan.Backend.MAUI.csproj" />
     <ProjectReference Include="..\LillyScan.Backend\LillyScan.Backend.csproj" />
   </ItemGroup>
 

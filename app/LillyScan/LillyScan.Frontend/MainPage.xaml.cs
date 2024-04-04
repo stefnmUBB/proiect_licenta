@@ -2,6 +2,7 @@
 using LillyScan.Backend;
 using LillyScan.Backend.API;
 using LillyScan.Backend.Imaging;
+using LillyScan.Backend.MAUI.Imaging;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics.Platform;
 using System.Diagnostics;
@@ -45,6 +46,9 @@ namespace LillyScan.Frontend
                 }
             });
             Loaded += MainPage_Loaded;
+
+            
+
         }
 
 
@@ -68,15 +72,15 @@ namespace LillyScan.Frontend
                 using var stream = await pic.Stream(CancellationToken.None);
                 using (var image = PlatformImage.FromStream(stream))
                 {
+                    var img = RawBitmapIO.FromBitmap(image);                    
+
                     Console.WriteLine($"Image {image.Width}x{image.Height}");
 
-                    using var cropped = image.CropCentered(70, 70);
-                    using var resized = cropped.Resize(256, 256, ResizeMode.Stretch);
-
+                    using var cropped = img.CropCenteredPercent(70, 70);
+                    using var resized = cropped.Resize(256, 256);
+                    using var gray = resized.AverageChannels();
                     Console.WriteLine($"Resized");
-                    var imageRGB = resized.ToBytesRGB();
-
-                    if (imageRGB == null) continue;
+                    var imageRGB = gray.ToArray();
 
                     try
                     {
