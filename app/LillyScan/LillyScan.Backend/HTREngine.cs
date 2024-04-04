@@ -41,6 +41,8 @@ namespace LillyScan.Backend
             return result;
         }
 
-        public abstract float[] Segment(float[] image);        
+        public abstract float[] Segment(float[] image);
+
+        public abstract float[] Segment64(float[] image);        
     }
 }

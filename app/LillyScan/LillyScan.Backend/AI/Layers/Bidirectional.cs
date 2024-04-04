@@ -1,5 +1,6 @@
 ﻿using LillyScan.Backend.AI.Layers.TfConfigConverters;
 using LillyScan.Backend.Math;
+using LillyScan.Backend.Parsers;
 using LillyScan.Backend.Types;
 using System;
 using System.Linq;
@@ -32,8 +33,23 @@ namespace LillyScan.Backend.AI.Layers
 
         protected override Tensor<float>[] OnCall(Tensor<float>[] inputs)
         {
+            var B = inputs[0].Shape[0];
+            var T = inputs[0].Shape[1];
+            var F = inputs[0].Shape[2];
+
+            var rev = new float[B * T * F];
+            for(int b=0;b<B;b++)
+            {
+                for(int t=0;t<T;t++)
+                    for(int f=0;f<F;f++)
+                    {
+                        rev[b * T * F + t * F + f] = inputs[0].Buffer[b * T * F + (T - 1 - t) * F + f];
+                    }
+            }
+            var reversed = new Tensor<float>(inputs[0].Shape, rev);
+
             var i0 = LSTMForward.Call(inputs)[0];
-            var i1 = LSTMForward.Call(inputs)[0];
+            var i1 = LSTMBackward.Call(reversed)[0];
             return new[] { Tensors.Concatenate(new[] { i0, i1 }, axis: -1) };
         }
 
@@ -57,6 +73,7 @@ namespace LillyScan.Backend.AI.Layers
 
         public override void LoadWeights(Tensor<float>[] weights)
         {
+            Console.WriteLine($"BiLSTM got weights {weights.SelectShapes().JoinToString(", ")}");
             Assert(() => weights.Length == 6);
             LSTMForward.LoadWeights(weights.Take(3).ToArray());
             LSTMBackward.LoadWeights(weights.Skip(3).ToArray());

@@ -8,7 +8,7 @@ namespace LillyScan.Backend.Imaging
     {         
         public static unsafe RawBitmap Crop(this RawBitmap bmp, int x, int y, int width, int height, bool disposeOriginal=false)
         {
-            if (x < 0 || y < 0 || x + width >= bmp.Width || y + height >= bmp.Height)
+            if (x < 0 || y < 0 || x + width > bmp.Width || y + height > bmp.Height)
                 throw new ArgumentException("Invalid crop area");
             int C = bmp.Channels;
 
@@ -53,10 +53,10 @@ namespace LillyScan.Backend.Imaging
             {
                 for(int j=0;j<width;j++)
                 {
-                    int xl = (int)System.Math.Floor(xRatio*j);
-                    int yl = (int)System.Math.Floor(yRatio*i);
-                    int xh = (int)System.Math.Ceiling(xRatio * j);
-                    int yh = (int)System.Math.Ceiling(yRatio * i);
+                    int xl = (int)System.Math.Floor(xRatio * j);
+                    int yl = (int)System.Math.Floor(yRatio * i);
+                    int xh = System.Math.Min((int)System.Math.Ceiling(xRatio * j), bmp.Width - 1);
+                    int yh = System.Math.Min((int)System.Math.Ceiling(yRatio * i), bmp.Height - 1);
 
                     var xw = xRatio * j - xl;
                     var yw = yRatio * i - yl;

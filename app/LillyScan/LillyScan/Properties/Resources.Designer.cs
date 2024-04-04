@@ -59,5 +59,15 @@ namespace LillyScan.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] seg_model_64 {
+            get {
+                object obj = ResourceManager.GetObject("seg_model_64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

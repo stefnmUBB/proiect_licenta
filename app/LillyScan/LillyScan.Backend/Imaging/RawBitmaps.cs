@@ -5,7 +5,7 @@ using System.Text;
 namespace LillyScan.Backend.Imaging
 {
     public static class RawBitmaps
-    {
+    {        
         public static unsafe RawBitmap FromRGB(int width, int height, int[] rgb)
         {
             if (rgb.Length != width * height)

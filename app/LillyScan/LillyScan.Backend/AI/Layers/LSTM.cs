@@ -72,6 +72,12 @@ namespace LillyScan.Backend.AI.Layers
             }, 2);
             return new[] { output };
         }
-        
+
+        public override void LoadWeights(Tensor<float>[] weights)
+        {
+            base.LoadWeights(weights);
+            Cell.LoadWeights(weights);
+        }
+
     }
 }

@@ -12,6 +12,12 @@ namespace LillyScan.Backend.Imaging
         public readonly int Channels;
         public readonly int Stride;        
 
+        public RawBitmap(int width, int height, int channels, float[] data) : this(width, height, channels)
+        {
+            for (int i = 0; i < Stride * Height; i++)
+                Buffer[i] = data[i];
+        }
+
         public RawBitmap(int width, int height, int channels)
         {
             Width = width;

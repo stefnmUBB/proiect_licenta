@@ -139,9 +139,9 @@ namespace LillyScan.Backend.AI.Models
                     throw new InvalidOperationException($"Unknown key: {key}");
                 }
             }
-            Console.WriteLine("#################################");
-            Console.WriteLine($"W : {weightTicks}");
-            Console.WriteLine($"D : {dictTicks}");
+            //Console.WriteLine("#################################");
+            //Console.WriteLine($"W : {weightTicks}");
+            //Console.WriteLine($"D : {dictTicks}");
             oLayers = layers.ToArray();
 
             foreach (var layer in layers)

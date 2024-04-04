@@ -1,4 +1,5 @@
 ﻿using LillyScan.Backend.Imaging;
+using LillyScan.BackendWinforms.Utils;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -68,10 +69,12 @@ namespace LillyScan.BackendWinforms.Imaging
             }
             
             var bmp = new Bitmap(rbmp.Width, rbmp.Height, rbmp.Channels == 3 ? PixelFormat.Format24bppRgb : PixelFormat.Format8bppIndexed);
-            if(bmp.PixelFormat==PixelFormat.Format8bppIndexed)
+            if (bmp.PixelFormat == PixelFormat.Format8bppIndexed) 
             {
+                ColorPalette palette = bmp.Palette;
                 for (int i = 0; i < 256; i++)
-                    bmp.Palette.Entries[i] = Color.FromArgb(i, i, i);                
+                    palette.Entries[i] = Color.FromArgb(i, i, i);
+                bmp.Palette = palette;
             }
 
             var bmpdata = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.WriteOnly, bmp.PixelFormat);

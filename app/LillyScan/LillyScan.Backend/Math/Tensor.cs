@@ -24,7 +24,7 @@ namespace LillyScan.Backend.Math
                 return;
             }
             if (buffer.Length != shape.ElementsCount)
-                throw new ArgumentException($"Elements count ({buffer.Length}) does not match shape {Shape}");
+                throw new ArgumentException($"Elements count ({buffer.Length}) does not match shape {shape}");
             (Shape, Buffer) = (shape, buffer);
         }        
 
@@ -169,8 +169,9 @@ namespace LillyScan.Backend.Math
             return hashCode;
         }
 
-        public int Rank => Shape.DimsCount;                
+        public int Rank => Shape.DimsCount;
 
 
+        public override string ToString() => $"Tensor of shape {Shape}";
     }    
 }

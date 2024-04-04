@@ -17,7 +17,7 @@ namespace LillyScan.Backend.AI.Layers
         public bool UseBias { get; private set; }
 
         Shape HidddenShape => (Units);
-        Shape WShape => (InputShapes[0][0], 4*Units);
+        Shape WShape => (InputShapes[2][0], 4*Units);
         Shape UShape => (Units, 4*Units);
         Shape BiasShape => (4*Units);
 
@@ -52,7 +52,7 @@ namespace LillyScan.Backend.AI.Layers
 
             var t = x.MatMul(W).Add(h.MatMul(U));
             if (UseBias)
-                t = t.Add(Context.GetWeight("bias"));
+                t = t.Add(Context.GetWeight("B"));
 
             var ft = RecurrentActivation.Call(t[null, new IndexAccessor(0)]);
             var it = RecurrentActivation.Call(t[null, new IndexAccessor(1)]);
@@ -77,7 +77,7 @@ namespace LillyScan.Backend.AI.Layers
 
         public override void LoadWeights(Tensor<float>[] weights) 
         {
-            Assert(() => weights.Length == 2);
+            Assert(() => weights.Length == (UseBias ? 3 : 2));
             Assert(() => WShape.Equals(weights[0].Shape));
             Assert(() => UShape.Equals(weights[1].Shape));
 

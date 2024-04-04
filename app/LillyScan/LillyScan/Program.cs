@@ -41,7 +41,28 @@ namespace LillyScan
             Console.ForegroundColor = ConsoleColor.White;
         }
 
-        static IHTREngine HTR = new DefaultHTREngine();
+        public static IHTREngine HTR = new DefaultHTREngine();
+
+        static void Run()
+        {
+            //var m = ModelLoader.LoadFromString(File.ReadAllText("D:\\Public\\model_saver\\model64.txt"));
+            //var b = ModelLoader.StreamToBytes(File.OpenRead("D:\\Public\\model_saver\\model64.txt"));
+            //File.WriteAllBytes("seg_model_64.lsm", b);
+
+            var img = RawBitmapIO.FromFile(@"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\IAM\1_in.png");
+            //var img = RawBitmapIO.FromFile(@"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\tmp\tmp_002_buruianasergiu_ofaptabuna.jpg");
+            img = img.Resize(64, 64);
+            img = img.AverageChannels();
+            img.ToBitmap().Save("holy0.png");
+            float[] o = null;
+            Measure(() => o = HTR.Segment64(img.ToArray()));
+
+            img = new RawBitmap(64, 64, 1, o);
+            RawBitmapIO.ToBitmap(img).Save("holy3.png");
+
+            Console.WriteLine("Done");
+            Console.ReadLine();
+        }
 
         /// <summary>
         /// The main entry point for the application.
@@ -51,24 +72,7 @@ namespace LillyScan
         {
             Backend.Initializer.Initialize();
 
-            //var img = RawBitmapIO.FromFile(@"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\tmp\tmp_002_buruianasergiu_ofaptabuna.jpg");
-
-            //img = img.Resize(256, 256);
-
-            //img.ToBitmap().Save("aaa.png");
-
-            var img = ImageRGBIO.FromBitmap(new Bitmap(new Bitmap(@"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\tmp\tmp_002_buruianasergiu_ofaptabuna.jpg"), new Size(256, 256)))
-                .Select(x => (float)((x.R.Value + x.G.Value + x.B.Value) / 3)).Items;
-
-            float[] o = null;
-            Measure(() => o = HTR.Segment(img));
-                      
-            var ocolors = o.GroupChunks(3).Select(x => new ColorRGB(x[0], x[1], x[2])).ToArray();
-            var oimg = new ImageRGB(new Matrix<ColorRGB>(256, 256, ocolors));
-            oimg.ToBitmap().Save("holy2.png");
-
-            Console.WriteLine("Done");
-            Console.ReadLine();
+            Application.Run(new MainForm());
         }
     }
 }

@@ -10,6 +10,7 @@ namespace LillyScan.Backend.API
     public class DefaultHTREngine : HTREngine
     {
         private readonly Model SegmentationModel = ModelLoader.LoadFromBytes(Resources.seg_model);
+        private readonly Model SegmentationModel64 = ModelLoader.LoadFromBytes(Resources.seg_model_64);
 
         public DefaultHTREngine()
         {
@@ -24,6 +25,12 @@ namespace LillyScan.Backend.API
         public override float[] Segment(float[] image)
         {            
             var predicted = SegmentationModel.Call(new[] { new Tensor<float>((1, 256, 256, 1), image) })[0];
+            return predicted.Buffer.Buffer.ToArray();
+        }
+
+        public override float[] Segment64(float[] image)
+        {
+            var predicted = SegmentationModel64.Call(new[] { new Tensor<float>((1, 64, 64, 1), image) })[0];
             return predicted.Buffer.Buffer.ToArray();
         }
     }

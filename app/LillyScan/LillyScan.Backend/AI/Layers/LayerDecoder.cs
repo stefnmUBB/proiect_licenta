@@ -56,6 +56,8 @@ namespace LillyScan.Backend.AI.Layers
             }
 
             layer.Build();
+            Console.WriteLine($"-------------------------------");
+            Console.WriteLine($"Weights: {weights.SelectShapes().JoinToString(", ")}");
             layer.LoadWeights(weights);
             return layer;
         }
