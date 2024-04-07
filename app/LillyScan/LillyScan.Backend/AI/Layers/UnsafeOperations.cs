@@ -9,73 +9,7 @@ namespace LillyScan.Backend.AI.Layers
     internal static class UnsafeOperations
     {                 
         public static unsafe void Conv2D(float* tbuff, float* kbuff, float* rbuff, int B, int N, int M, int C, int K1, int K2, int F)
-        {         
-            /*float* kbuff_t = (float*)Marshal.AllocCoTaskMem(F * C * K1 * K2 * sizeof(float));
-            float* tmpbuff = (float*)Marshal.AllocCoTaskMem(C * K1 * K2 * sizeof(float));            
-                        
-            float* kbuffi = kbuff_t;
-            for (int f = 0; f < F; f++)
-                for (int c = 0; c < C; c++)
-                    for (int k = 0; k < K1 * K2; k++)
-                        *kbuffi++ = kbuff[k * C * F + c * F + f];
-                
-            int CKK = C * K1 * K2;
-
-            for (int b = 0; b < B; b++)
-            {
-                float* it = tbuff + b * N * M * C;
-                for (int n = 0; n < N; n++)
-                {
-                    int n0 = n - (K1 >> 1);
-                    for (int m = 0; m < M; m++)
-                    {
-                        int m0 = m - (K2 >> 1);
-                        float* tmpi = tmpbuff;
-                        for (int c = 0; c < C; c++)
-                        {
-                            for (int k1 = 0; k1 < K1; k1++)
-                            {
-                                int ii = n0 + k1;
-
-                                if (ii < 0 || ii >= N)
-                                {
-                                    for (int k2 = 0; k2 < K2; k2++) *tmpi++ = 0;
-                                }
-                                else
-                                {
-                                    for (int k2 = 0; k2 < K2; k2++)
-                                    {
-                                        int jj = m0 + k2;
-                                        if (jj < 0 || jj >= M)
-                                        {
-                                            *tmpi++ = 0;
-                                            continue;
-                                        }
-                                        *tmpi++ = it[ii * M * C + jj * C + c];
-                                    }
-                                }
-                            }
-                        }
-
-                        for (int f = 0; f < F; f++)
-                        {
-                            float* fc = kbuff_t + f * C * K1 * K2;
-                            float s = 0;
-                            for (int i = 0; i < CKK; i++)
-                            {
-                                s += fc[i] * tmpbuff[i];
-                            }
-                            *rbuff++ = s;
-                        }
-                    }
-                }
-            }            
-
-            Marshal.FreeCoTaskMem((IntPtr)kbuff_t);
-            Marshal.FreeCoTaskMem((IntPtr)tmpbuff);           */ 
-
-
-
+        {                  
             int NMF = N * M * F;
             int MF = N * F;
             int NMC = N * M * C;
@@ -83,17 +17,17 @@ namespace LillyScan.Backend.AI.Layers
             int K2CF = K2 * C * F;
             int CF = C * F;
 
-            var rangePartitioner = Partitioner.Create(0, N);
+            //var rangePartitioner = Partitioner.Create(0, N);
 
             for (int b = 0; b < B; b++)
             {
                 int startC0 = b * NMC;
                 int startF0 = b * NMF;
 
-                Parallel.ForEach(rangePartitioner, new ParallelOptions { MaxDegreeOfParallelism = 8 }, (range, loopState) =>
+                //Parallel.ForEach(rangePartitioner, new ParallelOptions { MaxDegreeOfParallelism = 8 }, (range, loopState) =>
                 {
-                    for (int n = range.Item1; n < range.Item2; n++) 
-                    //for (int n = 0; n < N; n++) 
+                    //for (int n = range.Item1; n < range.Item2; n++) 
+                    for (int n = 0; n < N; n++) 
                     {
                         int startF1 = startF0 + n * MF;                        
 
@@ -127,7 +61,7 @@ namespace LillyScan.Backend.AI.Layers
                         }
                     }
                 }
-                );
+                //);
             }
         }
         public static unsafe void Conv2DTranspose(float* tbuff, float* kbuff, float* rbuff, int B, int N, int M, int C, int K1, int K2, int F, int strideRows, int strideCols)

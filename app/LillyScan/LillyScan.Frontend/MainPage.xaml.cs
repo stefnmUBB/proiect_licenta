@@ -34,7 +34,6 @@ namespace LillyScan.Frontend
             {
                 try
                 {
-
                     API = new DefaultHTREngine();
                 }
                 catch(Exception e)
@@ -45,14 +44,11 @@ namespace LillyScan.Frontend
                     Console.WriteLine($"i: {e.GetType()}: {e.Message} | {e.StackTrace}");
                 }
             });
-            Loaded += MainPage_Loaded;
-
-            
-
+            Loaded += MainPage_Loaded;            
         }
 
 
-        DefaultHTREngine API; //= new DefaultHTREngine();
+        DefaultHTREngine API;
 
 
         private bool IsLiveSegmentationActive = true;
@@ -60,46 +56,63 @@ namespace LillyScan.Frontend
 
         private async void LiveSegmentation()
         {
+            var r = new Random();
+            Microsoft.Maui.Graphics.IImage segmImage = null;
             Thread.Sleep(5000);
+            string elapsed = "";
+            int k = 0;
             while (IsLiveSegmentationActive)
             {
+                
                 Thread.Sleep(200);
                 if (cameraView == null) continue;
-                lock (cameraView)
-                    if (!cameraView.AreCamerasLoaded) continue;
-                var pic = cameraView.GetSnapshot() as StreamImageSource;
-                if (pic == null) continue;
-                using var stream = await pic.Stream(CancellationToken.None);
-                using (var image = PlatformImage.FromStream(stream))
+                var img = cameraView.GetSnapshot();
+                
+                //(img as StreamImageSource)
+                /*if (img == null) continue;
+
+                Console.WriteLine($"Image {img.Width}x{img.Height}");
+
+                var cropped = img.CropCenteredPercent(70, 70, true);
+                var resized = cropped.Resize(256, 256, true);
+                var gray = resized.AverageChannels(true);
+                Console.WriteLine($"Resized");                                
+
+                await MainThread.InvokeOnMainThreadAsync(() =>
                 {
-                    var img = RawBitmapIO.FromBitmap(image);                    
+                    var drw = GraphicsView2.Drawable as MyDrawable;
+                    drw.Color = new Color(r.Next() % 255, 0, 0);
+                    drw.Image = segmImage;
+                    GraphicsView2.Invalidate();
+                });
 
-                    Console.WriteLine($"Image {image.Width}x{image.Height}");
-
-                    using var cropped = img.CropCenteredPercent(70, 70);
-                    using var resized = cropped.Resize(256, 256);
-                    using var gray = resized.AverageChannels();
-                    Console.WriteLine($"Resized");
-                    var imageRGB = gray.ToArray();
-
-                    try
+                segmImage = null;
+                try
+                {                    
+                    var sw = new Stopwatch();
+                    sw.Start();
+                    var segm = API.SelectTiled64(gray, parallel: true);                                        
+                    sw.Stop();                    
+                    Console.WriteLine("________________________________________________________");
+                    Console.WriteLine($"Elapsed {sw.Elapsed} | {sw.ElapsedMilliseconds}ms");
+                    segmImage = segm.ToImage();                    
+                }
+                catch (AggregateException e)
+                {
+                    foreach (var ex in e.Flatten().InnerExceptions)
                     {
-                        var sw = new Stopwatch();
-                        sw.Start();
-                        var segm = API.Segment(imageRGB);
-                        sw.Stop();
-                        Console.WriteLine("________________________________________________________");
-                        Console.WriteLine($"Elapsed {sw.Elapsed} | {sw.ElapsedMilliseconds}ms");
-                    }
-                    catch (AggregateException e)
-                    {
-                        foreach (var ex in e.Flatten().InnerExceptions)
-                        {
-                            Console.WriteLine(ex.GetType());
-                            Console.WriteLine(ex.Message);
-                        }
+                        Console.WriteLine(ex.GetType());
+                        Console.WriteLine(ex.Message);
                     }
                 }
+
+
+                gray.Dispose();*/
+
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    Title = $"{DateTime.Now.Minute}:{DateTime.Now.Second} => {elapsed} ({++k})";
+                });
             }
         }
 
@@ -110,15 +123,7 @@ namespace LillyScan.Frontend
 
         private void OnCounterClicked(object sender, EventArgs e)
         {
-            count++;
-            //cameraView.CaptureAsync()
-
-            /*if (count == 1)
-                CounterBtn.Text = $"Clicked {count} time";
-            else
-                CounterBtn.Text = $"Clicked {count} times";
-
-            SemanticScreenReader.Announce(CounterBtn.Text);*/
+            count++;           
         }
     }
 

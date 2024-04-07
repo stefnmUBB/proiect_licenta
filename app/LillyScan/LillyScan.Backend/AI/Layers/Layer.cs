@@ -59,8 +59,8 @@ namespace LillyScan.Backend.AI.Layers
         protected virtual void OnValidateInputShapes(Shape[] inputShapes) { }
 
         public Tensor<float>[] Call(params Tensor<float>[] inputs)
-        {
-            ValidateInputShapes(inputs.Select(_=>_.Shape).ToArray());
+        {            
+            ValidateInputShapes(inputs.Select(_=>_.Shape).ToArray());            
             return OnCall(inputs);
         }
 

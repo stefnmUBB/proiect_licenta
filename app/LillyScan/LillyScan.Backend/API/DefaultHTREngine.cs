@@ -9,11 +9,13 @@ namespace LillyScan.Backend.API
 {
     public class DefaultHTREngine : HTREngine
     {
-        private readonly Model SegmentationModel = ModelLoader.LoadFromBytes(Resources.seg_model);
-        private readonly Model SegmentationModel64 = ModelLoader.LoadFromBytes(Resources.seg_model_64);
+        private readonly Model SegmentationModel;
+        private readonly Model SegmentationModel64;
 
-        public DefaultHTREngine()
+        public DefaultHTREngine(Model segmentationModel = null, Model segmentationModel64 = null)
         {
+            SegmentationModel = segmentationModel ?? ModelLoader.LoadFromBytes(Resources.seg_model);
+            SegmentationModel64 = segmentationModel64 ?? ModelLoader.LoadFromBytes(Resources.seg_model64_93);
             Debug.WriteLine("Loaded DefaultHTREngine");
         }
 

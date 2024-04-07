@@ -13,11 +13,12 @@ namespace LillyScan.BackendWinforms.Imaging
     {
         public static RawBitmap FromBitmap(Bitmap bmp)
         {
-            using(var b = new Bitmap(bmp.Width, bmp.Height, PixelFormat.Format24bppRgb))
-            {
-                Console.WriteLine($"{b.Width} {b.Height}");
+            Console.WriteLine($"BM {bmp.Width} {bmp.Height}");
+            using (var b = new Bitmap(bmp.Width, bmp.Height, PixelFormat.Format24bppRgb))
+            {                
+                Console.WriteLine($"BB {b.Width} {b.Height}");
                 using (var g = Graphics.FromImage(b))
-                    g.DrawImageUnscaled(bmp, 0, 0);
+                    g.DrawImage(bmp, 0, 0, bmp.Width, bmp.Height);                
                 var bmpdata = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.ReadOnly, b.PixelFormat);
                 Console.WriteLine(bmpdata.Stride);
                 int numbytes = bmpdata.Stride * bmp.Height;
@@ -46,8 +47,11 @@ namespace LillyScan.BackendWinforms.Imaging
 
         public static RawBitmap FromFile(string path)
         {
-            using (var bmp = new Bitmap(path))
+            using (var bmp0 = new Bitmap(path))
+            using (var bmp = new Bitmap(bmp0)) 
+            {                
                 return FromBitmap(bmp);
+            }
         }
 
         
@@ -63,7 +67,7 @@ namespace LillyScan.BackendWinforms.Imaging
                 {
                     for(int c=0;c<rbmp.Channels;c++)
                     {
-                        bytes[y * stride + rbmp.Channels * x + c] = (byte)(rbmp[k++]*255).Clamp(0,255);
+                        bytes[y * stride + rbmp.Channels * x + rbmp.Channels - 1 - c] = (byte)(rbmp[k++] * 255).Clamp(0, 255);
                     }
                 }
             }

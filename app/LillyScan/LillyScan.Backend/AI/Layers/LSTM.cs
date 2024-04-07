@@ -56,7 +56,7 @@ namespace LillyScan.Backend.AI.Layers
             var input = inputs[0];            
             var output = input.SubDimMap(t =>
             {
-                var cs = new List<Tensor<float>>();
+                var hs = new List<Tensor<float>>();
                 var c = Tensors.Zeros<float>(Units);
                 var h = Tensors.Zeros<float>(Units);
 
@@ -65,10 +65,10 @@ namespace LillyScan.Backend.AI.Layers
                     var x = t.GetFromBatches(new[] { i });
                     var cellOutput = Cell.Call(c, h, x);
                     c = cellOutput[0];
-                    h = cellOutput[1];                    
-                    cs.Add(c);
+                    h = cellOutput[1];
+                    hs.Add(h);
                 }
-                return Tensors.Stack(cs);                
+                return Tensors.Stack(hs);                
             }, 2);
             return new[] { output };
         }

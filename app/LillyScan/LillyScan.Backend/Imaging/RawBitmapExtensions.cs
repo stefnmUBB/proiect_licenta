@@ -5,7 +5,40 @@ using System.Text;
 namespace LillyScan.Backend.Imaging
 {
     public static class RawBitmapExtensions
-    {         
+    {
+        public static RawBitmap DrawImage(this RawBitmap target, RawBitmap src, int x, int y, bool inPlace = false)
+        {
+            var dest = inPlace ? target : new RawBitmap(target);            
+
+            for(int iy=0;iy<src.Height;iy++)
+            {
+                int dy = y + iy;
+                if (dy < 0 || dy >= dest.Height) continue;
+                for(int ix=0;ix<src.Width;ix++)
+                {
+                    int dx = x + ix;
+                    if (dx < 0 || dx >= dest.Width) continue;
+                    for (int c = 0; c < dest.Channels; c++)
+                        dest[dy, dx, c] = src[iy, ix, c];
+                }
+            }
+            return dest;
+        }
+
+        public static unsafe RawBitmap Threshold(this RawBitmap bmp, float threshold = 0.5f, float lowerValue = 0, float higherValue = 1, bool inPlace = false, bool disposeOriginal = false)
+        {
+            if (inPlace && disposeOriginal)
+                throw new InvalidOperationException("inPlace and disposeOriginal cannot be true simultaneously");
+            var dest = inPlace ? bmp : new RawBitmap(bmp);
+
+            for (int i = 0; i < bmp.Stride * bmp.Height; i++)
+                dest.Buffer[i] = dest.Buffer[i] < threshold ? lowerValue : higherValue;
+
+            if (disposeOriginal)
+                bmp.Dispose();
+            return dest;
+        }
+
         public static unsafe RawBitmap Crop(this RawBitmap bmp, int x, int y, int width, int height, bool disposeOriginal=false)
         {
             if (x < 0 || y < 0 || x + width > bmp.Width || y + height > bmp.Height)
@@ -32,11 +65,11 @@ namespace LillyScan.Backend.Imaging
             return res;
         }
 
-        public static RawBitmap CropCenteredPercent(this RawBitmap bmp, int pwidth, int pheight)
+        public static RawBitmap CropCenteredPercent(this RawBitmap bmp, int pwidth, int pheight, bool disposeOriginal=false)
         {
             var rw = bmp.Width * pwidth / 100;
             var rh = bmp.Height * pheight / 100;
-            return Crop(bmp, (bmp.Width - rw) / 2, (bmp.Height - rh) / 2, rw, rh);
+            return Crop(bmp, (bmp.Width - rw) / 2, (bmp.Height - rh) / 2, rw, rh, disposeOriginal);
         }
 
         public static unsafe RawBitmap Resize(this RawBitmap bmp, int width, int height, bool disposeOriginal = false)

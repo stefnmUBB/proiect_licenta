@@ -107,5 +107,15 @@ namespace LillyScan.Backend.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] seg_model64_93 {
+            get {
+                object obj = ResourceManager.GetObject("seg_model64_93", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

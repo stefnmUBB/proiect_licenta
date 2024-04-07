@@ -1,16 +1,66 @@
-﻿using LillyScan.Backend.Imaging;
+﻿using LillyScan.Backend.AI.Models;
+using LillyScan.Backend.Imaging;
 using LillyScan.Backend.Math;
 using LillyScan.Backend.Utils;
 using System;
+using System.Threading.Tasks;
 
 namespace LillyScan.Backend
 {
     public abstract class HTREngine : IHTREngine
     {
+
+        public RawBitmap SelectTiled64(RawBitmap bitmap, bool parallel = false)
+        {
+            var ow = bitmap.Width;
+            var oh = bitmap.Height;
+            var img = bitmap.Resize(256, 256);
+            img = img.AverageChannels(disposeOriginal: true);
+
+            var tiles = img.ToTiles(64, 64);
+            img.Dispose();
+
+            if (parallel)
+            {
+                Parallel.For(0, tiles.Length, i =>
+                {
+                    var segm = new RawBitmap(64, 64, 1, Segment64(tiles[i].ToArray()));
+                    tiles[i].Dispose();
+                    tiles[i] = segm;
+                });
+            }
+            else
+            {
+                for (int i = 0; i < tiles.Length; i++)
+                {
+                    var segm = new RawBitmap(64, 64, 1, Segment64(tiles[i].ToArray()));
+                    tiles[i].Dispose();
+                    tiles[i] = segm;
+                }
+            }
+
+            img = RawBitmaps.FromTiles(tiles, 4, 4);
+
+            if(parallel)
+            {
+                Parallel.For(0, tiles.Length, i => tiles[i].Dispose());
+            }
+            else
+            {
+                for (int i = 0; i < tiles.Length; i++)
+                    tiles[i].Dispose();
+            }            
+
+            var pred = img.Resize(ow, oh, disposeOriginal: true);
+            pred = pred.Threshold(inPlace: true);
+            return pred;
+        }
+
         public abstract string Predict(IReadMatrix<double> image);
         public string Predict(ImageRGB image) => Predict(ToGrayscaleDefault(image));
         private static Matrix<double> ToGrayscaleDefault(ImageRGB img)
-            => Matrices.DoEachItem(img, x => (x.R.Value + x.G.Value + x.B.Value) / 3);
+            => Matrices.DoEachItem(img, x => (x.R.Value + x.G.Value + x.B.Value) / 3);        
+
         public unsafe virtual byte[] Segment(byte[] image)
         {
             if (image.Length != 256 * 256)

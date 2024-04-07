@@ -1,5 +1,6 @@
 ﻿using LillyScan.Backend.Utils;
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace LillyScan.Backend.Imaging
@@ -10,7 +11,13 @@ namespace LillyScan.Backend.Imaging
         public readonly int Width;
         public readonly int Height;
         public readonly int Channels;
-        public readonly int Stride;        
+        public readonly int Stride;
+
+        public RawBitmap(RawBitmap bmp) : this(bmp.Width, bmp.Height, bmp.Channels)
+        {
+            for (int i = 0; i < Stride * Height; i++)
+                Buffer[i] = bmp.Buffer[i];
+        }
 
         public RawBitmap(int width, int height, int channels, float[] data) : this(width, height, channels)
         {
@@ -30,7 +37,13 @@ namespace LillyScan.Backend.Imaging
         }
 
         public float this[int index] { get => Buffer[index]; set => Buffer[index] = value; }
-        public float this[int y, int x, int c=0] => Buffer[y*Stride+x*Channels+c];        
+        public float this[int y, int x, int c = 0] {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Buffer[y * Stride + x * Channels + c];
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal set => Buffer[y * Stride + x * Channels + c]=value;
+        }
 
         public void Dispose()
         {

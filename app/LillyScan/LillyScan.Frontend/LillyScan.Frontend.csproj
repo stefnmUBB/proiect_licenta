@@ -42,7 +42,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android|AnyCPU'">
     <AndroidEnableSGenConcurrent>False</AndroidEnableSGenConcurrent>
     <RunAOTCompilation>True</RunAOTCompilation>
-    <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
+    <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>	
+    <!--AndroidEnableProfiler>True</AndroidEnableProfiler-->	
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android|AnyCPU'">
@@ -88,5 +89,11 @@
   <ItemGroup>
     <Folder Include="Utils\" />
   </ItemGroup>
-
+ 
+ 
+  <!--
+  adb reverse tcp:9000 tcp:9001
+  adb shell setprop debug.mono.profile '10.0.2.2:9000,suspend,connect'
+  dotnet-dsrouter android
+  --> 
 </Project>

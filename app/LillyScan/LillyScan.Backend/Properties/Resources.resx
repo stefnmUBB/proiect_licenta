@@ -124,6 +124,9 @@
   <data name="seg_model" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\seg_model.lsm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="seg_model64_93" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\seg_model64_93.lsm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="seg_model_64" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\seg_model_64.lsm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

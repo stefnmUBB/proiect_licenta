@@ -23,7 +23,7 @@ namespace LillyScan.Backend.AI.Models
             InputFlow = inputFlow;
         }
 
-        public Tensor<float>[] Call(Tensor<float>[] inputs)
+        public Tensor<float>[] Call(params Tensor<float>[] inputs)
         {
             var solvedValues = new Dictionary<Layer, Tensor<float>[]>();
             for (int i = 0; i < inputs.Length; i++)
@@ -42,7 +42,7 @@ namespace LillyScan.Backend.AI.Models
                 }
                 var crtInputs = inputLayers.SelectMany(_ => solvedValues[_]).ToArray();
 
-                Console.WriteLine("in: " + crtInputs.SelectShapes().JoinToString(", "));
+                Console.WriteLine("in: " + crtInputs.SelectShapes().JoinToString(", "));                
                 var output = layer.Call(crtInputs);
                 Console.WriteLine("out: " + output.SelectShapes().JoinToString(", "));
                 solvedValues[layer] = output;
