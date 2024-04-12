@@ -86,38 +86,94 @@ namespace LillyScan.Backend.Imaging
                         }
                     }
                 }
+                else if (bmp.Channels == 4)
+                {
+                    for (int i = 0; i < bmp.Height; i++)
+                    {
+                        for (int j = 0; j < bmp.Width; j++)
+                        {
+                            byte r = (byte)(src[i * bmp.Stride + 4 * j + 0] * 255);
+                            byte g = (byte)(src[i * bmp.Stride + 4 * j + 1] * 255);
+                            byte b = (byte)(src[i * bmp.Stride + 4 * j + 2] * 255);
+                            byte a = (byte)(src[i * bmp.Stride + 4 * j + 3] * 255);
+                            *idst++ = r | (g << 8) | (b << 16) | (a << 24);
+                        }
+                    }
+                }
                 else throw new NotImplementedException();
             }
 
             return result;
         }
 
-        public static unsafe RawBitmap FromRGB(int width, int height, int[] rgb)
+        public static unsafe RawBitmap FromRGB(int width, int height, int[] rgb, bool includeAlpha = false)
         {
             if (rgb.Length != width * height)
             {
                 throw new ArgumentException("RawBitmaps.FromRGB: Invalid RGB array length");
             }
-            var bmp = new RawBitmap(width, height, 3);
+            var bmp = new RawBitmap(width, height, includeAlpha ? 4 : 3);
 
             float* dbuf = bmp.Buffer;
 
             fixed (int* s = &rgb[0])
             {
                 int* si = s;
-                for (int i = 0; i < height; i++)
+                if (!includeAlpha)
                 {
-                    for (int j = 0; j < width; j++)
+                    for (int i = 0; i < height; i++)
                     {
-                        *dbuf++ = (((*si) >> 0) & 0xFF) / 255.0f;
-                        *dbuf++ = (((*si) >> 8) & 0xFF) / 255.0f;
-                        *dbuf++ = (((*si) >> 16) & 0xFF) / 255.0f;
-                        si++;
+                        for (int j = 0; j < width; j++)
+                        {
+                            *dbuf++ = (((*si) >> 0) & 0xFF) / 255.0f;
+                            *dbuf++ = (((*si) >> 8) & 0xFF) / 255.0f;
+                            *dbuf++ = (((*si) >> 16) & 0xFF) / 255.0f;
+                            si++;
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < height; i++)
+                    {
+                        for (int j = 0; j < width; j++)
+                        {
+                            *dbuf++ = (((*si) >> 0) & 0xFF) / 255.0f;
+                            *dbuf++ = (((*si) >> 8) & 0xFF) / 255.0f;
+                            *dbuf++ = (((*si) >> 16) & 0xFF) / 255.0f;
+                            *dbuf++ = (((*si) >> 24) & 0xFF) / 255.0f;
+                            si++;
+                        }
                     }
                 }
             }            
 
             return bmp;
+        }
+
+        public static unsafe RawBitmap GrayscaleToAlpha(this RawBitmap bmp, float r, float g, float b, float a = 1, bool disposeOriginal=false)
+        {
+            if (bmp.Channels != 1)
+                throw new ArgumentException("Grayscale bitmap must be single channel");
+
+            int width = bmp.Width, height = bmp.Height;
+            var result = new RawBitmap(width, height, 4);
+            float* dbuf = result.Buffer;
+            float* sbuf = bmp.Buffer;
+
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    *dbuf++ = r;
+                    *dbuf++ = g;
+                    *dbuf++ = b;
+                    *dbuf++ = a * (*sbuf++);
+                }
+            }
+            if (disposeOriginal)
+                bmp.Dispose();
+            return result;
         }
     }
 }

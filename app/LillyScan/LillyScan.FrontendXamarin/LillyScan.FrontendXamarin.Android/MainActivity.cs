@@ -4,6 +4,7 @@ using Android.App;
 using Android.Content.PM;
 using Android.Runtime;
 using Android.OS;
+using Android.Hardware.Usb;
 
 namespace LillyScan.FrontendXamarin.Droid
 {
@@ -16,6 +17,9 @@ namespace LillyScan.FrontendXamarin.Droid
 
             FrontendXamarin.Utils.RawBitmapIOAdapter.ImageSource2RawBitmap = Utils.RawBitmapIOAdapter.ToRawBitmap;
             FrontendXamarin.Utils.RawBitmapIOAdapter.RawBitmap2ImageSource = Utils.RawBitmapIOAdapter.ToImageSource;
+            Backend.Initializer.Initialize();
+            System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(FrontendXamarin.Utils.HTR).TypeHandle);
+
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);

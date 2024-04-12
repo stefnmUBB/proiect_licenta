@@ -17,10 +17,13 @@
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="*,*">
-        <cam:CameraPreview VerticalOptions="FillAndExpand" CapturePeeked="CameraPreview_CapturePeeked" Background="Green"></cam:CameraPreview>
-        <views:SKCanvasView x:Name="Canvas" Grid.Row="0" PaintSurface="Canvas_PaintSurface"/>
-        <Image x:Name="Img" Grid.Row="1" Aspect="AspectFit"></Image>
+    <Grid RowDefinitions="*,Auto">
+        <cam:CameraPreview x:Name="CameraPreview" VerticalOptions="FillAndExpand" CapturePeeked="CameraPreview_CapturePeeked" Background="Green"></cam:CameraPreview>
+        <!--views:SKCanvasView x:Name="Canvas" Grid.Row="0" PaintSurface="Canvas_PaintSurface"/-->
+        <Image x:Name="Img" Grid.Row="0" Aspect="Fill"></Image>
+        <Grid Grid.Row="1">
+            
+        </Grid>
     </Grid>
 
 </ContentPage>

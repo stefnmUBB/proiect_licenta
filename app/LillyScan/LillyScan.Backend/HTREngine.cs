@@ -3,6 +3,7 @@ using LillyScan.Backend.Imaging;
 using LillyScan.Backend.Math;
 using LillyScan.Backend.Utils;
 using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
 namespace LillyScan.Backend
@@ -22,11 +23,14 @@ namespace LillyScan.Backend
 
             if (parallel)
             {
-                Parallel.For(0, tiles.Length, i =>
+                Parallel.ForEach(Partitioner.Create(0, tiles.Length, 2), range =>
                 {
-                    var segm = new RawBitmap(64, 64, 1, Segment64(tiles[i].ToArray()));
-                    tiles[i].Dispose();
-                    tiles[i] = segm;
+                    for (int i = range.Item1; i < range.Item2; i++) 
+                    {
+                        var segm = new RawBitmap(64, 64, 1, Segment64(tiles[i].ToArray()));
+                        tiles[i].Dispose();
+                        tiles[i] = segm;
+                    }
                 });
             }
             else
@@ -43,7 +47,9 @@ namespace LillyScan.Backend
 
             if(parallel)
             {
-                Parallel.For(0, tiles.Length, i => tiles[i].Dispose());
+                //Parallel.For(0, tiles.Length, i => tiles[i].Dispose());
+                for (int i = 0; i < tiles.Length; i++)
+                    tiles[i].Dispose();
             }
             else
             {

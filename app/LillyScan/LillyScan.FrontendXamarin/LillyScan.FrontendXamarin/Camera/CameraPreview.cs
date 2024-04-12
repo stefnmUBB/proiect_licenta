@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using LillyScan.FrontendXamarin.Utils;
+using System.IO;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
@@ -21,22 +22,16 @@ namespace LillyScan.FrontendXamarin.Camera
         public delegate void OnCapturePeeked(object sender, byte[] imageBytes);
         public event OnCapturePeeked CapturePeeked;
 
+        private Atomic<bool> _CapturePeekEnabled = new Atomic<bool>(true);
+        public bool CapturePeekEnabled
+        {
+            get => _CapturePeekEnabled.Get();
+            set => _CapturePeekEnabled.Set(value);
+        }       
+
         public void HandleCapture(byte[] imageBytes)
         {
-            CapturePeeked?.Invoke(this, imageBytes);
-            //var imageSource = ImageSource.FromStream(() => new MemoryStream(imageBytes));
-            //Console.WriteLine(bytes.Length);
-            /*var str = Base64Encode(bytes);
-
-            for (int i = 0; i < System.Math.Min(str.Length, 100); i++)
-            {
-                Console.Write(str[i]);
-                if (i % 3000 == 0) Console.WriteLine();
-            }
-
-            //Console.WriteLine(str);*/
-            //Console.WriteLine(str.Length);
-            //MainThread.InvokeOnMainThreadAsync(()=>Img.)
+            CapturePeeked?.Invoke(this, imageBytes);            
         }
 
 

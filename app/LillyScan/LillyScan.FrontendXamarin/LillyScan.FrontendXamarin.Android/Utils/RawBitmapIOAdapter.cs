@@ -21,7 +21,7 @@ namespace LillyScan.FrontendXamarin.Droid.Utils
 {
     public static class RawBitmapIOAdapter
     {
-        public static async Task<RawBitmap> ToRawBitmap(ImageSource imageSource)
+        public static async Task<RawBitmap> ToRawBitmap(ImageSource imageSource, bool includeAlpha=false)
         {            
             if (imageSource is StreamImageSource sis)
             {
@@ -31,14 +31,8 @@ namespace LillyScan.FrontendXamarin.Droid.Utils
                 bitmap.GetPixels(buffer, 0, bitmap.Width, 0, 0, bitmap.Width, bitmap.Height);
                 int width = bitmap.Width;
                 int height = bitmap.Height;
-                bitmap.Recycle();
-
-                Console.WriteLine("ToRaw");
-                for (int i=0;i<12;i++)               
-                    Console.WriteLine(buffer[i].ToString("X8"));
-
-                var bmp =  RawBitmaps.FromRGB(width, height, buffer);
-                Console.WriteLine($"inFloats: {string.Join("; ", Enumerable.Range(0, 36).Select(_ => bmp[_].ToString()))}");
+                bitmap.Recycle();                
+                var bmp =  RawBitmaps.FromRGB(width, height, buffer, includeAlpha);                
                 return bmp;
             }            
             else
@@ -49,15 +43,11 @@ namespace LillyScan.FrontendXamarin.Droid.Utils
 
 
         public static async Task<ImageSource> ToImageSource(RawBitmap rawBitmap)
-        {            
-            Console.WriteLine($"Floats: {string.Join("; ", Enumerable.Range(0, 36).Select(_ => rawBitmap[_].ToString()))}");            
-            int[] colors = rawBitmap.ToRGB();
-            Console.WriteLine($"FromRaw: {string.Join("; ", Enumerable.Range(0, 12).Select(_ => colors[_].ToString("X8")))}");            
-
-            //Console.WriteLine(string.Join(" ", colors.Take(10).Select(_ => _.ToString("X8"))));            
+        {                        
+            int[] colors = rawBitmap.ToRGB();            
             var nativeBitmap = Bitmap.CreateBitmap(colors, rawBitmap.Width, rawBitmap.Height, Bitmap.Config.Argb8888);            
             using var ms = new MemoryStream();
-            await nativeBitmap.CompressAsync(Bitmap.CompressFormat.Jpeg, 90, ms);
+            await nativeBitmap.CompressAsync(rawBitmap.Channels == 4 ? Bitmap.CompressFormat.Png : Bitmap.CompressFormat.Jpeg, 90, ms);
             nativeBitmap.Recycle();
             var bytes = ms.ToArray();
             return ImageSource.FromStream(() => new MemoryStream(bytes));

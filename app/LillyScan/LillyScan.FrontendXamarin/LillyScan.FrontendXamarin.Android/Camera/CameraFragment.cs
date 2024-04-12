@@ -261,6 +261,8 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
 
             public override void OnCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result)
             {
+                if (!Fragment.Element.CapturePeekEnabled)
+                    return;
                 base.OnCaptureCompleted(session, request, result);
                 Console.WriteLine("OnCaptureCompleted");
                 if (Surface == null) return;
@@ -270,10 +272,9 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
                 Console.WriteLine($"{Size.Width} {Size.Height}");
                 using (var bmp = Bitmap.CreateBitmap(Size.Width, Size.Height, Bitmap.Config.Argb8888))
                 {
-                    Console.WriteLine("Request");
+                    Console.WriteLine($"Request");
                     PixelCopy.Request(Surface, bmp, listener, Handler);
-                    Console.WriteLine("Request done");
-
+                    Console.WriteLine("Request done");                                        
                     byte[] bytes = null;
                     using (var ms = new MemoryStream())
                     {
@@ -281,7 +282,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
                         bytes = ms.ToArray();
                     }
                     bmp.Recycle();
-                    CapturePeeked?.Invoke(bytes);
+                    CapturePeeked?.Invoke(bytes);                    
                 }
             }
             class PixelCopyFinishedListener : Java.Lang.Object, PixelCopy.IOnPixelCopyFinishedListener
@@ -512,22 +513,8 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
         void ConfigureTransform(int viewWidth, int viewHeight)
         {
             if (texture == null || previewSize == null || previewSize.Width == 0 || previewSize.Height == 0)
-                return;
-
-            Console.WriteLine($"CfgTransform");
-            Console.WriteLine($"View: {viewWidth}, {viewHeight}");
-            Console.WriteLine($"Prev: {previewSize.Width}, {previewSize.Height}");
-            Console.WriteLine($"Elem: {Element.Width}, {Element.Height}");
-
-            var matrix = new Matrix();
-            //matrix.SetScale((float)(Element.Width / previewSize.Width), 1f);
-            /*var viewRect = new RectF(0, 0, viewWidth, viewHeight);
-            var bufferRect = new RectF(0, 0, previewSize.Width, previewSize.Height);
-            var centerX = viewRect.CenterX();
-            var centerY = viewRect.CenterY();
-            bufferRect.Offset(centerX + bufferRect.CenterX(), centerY + bufferRect.CenterY());            
-            matrix.SetRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.Fill);            
-            matrix.PostRotate(GetCaptureOrientation(), centerX, centerY);*/
+                return;            
+            var matrix = new Matrix();            
             texture.SetTransform(matrix);
         }
         
