@@ -1,5 +1,4 @@
-﻿using Android.OS;
-using LillyScan.FrontendXamarin.Services;
+﻿using LillyScan.FrontendXamarin.Services;
 using LillyScan.FrontendXamarin.Views;
 using System;
 using Xamarin.Forms;
@@ -12,8 +11,6 @@ namespace LillyScan.FrontendXamarin
 
         public App()
         {
-            StrictMode.EnableDefaults();
-
             InitializeComponent();
 
             DependencyService.Register<MockDataStore>();

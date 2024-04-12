@@ -112,6 +112,7 @@ namespace LillyScan.Backend.Imaging
                         *dbuf++ = (((*si) >> 0) & 0xFF) / 255.0f;
                         *dbuf++ = (((*si) >> 8) & 0xFF) / 255.0f;
                         *dbuf++ = (((*si) >> 16) & 0xFF) / 255.0f;
+                        si++;
                     }
                 }
             }            

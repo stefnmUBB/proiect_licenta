@@ -4,8 +4,6 @@ using Android.App;
 using Android.Content.PM;
 using Android.Runtime;
 using Android.OS;
-using Xamarin.Forms.Platform.Android;
-using LillyScan.FrontendXamarin.Views.Controls;
 
 namespace LillyScan.FrontendXamarin.Droid
 {
@@ -15,7 +13,10 @@ namespace LillyScan.FrontendXamarin.Droid
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-            CameraPreview.CaptureView = Utils.Capture.CaptureView;
+
+            FrontendXamarin.Utils.RawBitmapIOAdapter.ImageSource2RawBitmap = Utils.RawBitmapIOAdapter.ToRawBitmap;
+            FrontendXamarin.Utils.RawBitmapIOAdapter.RawBitmap2ImageSource = Utils.RawBitmapIOAdapter.ToImageSource;
+
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             LoadApplication(new App());
