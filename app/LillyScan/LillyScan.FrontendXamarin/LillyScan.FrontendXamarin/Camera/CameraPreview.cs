@@ -1,4 +1,5 @@
-﻿using LillyScan.FrontendXamarin.Utils;
+﻿using LillyScan.Backend.Parallelization;
+using LillyScan.FrontendXamarin.Utils;
 using System.IO;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -22,7 +23,7 @@ namespace LillyScan.FrontendXamarin.Camera
         public delegate void OnCapturePeeked(object sender, byte[] imageBytes);
         public event OnCapturePeeked CapturePeeked;
 
-        private Atomic<bool> _CapturePeekEnabled = new Atomic<bool>(true);
+        private readonly Atomic<bool> _CapturePeekEnabled = new Atomic<bool>(true);
         public bool CapturePeekEnabled
         {
             get => _CapturePeekEnabled.Get();

@@ -34,23 +34,26 @@ namespace LillyScan
         //private static Model model64 = ModelLoader.LoadFromBytes(File.ReadAllBytes(@"D:\Public\CNNLSTMLineSeg64\train_model_1.txt.lsm"));
         public static HTREngine HTR = new DefaultHTREngine();
 
-        static void Run()
+        static void Run(string inf)
         {
-            var inf = @"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\JL\20240406_021410.jpg";
+
+            //var inf = @"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\JL\20240406_021410.jpg";
 
             //foreach (var inf in Directory.GetFiles(@"D:\Users\Stefan\Datasets\JL")) 
             {
                 //if (!inf.Contains("3")) continue;
+                var d = Path.GetDirectoryName(inf);
                 var fn = Path.GetFileNameWithoutExtension(inf);
                 using (var img0 = RawBitmapIO.FromFile(inf))
                 {
-                    var img = img0.CropCenteredPercent(70, 70);
+                    var img = img0;//.CropCenteredPercent(70, 70);
                     Console.WriteLine($"IMG: {img.Width}, {img.Height}");
-                    using (var bmp = img.ToBitmap())
-                        bmp.Save($"JL2\\{fn}_in.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+                    //using (var bmp = img.ToBitmap())
+                    //  bmp.Save($"JL2\\{fn}_in.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
                     using (var pred = HTR.SelectTiled64(img, parallel: true))
                     using (var bmp = pred.ToBitmap())
-                        bmp.Save($"JL2\\{fn}_out.png");
+                        //bmp.Save($"JL2\\{fn}_out.png");
+                        bmp.Save(Path.Combine(d, fn + "_out.png"));
                 }
             }
 
@@ -81,11 +84,11 @@ namespace LillyScan
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             Backend.Initializer.Initialize();
-            Run();
-            Console.WriteLine("Done"); Console.ReadLine();
+            Run(args[0]);
+            //Console.WriteLine("Done"); Console.ReadLine();
             //Application.Run(new MainForm());
         }
     }

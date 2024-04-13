@@ -1,17 +1,17 @@
-﻿using LillyScan.Backend.AI.Models;
-using LillyScan.Backend.Imaging;
+﻿using LillyScan.Backend.Imaging;
 using LillyScan.Backend.Math;
+using LillyScan.Backend.Parallelization;
 using LillyScan.Backend.Utils;
 using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LillyScan.Backend
 {
     public abstract class HTREngine : IHTREngine
-    {
-
-        public RawBitmap SelectTiled64(RawBitmap bitmap, bool parallel = false)
+    {        
+        public RawBitmap SelectTiled64(RawBitmap bitmap, bool parallel = false, bool preview=false, CancellationToken? cancellationToken = null)
         {
             var ow = bitmap.Width;
             var oh = bitmap.Height;
@@ -20,42 +20,61 @@ namespace LillyScan.Backend
 
             var tiles = img.ToTiles(64, 64);
             img.Dispose();
+            cancellationToken?.ThrowIfCancellationRequested();            
 
             if (parallel)
             {
+                Atomic<bool> canceled = new Atomic<bool>(false);
+                Atomic<int> counter = 0;
                 Parallel.ForEach(Partitioner.Create(0, tiles.Length, 2), range =>
                 {
                     for (int i = range.Item1; i < range.Item2; i++) 
                     {
-                        var segm = new RawBitmap(64, 64, 1, Segment64(tiles[i].ToArray()));
-                        tiles[i].Dispose();
+                        var buffer = tiles[i].ToArray(disposeBitmap: true);                        
+                        var segmentedBuffer = Segment64(buffer, preview);
+                        var segm = new RawBitmap(64, 64, 1, segmentedBuffer);
                         tiles[i] = segm;
+                        counter.Increment();
+                        if (cancellationToken?.IsCancellationRequested ?? false)
+                        {
+                            canceled.Set(false);
+                            break;
+                        }                        
                     }
                 });
+                Console.WriteLine($"[HTREngine] Counter = {counter}");
+                if (canceled.Get())
+                {
+                    for (int i = 0; i < tiles.Length; i++)
+                        tiles[i].Dispose();
+                    cancellationToken?.ThrowIfCancellationRequested();
+                }
             }
             else
             {
-                for (int i = 0; i < tiles.Length; i++)
+                bool canceled = false;
+                for (int i = 0; i < tiles.Length; i++) 
                 {
-                    var segm = new RawBitmap(64, 64, 1, Segment64(tiles[i].ToArray()));
+                    var segm = new RawBitmap(64, 64, 1, Segment64(tiles[i].ToArray(), preview));
                     tiles[i].Dispose();
                     tiles[i] = segm;
+                    if (cancellationToken?.IsCancellationRequested ?? false)
+                    {
+                        canceled = true;
+                        break;
+                    }
+                }
+                if(canceled)
+                {
+                    for (int i = 0; i < tiles.Length; i++)
+                        tiles[i].Dispose();
+                    cancellationToken?.ThrowIfCancellationRequested();
                 }
             }
 
-            img = RawBitmaps.FromTiles(tiles, 4, 4);
-
-            if(parallel)
-            {
-                //Parallel.For(0, tiles.Length, i => tiles[i].Dispose());
-                for (int i = 0; i < tiles.Length; i++)
-                    tiles[i].Dispose();
-            }
-            else
-            {
-                for (int i = 0; i < tiles.Length; i++)
-                    tiles[i].Dispose();
-            }            
+            img = RawBitmaps.FromTiles(tiles, 4, 4);        
+            for (int i = 0; i < tiles.Length; i++)
+                tiles[i].Dispose();            
 
             var pred = img.Resize(ow, oh, disposeOriginal: true);
             pred = pred.Threshold(inPlace: true);
@@ -99,6 +118,6 @@ namespace LillyScan.Backend
 
         public abstract float[] Segment(float[] image);
 
-        public abstract float[] Segment64(float[] image);        
+        public abstract float[] Segment64(float[] image, bool preview = false);        
     }
 }

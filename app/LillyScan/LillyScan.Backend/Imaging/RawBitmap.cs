@@ -25,6 +25,12 @@ namespace LillyScan.Backend.Imaging
                 Buffer[i] = data[i];
         }
 
+        public unsafe RawBitmap(int width, int height, int channels, float* data) : this(width, height, channels)
+        {
+            for (int i = 0; i < Stride * Height; i++)
+                Buffer[i] = data[i];
+        }
+
         public RawBitmap(int width, int height, int channels)
         {
             Width = width;
@@ -50,11 +56,13 @@ namespace LillyScan.Backend.Imaging
             Marshal.FreeHGlobal(new IntPtr(Buffer));
         }
 
-        public unsafe float[] ToArray()
+        public unsafe float[] ToArray(bool disposeBitmap = true)
         {
             var result = new float[Stride*Height];
             float* s = Buffer;
             for (int i = 0; i < result.Length; i++) result[i] = *s++;
+            if (disposeBitmap)
+                Dispose();
             return result;
         }
     }

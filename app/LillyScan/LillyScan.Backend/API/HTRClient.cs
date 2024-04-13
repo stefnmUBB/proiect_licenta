@@ -58,7 +58,7 @@ namespace LillyScan.Backend.API
             return Base64.Decode(recvData);            
         }
 
-        public override float[] Segment64(float[] image)
+        public override float[] Segment64(float[] image, bool preview = false)
         {
             throw new NotImplementedException();
         }

@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Runtime.InteropServices;
 
 namespace LillyScan.Backend.Imaging
 {
@@ -29,7 +28,34 @@ namespace LillyScan.Backend.Imaging
 
             return result;
         }
-        
+
+        public static unsafe float[] ToBufferedTiles(this RawBitmap bmp, int tileWidth, int tileHeight, bool padToFit = false)
+        {
+            if (!padToFit)
+            {
+                if (bmp.Width % tileWidth != 0 || bmp.Height % tileHeight != 0)
+                    throw new ArgumentException("Cannot perform tiling: invalid dimensions");
+            }
+
+            int tilesOnWidth = (bmp.Width + tileWidth - 1) / tileWidth;
+            int tilesOnHeight = (bmp.Height + tileHeight - 1) / tileHeight;
+            int tileLength = tileWidth * tileHeight * bmp.Channels;
+            var result = new float[tilesOnHeight * tilesOnWidth * tileLength];
+
+            int resPos = 0;                        
+            for (int i = 0; i < tilesOnHeight; i++)
+            {
+                for (int j = 0; j < tilesOnWidth; j++)
+                {
+                    using (var crop = bmp.Crop(j * tileWidth, i * tileHeight, tileWidth, tileHeight))
+                        Marshal.Copy((IntPtr)crop.Buffer, result, resPos, tileLength);
+                    resPos += tileLength;
+                }
+            }            
+
+            return result;
+        }
+
 
         public static unsafe RawBitmap FromTiles(RawBitmap[] tiles, int tilesOnWidth, int tilesOnHeight)
         {
@@ -174,6 +200,26 @@ namespace LillyScan.Backend.Imaging
             if (disposeOriginal)
                 bmp.Dispose();
             return result;
+        }
+
+
+        public static unsafe RawBitmap[] FromStackedBuffer(float[] buffer, int width, int height, int channels)
+        {
+            int imageLen = width * height * channels;
+            int imagesCount = System.Math.DivRem(buffer.Length, imageLen, out var rem);
+            if (rem != 0)
+                throw new InvalidOperationException($"Could not load {width}x{height}x{3} images from a {buffer.Length} length buffer");
+            var images = new RawBitmap[imagesCount];
+            fixed(float* ptr = buffer)
+            {
+                float* iptr = ptr;
+                for (int i = 0; i < imagesCount; i++)
+                {
+                    images[i] = new RawBitmap(width, height, channels, iptr);
+                    iptr += imageLen;
+                }
+            }
+            return images;
         }
     }
 }

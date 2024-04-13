@@ -37,12 +37,12 @@ namespace LillyScan.Backend.AI.Layers
                             for (int k1 = 0; k1 < K1; k1++)
                             {
                                 int ii = n + k1 - (K1 >> 1);
+                                if (ii < 0 || ii >= N) continue;
                                 int startC1 = startC0 + ii * MC;
                                 for (int k2 = 0; k2 < K2; k2++)
                                 {
                                     int jj = m + k2 - (K2 >> 1);
-                                    if (ii < 0 || jj < 0 || ii >= N || jj >= M)
-                                        continue;
+                                    if (jj < 0 || jj >= M) continue;
                                     int startC = startC1 + jj * C;
                                     int startK = k1 * K2CF + k2 * CF;
 
