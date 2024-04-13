@@ -1,21 +1,27 @@
 ﻿using LillyScan.Backend.Imaging;
 using LillyScan.Backend.Parallelization;
-using LillyScan.FrontendXamarin.Camera;
+using LillyScan.FrontendXamarin.Models;
 using LillyScan.FrontendXamarin.Utils;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
 
-namespace LillyScan.FrontendXamarin.Views
+namespace LillyScan.FrontendXamarin.Views.Pages
 {
-    public partial class AboutPage : ContentPage
-    {                
-        public AboutPage()
+    [XamlCompilation(XamlCompilationOptions.Compile)]
+    public partial class NewCapturePage : ContentPage
+    {
+        public NewCapturePage()
         {
-            InitializeComponent();                        
+            InitializeComponent();
         }
 
         readonly Stopwatch sw = new Stopwatch();
@@ -26,24 +32,33 @@ namespace LillyScan.FrontendXamarin.Views
         private async void CameraPreview_CapturePeeked(object sender, byte[] imageBytes)
         {
             Console.WriteLine($"[CameraPreview_CapturePeeked] Enter: CanPeek={CanPeek}");
-            if (!CanPeek.Get()) return;            
 
-                CameraPreview.CapturePeekEnabled = false;
-                Console.WriteLine($"CameraPreview_CapturePeeked {DateTime.Now}");
-                Console.WriteLine($"Frame {k++}");
-                lock (sw)
-                {
-                    if (sw.IsRunning)
-                        return;
-                    sw.Restart();
-                }
+            if(RedirectToProcessing.Get())
+            {
+                RedirectToProcessing.Set(false);
+                AppState.CaptureBytes.Set(imageBytes);
+                await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//ProcessingPage"));
+                return;
+            }
 
-                var imageSource = ImageSource.FromStream(() => new MemoryStream(imageBytes));
-                var rawBitmap = await imageSource.ToRawBitmap();
-                //imageSource = await rawBitmap.ToImageSource();
+            if (!CanPeek.Get()) return;
 
-                var sw2 = new Stopwatch();
-                sw2.Start();
+            CameraPreview.CapturePeekEnabled = false;
+            Console.WriteLine($"CameraPreview_CapturePeeked {DateTime.Now}");
+            Console.WriteLine($"Frame {k++}");
+            lock (sw)
+            {
+                if (sw.IsRunning)
+                    return;
+                sw.Restart();
+            }
+
+            var imageSource = ImageSource.FromStream(() => new MemoryStream(imageBytes));
+            var rawBitmap = await imageSource.ToRawBitmap();
+            //imageSource = await rawBitmap.ToImageSource();
+
+            var sw2 = new Stopwatch();
+            sw2.Start();
 
             RawBitmap segmentedBitmap = null;
             using (var cancellationTokenSource = new CancellationTokenSource())
@@ -57,7 +72,7 @@ namespace LillyScan.FrontendXamarin.Views
                 catch (OperationCanceledException e)
                 {
                     Console.WriteLine($"[CameraPreview_CapturePeeked] Operation canceled: {e.Message}");
-                    MaskPreviewCancellationTokenSource.Set(null);                    
+                    MaskPreviewCancellationTokenSource.Set(null);
                 }
             }
             sw2.Stop();
@@ -72,8 +87,8 @@ namespace LillyScan.FrontendXamarin.Views
             imageSource = await segmentedBitmap.ToImageSource();
             segmentedBitmap.Dispose();
             await MainThread.InvokeOnMainThreadAsync(() => Img.Source = imageSource);
-            lock (sw) 
-            {                
+            lock (sw)
+            {
                 sw.Stop();
                 Console.WriteLine($"Processed frame in {sw.ElapsedMilliseconds / 1000.0}s");
                 MainThread.InvokeOnMainThreadAsync(() => MyButton.Text = $"{sw.ElapsedMilliseconds / 1000.0}s");
@@ -116,10 +131,17 @@ namespace LillyScan.FrontendXamarin.Views
             MaskPreviewCancellationTokenSource.With(SafeCancel);
         }
 
-        ~AboutPage()
+        ~NewCapturePage()
         {
             Console.WriteLine($"[PreviewPage] Destroyed?: CanPeek={CanPeek} Preview={CameraPreview.CapturePeekEnabled}");
             MaskPreviewCancellationTokenSource.With(SafeCancel);
+        }
+
+        Atomic<bool> RedirectToProcessing = false;
+
+        private void CaptureButton_Clicked(object sender, EventArgs e)
+        {
+            RedirectToProcessing.Set(true);
         }
     }
 }

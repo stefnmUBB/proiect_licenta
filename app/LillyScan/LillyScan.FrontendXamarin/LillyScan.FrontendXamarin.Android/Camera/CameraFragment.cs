@@ -356,7 +356,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
 
             foreach (Android.Util.Size option in choices)
             {
-                if (option.Height == option.Width * h / w && option.Width >= width && option.Height >= height)
+                if (option.Height == option.Width * h / w && option.Width >= width / 2 && option.Height >= height / 2) 
                 {
                     bigEnough.Add(option);
                 }
@@ -365,9 +365,9 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
 
             if (bigEnough.Count > 0)
             {
-                //var sorted = bigEnough.OrderBy(s => s.Width * s.Height).ToArray();
-                //return sorted[sorted.Length / 2];
-                return bigEnough.OrderBy(s => s.Width * s.Height).First();
+                var sorted = bigEnough.OrderBy(s => s.Width * s.Height).ToArray();
+                return sorted[0];
+                //return bigEnough.OrderBy(s => s.Width * s.Height).First();
                 //int minArea = bigEnough.Min(s => s.Width * s.Height);
                 //return bigEnough.First(s => s.Width * s.Height == minArea);
             }

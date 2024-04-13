@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Shell xmlns="http://xamarin.com/schemas/2014/forms" 
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-       xmlns:local="clr-namespace:LillyScan.FrontendXamarin.Views"
+       xmlns:local="clr-namespace:LillyScan.FrontendXamarin.Views.Pages"       
        Title="LillyScan.FrontendXamarin"
        x:Class="LillyScan.FrontendXamarin.AppShell">
 
@@ -23,6 +23,7 @@
                 <Setter Property="Shell.TabBarForegroundColor" Value="White"/>
                 <Setter Property="Shell.TabBarUnselectedColor" Value="#95FFFFFF"/>
                 <Setter Property="Shell.TabBarTitleColor" Value="White"/>
+                <Setter Property="Shell.NavBarIsVisible" Value="False"/>
             </Style>
             <Style TargetType="TabBar" BasedOn="{StaticResource BaseStyle}" />
             <Style TargetType="FlyoutItem" BasedOn="{StaticResource BaseStyle}" />
@@ -30,8 +31,8 @@
     </Shell.Resources>
 
     <TabBar>
-        <ShellContent Title="About" Icon="icon_about.png" Route="AboutPage" ContentTemplate="{DataTemplate local:AboutPage}" />
-        <ShellContent Title="Browse" Icon="icon_feed.png" ContentTemplate="{DataTemplate local:ItemsPage}" />
+        <ShellContent Title="Capture" Icon="icon_about.png" Route="NewCapturePage" ContentTemplate="{DataTemplate local:NewCapturePage}" />
+        <ShellContent Title="Dummy" Icon="icon_about.png" Route="DummyPage" ContentTemplate="{DataTemplate local:DummyPage}" />
     </TabBar>
 
     <!--
@@ -39,7 +40,7 @@
         await Shell.Current.GoToAsync("//LoginPage");
     -->
     <TabBar>
-        <ShellContent Route="LoginPage" ContentTemplate="{DataTemplate local:LoginPage}" />
+        <ShellContent Route="ProcessingPage" ContentTemplate="{DataTemplate local:ProcessingPage}" />
     </TabBar>
 
 

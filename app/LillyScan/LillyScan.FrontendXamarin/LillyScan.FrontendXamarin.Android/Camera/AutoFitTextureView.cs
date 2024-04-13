@@ -14,7 +14,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
         readonly object locker = new object();
 
         public AutoFitTextureView(Context context) : this(context, null)
-        {
+        {                        
         }
 
         public AutoFitTextureView(Context context, IAttributeSet attrs) : this(context, attrs, 0)

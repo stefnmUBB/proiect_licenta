@@ -25,8 +25,8 @@ namespace LillyScan.Backend
             if (parallel)
             {
                 Atomic<bool> canceled = new Atomic<bool>(false);
-                Atomic<int> counter = 0;
-                Parallel.ForEach(Partitioner.Create(0, tiles.Length, 2), range =>
+                //Atomic<int> counter = 0;
+                Parallel.ForEach(Partitioner.Create(0, tiles.Length, 4), range =>
                 {
                     for (int i = range.Item1; i < range.Item2; i++) 
                     {
@@ -34,7 +34,7 @@ namespace LillyScan.Backend
                         var segmentedBuffer = Segment64(buffer, preview);
                         var segm = new RawBitmap(64, 64, 1, segmentedBuffer);
                         tiles[i] = segm;
-                        counter.Increment();
+                        //counter.Increment();
                         if (cancellationToken?.IsCancellationRequested ?? false)
                         {
                             canceled.Set(false);
@@ -42,7 +42,7 @@ namespace LillyScan.Backend
                         }                        
                     }
                 });
-                Console.WriteLine($"[HTREngine] Counter = {counter}");
+                //Console.WriteLine($"[HTREngine] Counter = {counter}");
                 if (canceled.Get())
                 {
                     for (int i = 0; i < tiles.Length; i++)
