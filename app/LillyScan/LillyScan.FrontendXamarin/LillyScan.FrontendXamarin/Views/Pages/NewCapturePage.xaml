@@ -23,7 +23,7 @@
                            Grid.Row="0" Grid.RowSpan="2"
                            CapturePeeked="CameraPreview_CapturePeeked" Background="Green"></cam:CameraPreview>
         <!--views:SKCanvasView x:Name="Canvas" Grid.Row="0" PaintSurface="Canvas_PaintSurface"/-->
-        <Image x:Name="Img" Grid.Row="0" Grid.RowSpan="2" Aspect="Fill"></Image>
+        <Image x:Name="Img" Grid.Row="0" Grid.RowSpan="2" Aspect="AspectFit"></Image>
         <Grid Grid.Row="1" BackgroundColor="#44000000">
             <StackLayout HorizontalOptions="Center" Orientation="Horizontal" Padding="20">
                 <Button ImageSource="icon_camera.png" HeightRequest="70" WidthRequest="70" Padding="10" xct:IconTintColorEffect.TintColor="{StaticResource Secondary}" BackgroundColor="#88000000"

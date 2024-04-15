@@ -69,7 +69,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
         {
             using var canvas = LockCanvas(null);
             lock (locker)
-            {
+            {               
                 try
                 {
                     canvas.DrawColor(color);

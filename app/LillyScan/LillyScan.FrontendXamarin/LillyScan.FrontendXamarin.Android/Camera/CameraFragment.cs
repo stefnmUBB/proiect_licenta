@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 using Android;
 using Android.Content;
@@ -171,7 +172,9 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
                     else
                     {
                         //texture.SetAspectRatio(previewSize.Height, previewSize.Width);
-                    }                    
+                        previewSize = new Android.Util.Size(previewSize.Height, previewSize.Width);
+                    }
+                    texture.SetAspectRatio(previewSize.Width, previewSize.Height);
 
                     initTaskSource = new TaskCompletionSource<CameraDevice>();
                     Manager.OpenCamera(cameraId, new CameraStateListener
@@ -512,9 +515,15 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
 
         void ConfigureTransform(int viewWidth, int viewHeight)
         {
+            
             if (texture == null || previewSize == null || previewSize.Width == 0 || previewSize.Height == 0)
                 return;            
-            var matrix = new Matrix();            
+            var matrix = new Matrix();
+            //matrix.PostScale(0.5f, 0.5f);
+            //matrix.PostTranslate(viewWidth / 2, viewHeight / 2);
+
+            Console.WriteLine($"[ConfigureTransform] View={(viewWidth, viewHeight)} Preview={(previewSize.Width, previewSize.Height)}");
+            //matrix.SetTranslate((viewWidth - previewSize.Width) / 2, (viewHeight - previewSize.Height) / 2);
             texture.SetTransform(matrix);
         }
         

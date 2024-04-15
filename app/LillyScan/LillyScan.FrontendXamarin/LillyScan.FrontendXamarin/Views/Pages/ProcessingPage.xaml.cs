@@ -13,15 +13,33 @@ namespace LillyScan.FrontendXamarin.Views.Pages
         public ProcessingPage()
         {
             InitializeComponent();
-
+            
             Task.Run(() =>
             {
-                var captureBytes = AppState.CaptureBytes.Get();
-                MainThread.InvokeOnMainThreadAsync(() 
+                var captureBytes = AppState.CaptureBytes.Value;
+                MainThread.InvokeOnMainThreadAsync(()
+                    => Image.Source = ImageSource.FromStream(() => new MemoryStream(captureBytes)));
+            });
+
+            AppState.CaptureBytes.ValueChanged += CaptureBytes_ValueChanged;
+        }
+
+        private void CaptureBytes_ValueChanged(Backend.Utils.Observable<byte[]> observable, byte[] newValue)
+        {
+            Task.Run(() =>
+            {
+                var captureBytes = newValue;
+                MainThread.InvokeOnMainThreadAsync(()
                     => Image.Source = ImageSource.FromStream(() => new MemoryStream(captureBytes)));
             });
         }
+        
 
+        protected override bool OnBackButtonPressed()
+        {
+            MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//NewCapturePage"));
+            return true;            
+        }
 
     }
 }

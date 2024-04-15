@@ -4,7 +4,7 @@
              x:Class="LillyScan.FrontendXamarin.Views.Pages.ProcessingPage">
     <ContentPage.Content>
         <Grid>
-            <Image x:Name="Image"></Image>
+            <Image x:Name="Image" Aspect="AspectFit"></Image>
         </Grid>
     </ContentPage.Content>
 </ContentPage>

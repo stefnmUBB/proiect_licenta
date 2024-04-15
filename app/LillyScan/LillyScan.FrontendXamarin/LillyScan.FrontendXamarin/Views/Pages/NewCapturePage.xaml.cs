@@ -7,9 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -36,7 +34,7 @@ namespace LillyScan.FrontendXamarin.Views.Pages
             if(RedirectToProcessing.Get())
             {
                 RedirectToProcessing.Set(false);
-                AppState.CaptureBytes.Set(imageBytes);
+                AppState.CaptureBytes.Value = imageBytes; // .Set(imageBytes);
                 await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//ProcessingPage"));
                 return;
             }
