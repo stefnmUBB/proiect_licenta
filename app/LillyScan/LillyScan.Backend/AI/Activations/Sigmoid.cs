@@ -8,7 +8,7 @@ namespace LillyScan.Backend.AI.Activations
     {
         public override Tensor<float> Call(Tensor<float> input)
         {
-            return input.Map(x => (float)(1.0 / (1 + System.Math.Exp(-x))));
+            return input.Map(x => (float)(1 / (1 + System.Math.Exp(-x))));
         }
     }
 }

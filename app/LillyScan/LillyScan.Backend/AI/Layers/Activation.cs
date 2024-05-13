@@ -26,9 +26,6 @@ namespace LillyScan.Backend.AI.Layers
             return inputs.Select(ActivationFunction.Call).ToArray();
         }
 
-        public override Shape[] OnGetOutputShape(Shape[] inputShapes)
-        {
-            return inputShapes;
-        }        
+        public override Shape[] OnGetOutputShape(Shape[] inputShapes) => inputShapes;        
     }
 }

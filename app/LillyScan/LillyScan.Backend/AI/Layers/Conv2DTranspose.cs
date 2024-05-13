@@ -65,7 +65,7 @@ namespace LillyScan.Backend.AI.Layers
             if (UseBias)
             {
                 var bias = Context.GetWeight("bias", BiasShape, false);
-                output = output.Add(bias);
+                output = output.FastFloatAdd(bias);
             }
             return new[] { output };            
         }

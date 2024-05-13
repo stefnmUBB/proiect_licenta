@@ -24,7 +24,7 @@ namespace LillyScan.Backend.AI.Layers
 
         public Conv2D(Shape[] inputShapes, int filters, (int, int)? kernelSize = null, bool useBias = true, string name = null, Activations.Activation activation = null) : base(inputShapes, name)
         {
-            Assert(() => inputShapes.Length == 1, () => inputShapes[0].Length == 4);
+            Assert("Invalid Conv2D shape", inputShapes.Length == 1, inputShapes[0].Length == 4);
             (Filters, KernelSize, UseBias) = (filters, kernelSize ?? (1, 1), useBias);
 
             Context.Weights["kernel"] = Tensors.Ones<float>((KernelSize.Rows, KernelSize.Cols, InputShapes[0][-1], Filters));
@@ -48,7 +48,7 @@ namespace LillyScan.Backend.AI.Layers
             if(UseBias)
             {
                 var bias = Context.GetWeight("bias", (Filters), false);
-                output = output.Add(bias);
+                output = output.FastFloatAdd(bias);
             }
 
             if(Activation != null)

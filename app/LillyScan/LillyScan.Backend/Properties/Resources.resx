@@ -118,22 +118,22 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="model_segm" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\model_segm.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  <data name="LinearSegmentationModel64_lsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\SegmentationLinear64.lsm.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="preview_segmentation_64.lsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\preview_segmentation_64.lsm.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PaddedLinearSegmentationModel64.lsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\PaddedLinearSegmentationModel64.lsm.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="q_seg_model.txt_lsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\q_seg_model.txt_lsm.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PreviewSegmentationModel64.lsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\PreviewSegmentationModel64.lsm.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="RecognitionModelEn.lsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\RecognitionModelEn.lsm.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="SegmentationModel64.lsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\SegmentationModel64.lsm.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="seg_model" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\seg_model.lsm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="seg_model64_93" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\seg_model64_93.lsm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="seg_model_64" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\seg_model_64.lsm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

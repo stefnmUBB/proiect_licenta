@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,7 +23,7 @@ namespace LillyScan.Backend.Utils
         public static string JoinToString<T>(this IEnumerable<T> items, string delimiter)
             => string.Join(delimiter, items.Select(_ => _.ToString()));
 
-        public static int IndexOfMax<T>(this IEnumerable<T> sequence) where T : IComparable<T>
+        public static int ArgMax<T>(this IEnumerable<T> sequence) where T : IComparable<T>
         {
             int maxIndex = -1;
             T maxValue = default(T);
@@ -31,6 +32,24 @@ namespace LillyScan.Backend.Utils
             foreach (T value in sequence)
             {
                 if (value.CompareTo(maxValue) > 0 || maxIndex == -1)
+                {
+                    maxIndex = index;
+                    maxValue = value;
+                }
+                index++;
+            }
+            return maxIndex;
+        }
+
+        public static int ArgMin<T>(this IEnumerable<T> sequence) where T : IComparable<T>
+        {
+            int maxIndex = -1;
+            T maxValue = default(T);
+
+            int index = 0;
+            foreach (T value in sequence)
+            {
+                if (value.CompareTo(maxValue) < 0 || maxIndex == -1) 
                 {
                     maxIndex = index;
                     maxValue = value;
@@ -88,6 +107,46 @@ namespace LillyScan.Backend.Utils
                 return;
             }
             Console.Write(o ?? "None");
+        }
+
+        public static (U min, U max) MinAndMax<T,U>(this IEnumerable<T> values, Func<T,U> selector)
+        {
+            using(var enumerator =  values.GetEnumerator())
+            {
+                enumerator.MoveNext();
+                U current = selector(enumerator.Current);
+                U min = current, max = current;
+                var comparer = Comparer<U>.Default;
+                while (enumerator.MoveNext()) 
+                {
+                    current = selector(enumerator.Current);
+                    if (comparer.Compare(current, min) < 0)
+                        min = current;
+                    if (comparer.Compare(max, current) < 0)
+                        max = current;
+                }
+                return (min, max);
+            }
+        }
+
+        public static (T min, T max) MinAndMax<T>(this IEnumerable<T> values)
+        {
+            using (var enumerator = values.GetEnumerator())
+            {
+                enumerator.MoveNext();
+                T current = enumerator.Current;
+                T min = current, max = current;
+                var comparer = Comparer<T>.Default;
+                while (enumerator.MoveNext())
+                {
+                    current = enumerator.Current;
+                    if (comparer.Compare(current, min) < 0)
+                        min = current;
+                    if (comparer.Compare(max, current) < 0)
+                        max = current;
+                }
+                return (min, max);
+            }
         }
     }
 }

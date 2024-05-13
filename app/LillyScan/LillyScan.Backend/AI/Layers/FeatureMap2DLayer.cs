@@ -10,7 +10,7 @@ namespace LillyScan.Backend.AI.Layers
         protected override void OnValidateInputShapes(Shape[] inputShapes)
         {
             base.OnValidateInputShapes(inputShapes);
-            Assert(() => inputShapes.Length == 1, () => inputShapes[0].Length == 4);
+            Assert("Invalid 2D Feature map shape", inputShapes.Length == 1, inputShapes[0].Length == 4);
         }
     }
 }

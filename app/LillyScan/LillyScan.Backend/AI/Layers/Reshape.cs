@@ -23,9 +23,8 @@ namespace LillyScan.Backend.AI.Layers
 
         protected override Tensor<float>[] OnCall(Tensor<float>[] inputs)
         {
-            Console.WriteLine("Reshape in: " + inputs.SelectShapes().JoinToString(", "));
-            var output = inputs[0].SubDimMap(x => x.Reshape(TargetShape), inputs[0].Rank - 1);
-            Console.WriteLine("Reshape out: " + output.Shape);
+            var newShape = inputs[0].Shape[0] + TargetShape;
+            var output = inputs[0].Reshape(newShape);            
             return new[] { output };
         }
 
@@ -33,7 +32,8 @@ namespace LillyScan.Backend.AI.Layers
         {
             base.OnValidateInputShapes(inputShapes);
             var itemShape = new Shape(inputShapes[0].Skip(1).ToArray());
-            Assert(() => inputShapes.Length == 1, () => itemShape.ElementsCount == TargetShape.ElementsCount);
+            Console.WriteLine($"{itemShape}, {TargetShape}");
+            Assert("Invalid Reshape input shape", inputShapes.Length == 1, itemShape.ElementsCount == TargetShape.ElementsCount);
         }
     }
 }

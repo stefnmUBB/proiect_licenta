@@ -11,7 +11,6 @@ namespace LillyScan.Backend.Math
     public class Tensor<T>
     {
         public Shape Shape { get; }        
-
         public ImmutableArray<T> Buffer { get; }
         public bool IsShapeless => Rank == 0;
         public bool IsScalar => Rank == 0;

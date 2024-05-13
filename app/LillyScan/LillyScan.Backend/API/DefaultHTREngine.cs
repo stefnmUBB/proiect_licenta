@@ -17,8 +17,8 @@ namespace LillyScan.Backend.API
         public DefaultHTREngine(Model segmentationModel = null, Model segmentationModel64 = null)
         {
             SegmentationModel = segmentationModel ?? ModelLoader.LoadFromBytes(Resources.seg_model);
-            SegmentationModel64 = segmentationModel64 ?? ModelLoader.LoadFromBytes(Resources.q_seg_model_txt_lsm);
-            PreviewSegmentationModel64 = ModelLoader.LoadFromBytes(Resources.preview_segmentation_64_lsm);
+            SegmentationModel64 = segmentationModel64 ?? ModelLoader.LoadFromBytes(Resources.SegmentationModel64_lsm);
+            PreviewSegmentationModel64 = ModelLoader.LoadFromBytes(Resources.PreviewSegmentationModel64_lsm);
             Debug.WriteLine("Loaded DefaultHTREngine");
         }
 
@@ -29,14 +29,14 @@ namespace LillyScan.Backend.API
 
         public override float[] Segment(float[] image)
         {            
-            var predicted = SegmentationModel.Call(new[] { new Tensor<float>((1, 256, 256, 1), image) })[0];
+            var predicted = SegmentationModel.Call(new[] { new Tensor<float>((1, 256, 256, 1), image) }, verbose:false)[0];
             return predicted.Buffer.Buffer.ToArray();
         }
 
         public override float[] Segment64(float[] image, bool preview=false)
         {
             var segModel = preview ? PreviewSegmentationModel64 : SegmentationModel64;
-            var predicted = segModel.Call(new[] { new Tensor<float>((1, 64, 64, 1), image) })[0];
+            var predicted = segModel.Call(new[] { new Tensor<float>((1, 64, 64, 1), image) }, verbose: false)[0];
             return predicted.Buffer.Buffer.ToArray();
         }      
 

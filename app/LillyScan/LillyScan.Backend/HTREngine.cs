@@ -16,11 +16,11 @@ namespace LillyScan.Backend
             var ow = bitmap.Width;
             var oh = bitmap.Height;
             var img = bitmap.Resize(256, 256);
-            img = img.AverageChannels(disposeOriginal: true);
-
+            if (img.Channels > 1)
+                img = img.AverageChannels(disposeOriginal: true);
             var tiles = img.ToTiles(64, 64);
             img.Dispose();
-            cancellationToken?.ThrowIfCancellationRequested();            
+            cancellationToken?.ThrowIfCancellationRequested();
 
             if (parallel)
             {
@@ -118,6 +118,79 @@ namespace LillyScan.Backend
 
         public abstract float[] Segment(float[] image);
 
-        public abstract float[] Segment64(float[] image, bool preview = false);        
+        public abstract float[] Segment64(float[] image, bool preview = false);
+
+        public RawBitmap SegmentTiles64(RawBitmap bitmap, bool preview = false, bool parallel = true, ProgressMonitor progressMonitor = null)
+        {
+            var ow = bitmap.Width;
+            var oh = bitmap.Height;
+            var img = bitmap.Resize(256, 256);
+            if (img.Channels > 1)
+                img = img.AverageChannels(disposeOriginal: true);
+            var tiles = img.ToTiles(64, 64);
+            img.Dispose();
+
+            progressMonitor?.PushTask("seg_tiles64", 16);            
+
+            if (parallel)
+            {
+                Atomic<bool> canceled = new Atomic<bool>(false);
+                //Atomic<int> counter = 0;
+                Parallel.ForEach(Partitioner.Create(0, tiles.Length, 6), range =>
+                {
+                    for (int i = range.Item1; i < range.Item2; i++)
+                    {                                                
+                        tiles[i].InplaceCopyFrom(Segment64(tiles[i].ToArray(), preview));                        
+                        if (progressMonitor?.TaskCanceled ?? false) 
+                        {
+                            canceled.Set(false);
+                            break;
+                        }
+                    }
+                });
+                //Console.WriteLine($"[HTREngine] Counter = {counter}");
+                if (canceled.Get())
+                {
+                    for (int i = 0; i < tiles.Length; i++)
+                        tiles[i].Dispose();
+                    progressMonitor?.CancellationToken?.ThrowIfCancellationRequested();
+                }
+            }
+            else
+            {
+                bool canceled = false;
+                for (int i = 0; i < tiles.Length; i++)
+                {
+                    tiles[i].InplaceCopyFrom(Segment64(tiles[i].ToArray(), preview));                    
+                    if (progressMonitor?.TaskCanceled ?? false)
+                    {
+                        canceled = true;
+                        break;
+                    }
+                }
+                if (canceled)
+                {
+                    for (int i = 0; i < tiles.Length; i++)
+                        tiles[i].Dispose();
+                    progressMonitor?.CancellationToken?.ThrowIfCancellationRequested();
+                }
+            }
+
+            img = RawBitmaps.FromTiles(tiles, 4, 4);
+            for (int i = 0; i < tiles.Length; i++)
+                tiles[i].Dispose();
+
+            var pred = img.Resize(ow, oh, disposeOriginal: true);
+            pred = pred.Threshold(inPlace: true);
+
+            progressMonitor.PopTask();
+
+            return pred;
+        }
+
+        public RawBitmap SegmentFix(RawBitmap image, RawBitmap mask, ProgressMonitor progressMonitor = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

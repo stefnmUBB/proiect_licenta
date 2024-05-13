@@ -61,39 +61,11 @@ namespace LillyScan.Backend.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to [[Layer]]
-        ///[type]
-        ///InputLayer
-        ///[name]
-        ///input_1
-        ///[config]
-        ///{&apos;batch_input_shape&apos;: (None, 256, 256, 1), &apos;dtype&apos;: &apos;float64&apos;, &apos;sparse&apos;: False, &apos;ragged&apos;: False, &apos;name&apos;: &apos;input_1&apos;}
-        ///[weight_shapes]
-        ///0
-        ///[[Layer]]
-        ///[type]
-        ///Conv2D
-        ///[name]
-        ///conv2d
-        ///[config]
-        ///{&apos;name&apos;: &apos;conv2d&apos;, &apos;dtype&apos;: &apos;float64&apos;, &apos;filters&apos;: 16, &apos;kernel_size&apos;: (3, 3), &apos;strides&apos;: (1, 1), &apos;padding&apos;: &apos;same&apos;, &apos;data_format&apos;: &apos;channels_last&apos;, &apos;dilation_rate&apos;: (1, 1), &apos;groups&apos;: 1, &apos;activation&apos;: &apos;linear&apos;, &apos;use_bias&apos;: True}
-        ///[inputs]
-        ///input_1
-        ///[weight_shapes]
-        /// [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string model_segm {
-            get {
-                return ResourceManager.GetString("model_segm", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] preview_segmentation_64_lsm {
+        internal static byte[] LinearSegmentationModel64_lsm {
             get {
-                object obj = ResourceManager.GetObject("preview_segmentation_64.lsm", resourceCulture);
+                object obj = ResourceManager.GetObject("LinearSegmentationModel64_lsm", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -101,9 +73,29 @@ namespace LillyScan.Backend.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] q_seg_model_txt_lsm {
+        internal static byte[] PaddedLinearSegmentationModel64_lsm {
             get {
-                object obj = ResourceManager.GetObject("q_seg_model.txt_lsm", resourceCulture);
+                object obj = ResourceManager.GetObject("PaddedLinearSegmentationModel64.lsm", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] PreviewSegmentationModel64_lsm {
+            get {
+                object obj = ResourceManager.GetObject("PreviewSegmentationModel64.lsm", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] RecognitionModelEn_lsm {
+            get {
+                object obj = ResourceManager.GetObject("RecognitionModelEn.lsm", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -121,19 +113,9 @@ namespace LillyScan.Backend.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] seg_model_64 {
+        internal static byte[] SegmentationModel64_lsm {
             get {
-                object obj = ResourceManager.GetObject("seg_model_64", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] seg_model64_93 {
-            get {
-                object obj = ResourceManager.GetObject("seg_model64_93", resourceCulture);
+                object obj = ResourceManager.GetObject("SegmentationModel64.lsm", resourceCulture);
                 return ((byte[])(obj));
             }
         }

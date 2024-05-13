@@ -30,7 +30,7 @@ namespace LillyScan
 
         void Execute(string path)
         {
-            try
+            /*try
             {
                 using (var bmp = new Bitmap(path))
                 {
@@ -75,7 +75,7 @@ namespace LillyScan
             catch(Exception e)
             {
                 MessageBox.Show(e.Message);
-            }
+            }*/
         }
 
         private void ImgPanel_Paint(object sender, PaintEventArgs e)

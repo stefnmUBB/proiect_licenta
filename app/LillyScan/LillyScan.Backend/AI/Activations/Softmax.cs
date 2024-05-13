@@ -11,18 +11,24 @@ namespace LillyScan.Backend.AI.Activations
             int elemsCount = input.Shape.ElementsCount;
             var buffer = new float[elemsCount];
 
-            int logitsLen = input.Shape[-1];            
+            int logitsLen = input.Shape[-1];
+                        
+
 
             fixed(float* ibuff = &input.Buffer.Buffer[0])
             fixed(float* obuff = &buffer[0])
             {
                 for(int i=0;i<elemsCount;i+=logitsLen)
                 {
+                    float max = ibuff[0];
+                    for (int j = 1; j < logitsLen; j++)
+                        if (ibuff[i + j] > max) max = ibuff[i + j];
+
                     double sum = 0;
                     for(int j=0;j<logitsLen;j++)
                     {
-                        obuff[i + j] = (float)System.Math.Exp(ibuff[i + j]);
-                        sum += obuff[i + j];
+                        obuff[i + j] = (float)System.Math.Exp(ibuff[i + j] - max);
+                        sum += obuff[i + j] - max;
                     }
 
                     for (int j = 0; j < logitsLen; j++)

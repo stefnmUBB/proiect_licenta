@@ -1,12 +1,39 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace LillyScan.Backend.Imaging
 {
     public static class RawBitmaps
     {
-        public static unsafe RawBitmap[] ToTiles(this RawBitmap bmp, int tileWidth, int tileHeight, bool padToFit = false)
+        public static unsafe RawBitmap[] ToTilesPadded(this RawBitmap bmp, int tileWidth, int tileHeight, int padding = 0, bool padToFit = false, bool disposeOriginal = false)
         {
+            if (!padToFit)
+            {
+                if (bmp.Width % tileWidth != 0 || bmp.Height % tileHeight != 0)
+                    throw new ArgumentException("Cannot perform tiling: invalid dimensions");
+            }
+
+            int tilesOnWidth = (bmp.Width + tileWidth - 1) / tileWidth;
+            int tilesOnHeight = (bmp.Height + tileHeight - 1) / tileHeight;
+            var result = new RawBitmap[tilesOnHeight * tilesOnWidth];
+
+            int k = 0;
+            for (int i = 0; i < tilesOnHeight; i++)
+            {
+                for (int j = 0; j < tilesOnWidth; j++)
+                {
+                    result[k++] = bmp.CropUnrestricted(j * tileWidth - padding, i * tileHeight - padding, tileWidth + 2 * padding, tileHeight + 2 * padding);
+                }
+            }
+            if (disposeOriginal)
+                bmp.Dispose();
+
+            return result;
+        }
+
+        public static unsafe RawBitmap[] ToTiles(this RawBitmap bmp, int tileWidth, int tileHeight, bool padToFit = false, bool disposeOriginal = false)
+        {            
             if(!padToFit)
             {
                 if (bmp.Width % tileWidth != 0 || bmp.Height % tileHeight != 0)
@@ -25,6 +52,8 @@ namespace LillyScan.Backend.Imaging
                     result[k++] = bmp.Crop(j * tileWidth, i * tileHeight, tileWidth, tileHeight);
                 }
             }
+            if (disposeOriginal)
+                bmp.Dispose();
 
             return result;
         }
@@ -57,7 +86,7 @@ namespace LillyScan.Backend.Imaging
         }
 
 
-        public static unsafe RawBitmap FromTiles(RawBitmap[] tiles, int tilesOnWidth, int tilesOnHeight)
+        public static unsafe RawBitmap FromTiles(RawBitmap[] tiles, int tilesOnWidth, int tilesOnHeight, bool disposeOriginal = false)
         {
             if (tiles.Length != tilesOnWidth * tilesOnHeight)
                 throw new ArgumentException("Invalid tiles count");
@@ -76,6 +105,15 @@ namespace LillyScan.Backend.Imaging
                 for (int j = 0; j < tilesOnWidth; j++)
                 {
                     result = result.DrawImage(tiles[k++], j * w, i * h, inPlace: true);
+                }
+            }
+
+            if(disposeOriginal)
+            {
+                for (int i = 0; i < tiles.Length; i++)
+                {
+                    Debug.WriteLine($"Dispose tile {i}");
+                    tiles[i].Dispose();
                 }
             }
             return result;

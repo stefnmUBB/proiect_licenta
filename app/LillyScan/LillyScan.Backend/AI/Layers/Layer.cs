@@ -1,8 +1,9 @@
 ﻿using LillyScan.Backend.Math;
 using LillyScan.Backend.Utils;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 
 namespace LillyScan.Backend.AI.Layers
 {    
@@ -18,9 +19,9 @@ namespace LillyScan.Backend.AI.Layers
 
         protected Layer(Shape[] inputShapes, string name = null)
         {
-            AssertNotNull(() => inputShapes);
+            AssertNotNull("Null input shapes",() => inputShapes);
             foreach (var inputShape in inputShapes)
-                AssertNotNull(() => inputShape);
+                AssertNotNull("Null input shape", () => inputShape);
             Name = name;
             InputShapes = inputShapes.ToArray();
         }
@@ -31,17 +32,17 @@ namespace LillyScan.Backend.AI.Layers
 
         public abstract Shape[] OnGetOutputShape(Shape[] inputShapes);
 
-        protected void Assert(Expression<Func<bool>> condition)
+        protected void Assert(string message, bool condition)
         {
-            if (!condition.Compile()())
-                throw new LayerAssertionFailedException(condition);
+            if(!condition)
+                throw new LayerAssertionFailedException(message);            
         }
 
-        protected void Assert(params Expression<Func<bool>>[] conditions) => conditions.ForEach(Assert);      
-        protected void AssertNotNull<T>(Expression<Func<T>> expr)
+        protected void Assert(string message, params bool[] conditions) => conditions.ForEach(_ => Assert(message, _));
+        protected void AssertNotNull<T>(string message, Func<T> expr)
         {
-            if (expr.Compile() == null)
-                throw new ArgumentNullException($"Expression was null: {expr}");
+            if (expr() == null)
+                throw new ArgumentNullException($"Expression was null: {message}");
         }
 
         void ValidateInputShapes(Shape[] inputShapes)
@@ -58,10 +59,36 @@ namespace LillyScan.Backend.AI.Layers
 
         protected virtual void OnValidateInputShapes(Shape[] inputShapes) { }
 
+        public static int X = -1;
+
         public Tensor<float>[] Call(params Tensor<float>[] inputs)
         {            
             ValidateInputShapes(inputs.Select(_=>_.Shape).ToArray());            
-            return OnCall(inputs);
+            var result = OnCall(inputs);
+
+            foreach(var r in result)
+            {
+                for(int i=0;i< r.Buffer.Length;i++)
+                {
+                    if (float.IsNaN(r.Buffer[i]))
+                        throw new InvalidOperationException($"Outputs NaN: {this}");
+                }
+            }
+
+            if (X >= 0 && GetType() != typeof(LSTMCell)) 
+            {
+                using(var f=File.OpenWrite($@"D:\anu3\proiect_licenta\app\LillyScan\LillyScan\bin\Debug\cc\L\{X++}_{GetType().Name}.txt"))
+                using(var w=new StreamWriter(f))
+                {
+                    w.WriteLine(Name);
+                    foreach (var r in result)
+                    {
+                        w.WriteLine($"[{r.Buffer.Buffer.JoinToString(", ")}]");                        
+                    }
+                }                
+            }
+
+            return result;
         }
 
         public Shape[] GetOutputShapes(params Shape[] inputShapes)

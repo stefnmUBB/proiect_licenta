@@ -73,7 +73,7 @@ namespace LillyScan.Backend.AI.Layers
 
         private Tensor<float> SolveSingleMap(Tensor<float> input) 
         {
-            Assert(() => input.Rank == 3); // shape (h,w,c)
+            Assert("Invalid Pooling2D sample rank", input.Rank == 3); // shape (h,w,c)
             var shape = input.Shape;
 
             switch (Padding)
@@ -143,7 +143,7 @@ namespace LillyScan.Backend.AI.Layers
             base.OnValidateInputShapes(inputShapes);
             var shape = inputShapes[0];
             if (Padding == Padding.Valid)
-                Assert(() => shape[1] >= PoolSize.Rows, () => shape[2] >= PoolSize.Cols);
+                Assert("Invalid Pooling2D input shape", shape[1] >= PoolSize.Rows, shape[2] >= PoolSize.Cols);
         }
     }
 }

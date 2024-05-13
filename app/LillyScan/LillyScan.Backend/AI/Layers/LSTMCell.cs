@@ -2,6 +2,7 @@
 using LillyScan.Backend.Math;
 using LillyScan.Backend.Utils;
 using System;
+using System.IO;
 using System.Linq;
 
 namespace LillyScan.Backend.AI.Layers
@@ -40,28 +41,39 @@ namespace LillyScan.Backend.AI.Layers
 
         public override Shape[] OnGetOutputShape(Shape[] inputShapes) => new[] { HidddenShape, HidddenShape }; // c,h        
 
+        static int Q = 0;
+
         protected override Tensor<float>[] OnCall(Tensor<float>[] inputs)
         {
             (var c, var h, var x) = (inputs[0], inputs[1], inputs[2]);
             c = c.Reshape(1 + c.Shape);
-            h = c.Reshape(1 + h.Shape);
-            x = x.Reshape(1 + x.Shape);
+            h = h.Reshape(1 + h.Shape);
+            x = x.Reshape(1 + x.Shape);         
 
             var W = Context.GetWeight("W");
             var U = Context.GetWeight("U");
+            var t = x.MatMul(W).Add(h.MatMul(U));            
 
-            var t = x.MatMul(W).Add(h.MatMul(U));
-            if (UseBias)
-                t = t.Add(Context.GetWeight("B"));
-
-            var ft = RecurrentActivation.Call(t[null, new IndexAccessor(0)]);
-            var it = RecurrentActivation.Call(t[null, new IndexAccessor(1)]);
-            var ot = RecurrentActivation.Call(t[null, new IndexAccessor(2)]);
-            var ctt = Activation.Call(t[null, new IndexAccessor(3)]);
+            //Console.WriteLine($"(t, b)= {(t.Shape, Context.GetWeight("B").Shape)}");
+            if (UseBias) t = t.Add(Context.GetWeight("B"));            
+            t = t.Reshape((t.Shape[0], 4, Units));
+            var it = RecurrentActivation.Call(t[null, new IndexAccessor(0)]);
+            var ft = RecurrentActivation.Call(t[null, new IndexAccessor(1)]);
+            var ctt = Activation.Call(t[null, new IndexAccessor(2)]);
+            var ot = RecurrentActivation.Call(t[null, new IndexAccessor(3)]);            
 
             var ct = ft.Multiply(c).Add(it.Multiply(ctt));
-            ct = Activation.Call(ct);
-            var ht = ot.Multiply(ct);
+            //ct = ct.ClipByValue(-3,3);
+            //if (ct.Buffer.Any(_ => _ < -3 || _ > 3))
+                //throw new InvalidOperationException("Clip needed");
+
+            var ht = ot.Multiply(Activation.Call(ct));
+
+            using (var f = File.CreateText($"cc\\T\\{Q++}.txt"))
+            {
+                ht.Print("h", f);
+                ct.Print("c", f);
+            }
 
             return new[] { ct.Reshape(Units), ht.Reshape(Units) };
         }
@@ -69,24 +81,24 @@ namespace LillyScan.Backend.AI.Layers
         protected override void OnValidateInputShapes(Shape[] inputShapes)
         {
             base.OnValidateInputShapes(inputShapes);
-            Assert(() => InputShapes.Length == 3);
+            Assert("LSTMCell: InputShapes.Length == 3", InputShapes.Length == 3);
             (var h, var c, var x) = (inputShapes[0], inputShapes[1], inputShapes[2]);
-            Assert(() => h.Length == 1, () => c.Length == 1, () => x.Length == 1);            
-            Assert(() => h.SequenceEqual(c));
+            Assert("LSTMCell: h.Length == 1 && c.Length == 1 && x.Length == 1", h.Length == 1, c.Length == 1, x.Length == 1);
+            Assert("LSTMCell: h.SequenceEqual(c)", h.SequenceEqual(c));
         }
 
         public override void LoadWeights(Tensor<float>[] weights) 
         {
-            Assert(() => weights.Length == (UseBias ? 3 : 2));
-            Assert(() => WShape.Equals(weights[0].Shape));
-            Assert(() => UShape.Equals(weights[1].Shape));
+            Assert("LSTMCell: weights.Length == (UseBias ? 3 : 2)", weights.Length == (UseBias ? 3 : 2));
+            Assert("LSTMCell: WShape.Equals(weights[0].Shape)", WShape.Equals(weights[0].Shape));
+            Assert("LSTMCell: UShape.Equals(weights[1].Shape)", UShape.Equals(weights[1].Shape));
 
             Context.Weights["W"] = weights[0];
             Context.Weights["U"] = weights[1];
 
             if (UseBias)
             {
-                Assert(() => BiasShape.Equals(weights[2].Shape));
+                Assert("LSTMCell: BiasShape.Equals(weights[2].Shape)", BiasShape.Equals(weights[2].Shape));
                 Context.Weights["B"] = weights[2];
             }
         }

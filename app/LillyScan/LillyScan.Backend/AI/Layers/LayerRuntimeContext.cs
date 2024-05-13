@@ -7,7 +7,7 @@ namespace LillyScan.Backend.AI.Layers
 {
     public class LayerRuntimeContext
     {
-        public Dictionary<string, Tensor<float>> Weights { get; } = new Dictionary<string, Tensor<float>>();
+        public Dictionary<string, Tensor<float>> Weights { get; } = new Dictionary<string, Tensor<float>>();        
 
         public Tensor<float> GetWeight(string name, Shape expectedShape=null, bool throwWhenNotFound=true)
         {

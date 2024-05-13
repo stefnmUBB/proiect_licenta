@@ -3,12 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace LillyScan.Backend.Utils
 {
     public class ImmutableArray<T> : IEnumerable<T>
     {
-        internal readonly T[] Buffer;        
+        public readonly T[] Buffer;        
 
         public ImmutableArray(T[] buffer)
         {
@@ -24,12 +25,8 @@ namespace LillyScan.Backend.Utils
 
         public T this[int index]
         {
-            get
-            {
-                if (index < 0 || index >= Buffer.Length)
-                    throw new IndexOutOfRangeException($"Accessing index {index} of array with length  {Buffer.Length}");
-                return Buffer[index];
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Buffer[index];            
         }
 
         public int Length => Buffer.Length;

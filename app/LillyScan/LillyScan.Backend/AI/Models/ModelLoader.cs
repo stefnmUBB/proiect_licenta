@@ -272,8 +272,9 @@ namespace LillyScan.Backend.AI.Models
 
 
         private static void BuildLayers(LayerInfo[] layers, Dictionary<string, string[]> inputFlow, LayerInfo[] _outputs,
-            out Layer[] inputs, out Layer[] outputs, out Dictionary<Layer, Layer[]> layerInputs)
+            out Layer[] inputs, out Layer[] outputs, out Dictionary<Layer, Layer[]> layerInputs, bool verbose = false)
         {
+            var log = verbose ? Console.Out : null;
             var solvedLayers = new Dictionary<LayerInfo, Layer>();
             var queue = new Queue<LayerInfo>(layers.ToArray());
             var _inputs = layers.Where(li => li.Type == "InputLayer")
@@ -283,23 +284,24 @@ namespace LillyScan.Backend.AI.Models
             while (queue.Count > 0)
             {
                 var li = queue.Dequeue();
-                Console.WriteLine($"Dequeued {li.Name}");
+                log?.WriteLine($"Dequeued {li.Name}");
                 if (solvedLayers.ContainsKey(li))
                     continue;
                 if (li.Inputs.Any(_ => !solvedLayers.ContainsKey(_)))
                 {
-                    Console.WriteLine($"Enqueued {li.Name}");
+                    log?.WriteLine($"Enqueued {li.Name}");
                     queue.Enqueue(li);
                     continue;
                 }
                 var lInputs = li.Inputs.Select(_ => solvedLayers[_]).ToArray();
                 var inputShapes = lInputs.SelectMany(_ => _.GetOutputShapes()).ToArray();
-                inputShapes.DeepPrint();
+                if (verbose)
+                    inputShapes.DeepPrint();
                 var layer = li.ToLayer(inputShapes);
                 _layerInputs[layer] = lInputs;
                 solvedLayers[li] = layer;
                 //Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"Layer {layer} outputs {layer.GetOutputShapes().JoinToString(", ")}");
+                log?.WriteLine($"Layer {layer} outputs {layer.GetOutputShapes().JoinToString(", ")}");
                 //Console.ForegroundColor = ConsoleColor.White;
             }
 
@@ -308,16 +310,16 @@ namespace LillyScan.Backend.AI.Models
             layerInputs = _layerInputs;
         }
 
-        private static void LoadFromStream(Stream stream, out Layer[] inputs, out Layer[] outputs, out Dictionary<Layer, Layer[]> layerInputs)
+        private static void LoadFromStream(Stream stream, out Layer[] inputs, out Layer[] outputs, out Dictionary<Layer, Layer[]> layerInputs, bool verbose = false)
         {
             LoadLayerInfosFromStream(stream, out var layers, out var inputFlow, out var _outputs);
-            BuildLayers(layers, inputFlow, _outputs, out inputs, out outputs, out layerInputs);            
+            BuildLayers(layers, inputFlow, _outputs, out inputs, out outputs, out layerInputs, verbose);            
         }
 
-        private static void LoadFromBinary(BinaryReader br, out Layer[] inputs, out Layer[] outputs, out Dictionary<Layer, Layer[]> layerInputs)
+        private static void LoadFromBinary(BinaryReader br, out Layer[] inputs, out Layer[] outputs, out Dictionary<Layer, Layer[]> layerInputs, bool verbose = false)
         {
-            LoadLayerInfosFromBinary(br, out var layers, out var inputFlow, out var _outputs);            
-            BuildLayers(layers, inputFlow, _outputs, out inputs, out outputs, out layerInputs);
+            LoadLayerInfosFromBinary(br, out var layers, out var inputFlow, out var _outputs);   
+            BuildLayers(layers, inputFlow, _outputs, out inputs, out outputs, out layerInputs, verbose);
         }
 
         public static Model LoadFromStream(Stream stream)
@@ -332,20 +334,20 @@ namespace LillyScan.Backend.AI.Models
             {
                 return LoadFromStream(ms);
             }
-        }  
+        }
 
-        public static Model LoadFromBinary(BinaryReader br)
+        public static Model LoadFromBinary(BinaryReader br, bool verbose = false)
         {
-            LoadFromBinary(br, out var inputs, out var outputs, out var layerInputs);
+            LoadFromBinary(br, out var inputs, out var outputs, out var layerInputs, verbose);
             return new Model(inputs, outputs, layerInputs);
         }
 
 
-        public static Model LoadFromBytes(byte[] bytes)
+        public static Model LoadFromBytes(byte[] bytes, bool verbose = false)
         {
             using (var ms = new MemoryStream(bytes))
             using (var br = new BinaryReader(ms))
-                return LoadFromBinary(br);
+                return LoadFromBinary(br, verbose);
         }
     }
 }

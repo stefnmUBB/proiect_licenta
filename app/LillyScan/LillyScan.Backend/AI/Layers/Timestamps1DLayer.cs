@@ -13,8 +13,8 @@ namespace LillyScan.Backend.AI.Layers
         protected override void OnValidateInputShapes(Shape[] inputShapes)
         {
             base.OnValidateInputShapes(inputShapes);
-            Assert(() => inputShapes.Length == 1);
-            Assert(() => inputShapes[0].Length==3);
+            Assert("Timestamps1DLayer: inputShapes.Length == 1", inputShapes.Length == 1);
+            Assert("Timestamps1DLayer: inputShapes[0].Length==3", inputShapes[0].Length==3);
         }
     }
 }
