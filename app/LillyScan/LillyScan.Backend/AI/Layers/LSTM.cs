@@ -58,28 +58,9 @@ namespace LillyScan.Backend.AI.Layers
             var bytes = BitConverter.GetBytes(f);
             var i = BitConverter.ToInt32(bytes, 0);
             return i.ToString("X8");
-        }
-
-        static int K = 0;
-        static int Q = 0;
+        }        
         protected override Tensor<float>[] OnCall(Tensor<float>[] inputs)
-        {
-            using (var f = File.CreateText($"D:\\anu3\\proiect_licenta\\app\\LillyScan\\LillyScan\\bin\\Debug\\cc\\v_{Q++}.txt")) 
-            {
-                var w = Cell.Context.Weights["W"].Buffer.Buffer;
-                var u = Cell.Context.Weights["U"].Buffer.Buffer;
-                var b = Cell.Context.Weights["B"].Buffer.Buffer;
-                f.WriteLine($"# {Cell.Context.Weights["W"].Shape}");
-                //f.WriteLine($"W=[{w.JoinToString(", ")}]");
-                f.WriteLine($"W=[{w.Select(_=>$"\"{ToHexString(_)}\"").JoinToString(", ")}]");
-                f.WriteLine($"# {Cell.Context.Weights["U"].Shape}");
-                //f.WriteLine($"U=[{u.JoinToString(", ")}]");
-                f.WriteLine($"U=[{u.Select(_ => $"\"{ToHexString(_)}\"").JoinToString(", ")}]");
-                f.WriteLine($"# {Cell.Context.Weights["B"].Shape}");
-                //f.WriteLine($"B=[{b.JoinToString(", ")}]");
-                f.WriteLine($"B=[{b.Select(_ => $"\"{ToHexString(_)}\"").JoinToString(", ")}]");
-            }
-
+        {            
             var input = inputs[0];            
             var output = input.SubDimMap(t =>
             {
@@ -88,14 +69,8 @@ namespace LillyScan.Backend.AI.Layers
                 var h = Tensors.Zeros<float>(Units); 
                 
                 for (int i = 0; i < t.Shape[0]; i++)
-                {
-                    //c = Tensors.Zeros<float>(Units);
-                    //h = Tensors.Zeros<float>(Units);
-                    var x = t.GetFromBatches(new[] { i });
-                    using (var f = File.CreateText($@"D:\anu3\proiect_licenta\app\LillyScan\LillyScan\bin\Debug\cc\D\{K++}.txt"))
-                    {
-                        x.Print($"Input {i}", f);
-                    }                    
+                {                    
+                    var x = t.GetFromBatches(new[] { i });                    
                     var cellOutput = Cell.Call(c, h, x);
                     c = cellOutput[0];
                     h = cellOutput[1];

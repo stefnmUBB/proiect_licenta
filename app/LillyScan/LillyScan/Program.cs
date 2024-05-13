@@ -32,75 +32,7 @@ namespace LillyScan
         public static Backend.HTR.IHTREngine HTR = new BuiltInHTREngine();
 
         static void Run()
-        {
-            /*var buf1 = new float[14*32];
-            var buf2 = new float[8 * 32];
-            var buf3 = new float[32];
-            var buf4 = new float[14];
-            var buf5 = new float[8];
-            var buf6 = new float[8];
-
-            var r = new Random();           
-            buf1 = new float[] { 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1 };
-            buf2 = new float[] { 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1 };
-            buf3 = new float[] { 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0 };
-            buf4 = new float[] { 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1 };
-            buf5 = new float[] { 1, 0, 0, 0, 1, 0, 0, 1 };
-            buf6 = new float[] { 1, 1, 1, 1, 0, 1, 0, 1 };
-
-
-            var W = new Tensor<float>((14, 32), buf1);
-            var U = new Tensor<float>((8, 32), buf2);
-            var B = new Tensor<float>((32), buf3);
-            var X = new Tensor<float>((14), buf4);
-            var H = new Tensor<float>((8), buf5);
-            var C = new Tensor<float>((8), buf6);
-            
-            using(var f=File.Create("cc\\w.txt"))
-            {
-                using(var w=new StreamWriter(f))
-                {
-                    w.WriteLine($"W=[{buf1.JoinToString(", ")}]");
-                    w.WriteLine($"U=[{buf2.JoinToString(", ")}]");
-                    w.WriteLine($"B=[{buf3.JoinToString(", ")}]");
-                    w.WriteLine($"X=[{buf4.JoinToString(", ")}]");
-                    w.WriteLine($"H=[{buf5.JoinToString(", ")}]");
-                    w.WriteLine($"C=[{buf6.JoinToString(", ")}]");
-                }
-            }
-
-            var cell = new LSTMCell(14, 8, useBias: true);
-            cell.Context.Weights["W"] = W;
-            cell.Context.Weights["U"] = U;
-            cell.Context.Weights["B"] = B;
-
-            var R = cell.Call(new[] { C, H, X });
-            R[1].Print();
-            R[0].Print();            
-
-
-            return;*/
-
-            /*var bff = new float[] { 1, -1, 1, -1, 1, -1, 2, -2, 2, -2, 2, -2, 3, -3, 3, -3, 3, -3 };
-            var t = new Tensor<float>((3, 2, 3), bff);
-            t.Print();
-            t[null, new IndexAccessor(1)].Print();
-
-            return;*/
-            /*Measure(() =>
-            {
-                int B = 1, N = 128, M = 1, C = 1024, F = 82;
-                int K1 = 1, K2 = 1;
-
-                var t = Tensors.Ones<float>((B, N, M, C));
-                var k = Tensors.Ones<float>((K1, K2, C, F));
-                var r = new float[B * N * M * F];
-                UnsafeOperations.Conv2D(t.Buffer.Buffer, k.Buffer.Buffer, r, B, N, M, C, K1, K2, F);
-                new Tensor<float>((B, N, M, F), r).Print();
-                //Console.WriteLine(r.JoinToString(", "));
-            });
-           
-            return;*/
+        {            
             var imagePath = @"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\IAM_0\322_in.png";
             //var imagePath = @"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\Compuneri\51_in.png";
             //var imagePath = @"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\IAM\5_in.png";

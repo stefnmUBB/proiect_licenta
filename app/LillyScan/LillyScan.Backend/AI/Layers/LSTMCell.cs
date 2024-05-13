@@ -39,9 +39,7 @@ namespace LillyScan.Backend.AI.Layers
                 Context.Weights["bias"] = Tensors.Ones<float>(BiasShape);
         }
 
-        public override Shape[] OnGetOutputShape(Shape[] inputShapes) => new[] { HidddenShape, HidddenShape }; // c,h        
-
-        static int Q = 0;
+        public override Shape[] OnGetOutputShape(Shape[] inputShapes) => new[] { HidddenShape, HidddenShape }; // c,h                
 
         protected override Tensor<float>[] OnCall(Tensor<float>[] inputs)
         {
@@ -53,27 +51,15 @@ namespace LillyScan.Backend.AI.Layers
             var W = Context.GetWeight("W");
             var U = Context.GetWeight("U");
             var t = x.MatMul(W).Add(h.MatMul(U));            
-
-            //Console.WriteLine($"(t, b)= {(t.Shape, Context.GetWeight("B").Shape)}");
+            
             if (UseBias) t = t.Add(Context.GetWeight("B"));            
             t = t.Reshape((t.Shape[0], 4, Units));
             var it = RecurrentActivation.Call(t[null, new IndexAccessor(0)]);
             var ft = RecurrentActivation.Call(t[null, new IndexAccessor(1)]);
             var ctt = Activation.Call(t[null, new IndexAccessor(2)]);
             var ot = RecurrentActivation.Call(t[null, new IndexAccessor(3)]);            
-
-            var ct = ft.Multiply(c).Add(it.Multiply(ctt));
-            //ct = ct.ClipByValue(-3,3);
-            //if (ct.Buffer.Any(_ => _ < -3 || _ > 3))
-                //throw new InvalidOperationException("Clip needed");
-
-            var ht = ot.Multiply(Activation.Call(ct));
-
-            using (var f = File.CreateText($"cc\\T\\{Q++}.txt"))
-            {
-                ht.Print("h", f);
-                ct.Print("c", f);
-            }
+            var ct = ft.Multiply(c).Add(it.Multiply(ctt));            
+            var ht = ot.Multiply(Activation.Call(ct));            
 
             return new[] { ct.Reshape(Units), ht.Reshape(Units) };
         }
