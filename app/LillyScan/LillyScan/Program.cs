@@ -50,12 +50,12 @@ namespace LillyScan
             Action<RawBitmap, string> action = (b, c) => b.Save($"cc\\predCC{q++}_{c}.png");
             (HTR as BuiltInHTREngine).CCAction = action;
 
-            using (var bmp = RawBitmapIO.FromFile(@"D:\anu3\proiect_licenta\app\LillyScan\LillyScan\bin\Debug\cc\IAM1.png")) 
+            /*using (var bmp = RawBitmapIO.FromFile(@"D:\anu3\proiect_licenta\app\LillyScan\LillyScan\bin\Debug\cc\IAM1.png")) 
             {
                 Layer.X = 0;
                 HTR.PredictTextLine(bmp);
             }
-            return;
+            return;*/
 
             //var task = Task.Run(() =>
             {

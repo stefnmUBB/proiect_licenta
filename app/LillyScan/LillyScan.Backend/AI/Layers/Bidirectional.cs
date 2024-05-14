@@ -51,13 +51,14 @@ namespace LillyScan.Backend.AI.Layers
             var i0 = LSTMForward.Call(inputs)[0];
             var i1 = LSTMBackward.Call(reversed)[0];
 
-            var revOut = new float[B * T * F];
+            var U = LSTMBackward.Units;
+            var revOut = new float[B * T * U];
             for (int b = 0; b < B; b++)
             {
                 for (int t = 0; t < T; t++)
-                    for (int f = 0; f < F; f++)
+                    for (int u = 0; u < U; u++)
                     {
-                        revOut[b * T * F + t * F + f] = i1.Buffer[b * T * F + (T - 1 - t) * F + f];
+                        revOut[b * T * U + t * U + u] = i1.Buffer[b * T * U + (T - 1 - t) * U + u];
                     }
             }
             i1 = new Tensor<float>(i1.Shape, revOut);
