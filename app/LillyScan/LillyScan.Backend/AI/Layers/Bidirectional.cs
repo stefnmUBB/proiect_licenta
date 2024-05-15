@@ -3,6 +3,7 @@ using LillyScan.Backend.Math;
 using LillyScan.Backend.Parsers;
 using LillyScan.Backend.Types;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace LillyScan.Backend.AI.Layers
@@ -85,8 +86,7 @@ namespace LillyScan.Backend.AI.Layers
         }
 
         public override void LoadWeights(Tensor<float>[] weights)
-        {
-            Console.WriteLine($"BiLSTM got weights {weights.SelectShapes().JoinToString(", ")}");
+        {            
             Assert("Invalid weights length", weights.Length == 6);
             LSTMForward.LoadWeights(weights.Take(3).ToArray());
             LSTMBackward.LoadWeights(weights.Skip(3).ToArray());

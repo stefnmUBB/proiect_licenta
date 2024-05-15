@@ -1,5 +1,6 @@
 ﻿using LillyScan.Backend.Imaging;
 using LillyScan.Backend.Parallelization;
+using LillyScan.Backend.Utils;
 using LillyScan.FrontendXamarin.Models;
 using LillyScan.FrontendXamarin.Utils;
 using System;
@@ -63,9 +64,12 @@ namespace LillyScan.FrontendXamarin.Views.Pages
             {
                 MaskPreviewCancellationTokenSource.Set(cancellationTokenSource);
                 var cancellationToken = MaskPreviewCancellationTokenSource.Get().Token;
+                var pm = new ProgressMonitor(cancellationToken);
                 try
                 {
-                    segmentedBitmap = HTR.Engine.SelectTiled64(rawBitmap, parallel: true, preview: true, cancellationToken);
+                    //segmentedBitmap = HTR.Engine.SelectTiled64(rawBitmap, parallel: true, preview: true, cancellationToken);
+                    segmentedBitmap = HTR.Engine.SegmentTiles64(rawBitmap, Backend.HTR.SegmentationType.Preview,
+                        parallel: true, progressMonitor: pm);
                 }
                 catch (OperationCanceledException e)
                 {

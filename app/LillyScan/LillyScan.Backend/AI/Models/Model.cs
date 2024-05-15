@@ -26,7 +26,7 @@ namespace LillyScan.Backend.AI.Models
             InputFlow = inputFlow;
         }
 
-        public Tensor<float>[] Call(Tensor<float>[] inputs, bool verbose=true, ProgressMonitor progressMonitor = null)
+        public Tensor<float>[] Call(Tensor<float>[] inputs, bool verbose = true, ProgressMonitor progressMonitor = null)
         {
             var log = verbose ? Console.Out : null;
             var solvedValues = new Dictionary<Layer, Tensor<float>[]>();

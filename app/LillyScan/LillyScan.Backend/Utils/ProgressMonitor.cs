@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
@@ -53,7 +56,19 @@ namespace LillyScan.Backend.Utils
             lastTask.CurrentProgress = lastTask.FinishedSteps * 100 / lastTask.ExpectedSteps;
             TriggerProgressChanged();
             if (throwIfCancelled)
-                CancellationToken?.ThrowIfCancellationRequested();
+            {
+                try
+                {
+                    CancellationToken?.ThrowIfCancellationRequested();
+                }
+                catch(OperationCanceledException e)
+                {
+                    Debug.WriteLine("At task: " + Tasks.Select(_ => (_.Name, _.FinishedSteps)).JoinToString(", "));
+                    Debug.WriteLine(e.Message);
+                    Debug.WriteLine(e.StackTrace);
+                    throw e;
+                }
+            }
         }
 
         public bool TaskCanceled => CancellationToken?.IsCancellationRequested ?? false;

@@ -75,7 +75,7 @@ namespace LillyScan.Backend.AI.Layers
                 }
             }
 
-            if (X >= 0 && GetType() != typeof(LSTMCell) && GetType() != typeof(LSTM)) 
+            /*if (X >= 0 && GetType() != typeof(LSTMCell) && GetType() != typeof(LSTM)) 
             {
                 using(var f=File.CreateText($@"D:\anu3\proiect_licenta\app\LillyScan\LillyScan\bin\Debug\cc\L2\{X++}.txt"))
                 //using(var f=File.CreateText($@"D:\anu3\proiect_licenta\app\LillyScan\LillyScan\bin\Debug\cc\L\{X++}_{GetType().Name}.txt"))                
@@ -86,7 +86,7 @@ namespace LillyScan.Backend.AI.Layers
                         f.WriteLine($"[{r.Buffer.Buffer.JoinToString(", ")}]");
                     }
                 }                
-            }
+            }*/
 
             return result;
         }

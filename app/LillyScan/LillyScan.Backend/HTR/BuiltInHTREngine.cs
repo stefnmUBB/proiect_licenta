@@ -89,7 +89,7 @@ namespace LillyScan.Backend.HTR
         {
             if(parallel && progressMonitor!=null)
             {
-                progressMonitor = null;
+                progressMonitor = new ProgressMonitor(progressMonitor.CancellationToken);                
                 Debug.WriteLine("Progress monitor is not available in parallel mode. It has been disabled.");
             }
             var originalWidth = bitmap.Width;
@@ -99,7 +99,7 @@ namespace LillyScan.Backend.HTR
 
             Model segmentationModel = null;
 
-            RawBitmap img = null;
+            RawBitmap img;
 
             if ((segmentationType & SegmentationType.Padded) == 0)
             {                
@@ -135,7 +135,7 @@ namespace LillyScan.Backend.HTR
         {
             progressMonitor?.PushTask(taskName ?? nameof(SegmentLines), 3);
 
-            var normalSegm = SegmentTiles64(bitmap, SegmentationType.Normal, parallel: false, resizeToOriginal, progressMonitor, "NormalSegm");
+            var normalSegm = SegmentTiles64(bitmap, SegmentationType.Normal, parallel: false, resizeToOriginal, progressMonitor, "NormalSegm");            
             progressMonitor?.AdvanceOneStep();
             var linearSegm = SegmentTiles64(bitmap, SegmentationType.PaddedLinear, parallel: false, resizeToOriginal, progressMonitor, "LinearSegm");
             progressMonitor?.AdvanceOneStep();
@@ -267,7 +267,7 @@ namespace LillyScan.Backend.HTR
             if (opstatus == false)
             {
                 for (int i = 0; i < tiles.Length; i++)
-                    tiles[i].Dispose();
+                    tiles[i].Dispose();                
                 progressMonitor?.CancellationToken?.ThrowIfCancellationRequested();
                 return null;
             }
@@ -288,7 +288,7 @@ namespace LillyScan.Backend.HTR
             if (opstatus == false)
             {
                 for (int i = 0; i < tiles.Length; i++)
-                    tiles[i].Dispose();
+                    tiles[i].Dispose();                
                 progressMonitor?.CancellationToken?.ThrowIfCancellationRequested();
                 return null;
             }
@@ -300,14 +300,14 @@ namespace LillyScan.Backend.HTR
         private static bool ProcessTilesSegmentationInPlaceParallel(RawBitmap[] tiles, Model segmentationModel, ProgressMonitor progressMonitor = null)
         {
             Atomic<bool> canceled = new Atomic<bool>(false);            
-            Parallel.ForEach(Partitioner.Create(0, tiles.Length, 6), range =>
+            Parallel.ForEach(Partitioner.Create(0, tiles.Length, 4), range =>
             {
                 for (int i = range.Item1; i < range.Item2; i++)
                 {
                     SegmentTile64(segmentationModel, tiles[i], progressMonitor);
-                    progressMonitor?.AdvanceOneStep();
-                    Debug.WriteLine($"AdvancedOne");
-                    if (progressMonitor?.TaskCanceled ?? false)
+                    progressMonitor?.AdvanceOneStep(throwIfCancelled: false);
+                    //Debug.WriteLine($"AdvancedOne");
+                    if (progressMonitor?.TaskCanceled ?? false) 
                     {
                         canceled.Set(false);
                         break;
@@ -323,7 +323,7 @@ namespace LillyScan.Backend.HTR
             for (int i = 0; i < tiles.Length; i++)
             {
                 SegmentTile64(segmentationModel, tiles[i], progressMonitor);                                
-                progressMonitor?.AdvanceOneStep();
+                progressMonitor?.AdvanceOneStep(throwIfCancelled: false);
                 Debug.WriteLine($"AdvancedOne");
                 if (progressMonitor?.TaskCanceled ?? false)
                 {
@@ -337,12 +337,12 @@ namespace LillyScan.Backend.HTR
         private static bool ProcessTilesSegmentation80_64Parallel(RawBitmap[] tiles, Model segmentationModel, ProgressMonitor progressMonitor = null)
         {
             Atomic<bool> canceled = new Atomic<bool>(false);
-            Parallel.ForEach(Partitioner.Create(0, tiles.Length, 6), range =>
+            Parallel.ForEach(Partitioner.Create(0, tiles.Length, 4), range =>
             {
                 for (int i = range.Item1; i < range.Item2; i++)
                 {
                     SegmentTile80_64(segmentationModel, ref tiles[i], progressMonitor);                    
-                    progressMonitor?.AdvanceOneStep();
+                    progressMonitor?.AdvanceOneStep(throwIfCancelled: false);
                     Debug.WriteLine($"AdvancedOne");
                     if (progressMonitor?.TaskCanceled ?? false)
                     {
@@ -361,7 +361,7 @@ namespace LillyScan.Backend.HTR
             for (int i = 0; i < tiles.Length; i++)
             {
                 SegmentTile80_64(segmentationModel, ref tiles[i], progressMonitor);                
-                progressMonitor?.AdvanceOneStep();
+                progressMonitor?.AdvanceOneStep(throwIfCancelled: false);
                 Debug.WriteLine($"AdvancedOne");
                 if (progressMonitor?.TaskCanceled ?? false)
                 {
@@ -375,16 +375,30 @@ namespace LillyScan.Backend.HTR
         private static void SegmentTile64(Model segmentationModel, RawBitmap tile, ProgressMonitor progressMonitor)
         {
             var input = new[] { new Math.Tensor<float>((1, 64, 64, 1), tile.ToArray()) };
-            var result = segmentationModel.Call(input, progressMonitor: progressMonitor, verbose: false)[0].Buffer.Buffer;
-            tile.InplaceCopyFrom(result);
+            try
+            {
+                var result = segmentationModel.Call(input, progressMonitor: progressMonitor, verbose: false)[0].Buffer.Buffer;                
+                tile.InplaceCopyFrom(result);
+            }
+            catch(OperationCanceledException e)
+            {
+
+            }
         }
 
         private static void SegmentTile80_64(Model segmentationModel, ref RawBitmap tile, ProgressMonitor progressMonitor)
         {
             var input = new[] { new Math.Tensor<float>((1, 80, 80, 1), tile.ToArray()) };
-            var result = segmentationModel.Call(input, progressMonitor: progressMonitor, verbose: false)[0].Buffer.Buffer;
-            tile.Dispose();
-            tile = new RawBitmap(64, 64, 1, result);            
+            try
+            {
+                var result = segmentationModel.Call(input, progressMonitor: progressMonitor, verbose: false)[0].Buffer.Buffer;                
+                tile.Dispose();
+                tile = new RawBitmap(64, 64, 1, result);
+            }
+            catch(OperationCanceledException e)
+            {
+
+            }
         }
 
 

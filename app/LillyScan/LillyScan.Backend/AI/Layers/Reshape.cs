@@ -32,7 +32,7 @@ namespace LillyScan.Backend.AI.Layers
         {
             base.OnValidateInputShapes(inputShapes);
             var itemShape = new Shape(inputShapes[0].Skip(1).ToArray());
-            Console.WriteLine($"{itemShape}, {TargetShape}");
+            //Console.WriteLine($"{itemShape}, {TargetShape}");
             Assert("Invalid Reshape input shape", inputShapes.Length == 1, itemShape.ElementsCount == TargetShape.ElementsCount);
         }
     }

@@ -9,7 +9,7 @@ namespace LillyScan.FrontendXamarin.Views.Pages
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class ProcessingPage : ContentPage
-    {
+    {        
         public ProcessingPage()
         {
             InitializeComponent();
@@ -39,6 +39,20 @@ namespace LillyScan.FrontendXamarin.Views.Pages
         {
             MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//NewCapturePage"));
             return true;            
+        }
+
+        private void LoadFromCaptureBytes(byte[] captureBytes)
+        {
+            var image = ImageSource.FromStream(() => new MemoryStream(captureBytes));
+            MainThread.InvokeOnMainThreadAsync(() => Image.Source = image);
+
+            using(var bitmap = image.ToRawBitmap())
+            {
+                var normSegmentation = HTR.Engine;
+
+
+            }
+
         }
 
     }
