@@ -1,0 +1,12 @@
+﻿.InputValidateButton {        
+    background: white;
+    font-weight:bold;
+}
+
+#InputRetryButton {
+    color: red;        
+}
+
+#InputConfirmButton {
+    color: green;
+}

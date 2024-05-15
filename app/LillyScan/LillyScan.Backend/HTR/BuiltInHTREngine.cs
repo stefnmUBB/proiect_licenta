@@ -123,7 +123,7 @@ namespace LillyScan.Backend.HTR
 
             if (resizeToOriginal)
                 img = img.Resize(originalWidth, originalHeight, disposeOriginal: true);
-            //img = img.Threshold(inPlace: true);
+            img = img.Threshold(inPlace: true);
 
             progressMonitor?.PopTask();
             return img;

@@ -2,9 +2,46 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="LillyScan.FrontendXamarin.Views.Pages.ProcessingPage">
+    <ContentPage.Resources>
+        <StyleSheet Source="/Styles/ProcessingPageStyles.css"/>
+        <ResourceDictionary>
+            <EllipseGeometry x:Key="CircleClipMask" Center="40,40" RadiusX="40" RadiusY="40"/>
+        </ResourceDictionary>
+
+        <Style TargetType="Button" x:Key="InputConfirmButtonStyle">
+            <Style.Triggers>
+                <Trigger TargetType="Button" Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="Green"/>
+                    <Setter Property="TextColor" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="Button" x:Key="InputRetryButtonStyle">
+            <Style.Triggers>
+                <Trigger TargetType="Button" Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="Red"/>
+                    <Setter Property="TextColor" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+
+    </ContentPage.Resources>
+
     <ContentPage.Content>
-        <Grid>
-            <Image x:Name="Image" Aspect="AspectFit"></Image>
+        <Grid RowDefinitions="*,Auto">
+            <Image x:Name="Image" Aspect="AspectFit" Grid.Row="0"></Image>
+            <Image x:Name="MaskImage" Aspect="AspectFit" Grid.Column="0"></Image>
+            <StackLayout Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="Center">
+                <Button Text="✓" FontSize="32" Margin="20" x:Name="InputConfirmButton" StyleClass="InputValidateButton"      
+                        Style="{StaticResource Key=InputConfirmButtonStyle}"
+                        Clip="{StaticResource Key=CircleClipMask}" WidthRequest="80" HeightRequest="80"/>
+                <Button Text="↺" FontSize="32" Margin="20" x:Name="InputRetryButton" StyleClass="InputValidateButton"
+                        Style="{StaticResource Key=InputRetryButtonStyle}"
+                        Clip="{StaticResource Key=CircleClipMask}" WidthRequest="80" HeightRequest="80"/>
+            </StackLayout>
+
         </Grid>
     </ContentPage.Content>
 </ContentPage>

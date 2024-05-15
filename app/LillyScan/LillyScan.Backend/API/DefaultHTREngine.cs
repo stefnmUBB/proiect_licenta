@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace LillyScan.Backend.API
 {
-    public class DefaultHTREngine : HTREngine
+    /*public class DefaultHTREngine : HTREngine
     {
         private readonly Model SegmentationModel;
         private readonly Model SegmentationModel64;
@@ -40,5 +40,5 @@ namespace LillyScan.Backend.API
             return predicted.Buffer.Buffer.ToArray();
         }      
 
-    }
+    }*/
 }

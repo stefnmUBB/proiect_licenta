@@ -57,15 +57,15 @@ namespace LillyScan.Backend.AI.Layers
             OnValidateInputShapes(inputShapes);
         }
 
-        protected virtual void OnValidateInputShapes(Shape[] inputShapes) { }
-
-        public static int X = -1;
+        protected virtual void OnValidateInputShapes(Shape[] inputShapes) { }        
 
         public Tensor<float>[] Call(params Tensor<float>[] inputs)
-        {            
-            ValidateInputShapes(inputs.Select(_=>_.Shape).ToArray());            
+        {
+#if DEBUG
+            ValidateInputShapes(inputs.Select(_=>_.Shape).ToArray());
+#endif
             var result = OnCall(inputs);
-
+#if DEBUG
             foreach(var r in result)
             {
                 for(int i=0;i< r.Buffer.Length;i++)
@@ -74,17 +74,15 @@ namespace LillyScan.Backend.AI.Layers
                         throw new InvalidOperationException($"Outputs NaN: {this}");
                 }
             }
-
+#endif
             /*if (X >= 0 && GetType() != typeof(LSTMCell) && GetType() != typeof(LSTM)) 
             {
                 using(var f=File.CreateText($@"D:\anu3\proiect_licenta\app\LillyScan\LillyScan\bin\Debug\cc\L2\{X++}.txt"))
                 //using(var f=File.CreateText($@"D:\anu3\proiect_licenta\app\LillyScan\LillyScan\bin\Debug\cc\L\{X++}_{GetType().Name}.txt"))                
                 {
                     f.WriteLine(Name);
-                    foreach (var r in result)
-                    {
-                        f.WriteLine($"[{r.Buffer.Buffer.JoinToString(", ")}]");
-                    }
+                    foreach (var r in result)                    
+                        f.WriteLine($"[{r.Buffer.Buffer.JoinToString(", ")}]");                    
                 }                
             }*/
 

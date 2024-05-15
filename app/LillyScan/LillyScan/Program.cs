@@ -69,7 +69,7 @@ namespace LillyScan
                         linebmp = linebmp.RotateAndCrop((float)-System.Math.Atan2(-mask.LineFit.A, mask.LineFit.B), disposeOriginal: true);
                         linebmp.CheckNaN();
                         //action(linebmp, "");
-                        Layer.X = 0;
+                        //Layer.X = 0;
                         HTR.PredictTextLine(linebmp);
                         linebmp.Dispose();
                         break;
