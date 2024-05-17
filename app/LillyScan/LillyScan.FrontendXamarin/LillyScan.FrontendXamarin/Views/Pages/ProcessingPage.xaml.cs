@@ -22,25 +22,31 @@ namespace LillyScan.FrontendXamarin.Views.Pages
             });
 
             AppState.CaptureBytes.ValueChanged += CaptureBytes_ValueChanged;
+
+            ProcessingState = ProcessingState.Pending;
+
+            InputRetryButton.Clicked += InputRetryButton_Clicked;
+            InputConfirmButton.Clicked += InputConfirmButton_Clicked;
         }
 
-        private ProcessingState pProcessingState = ProcessingState.Pending;
+        private void InputConfirmButton_Clicked(object sender, System.EventArgs e)
+        {
+            ProcessingState = ProcessingState.Running;
+        }
+
+        private void InputRetryButton_Clicked(object sender, System.EventArgs e)
+        {
+            MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//NewCapturePage"));
+        }
+
         public ProcessingState ProcessingState
         {
-            get => pProcessingState;
-            set
-            {
-                switch (pProcessingState = value)
-                {
-                    case ProcessingState.Pending:
-                        break;
-                    case ProcessingState.Running:
-                        break;
-                    case ProcessingState.Done:
-                        break;
-                }
-            }
+            get => (ProcessingState)GetValue(ProcessingStateProperty);
+            set => SetValue(ProcessingStateProperty, value);            
         }
+
+        public static readonly BindableProperty ProcessingStateProperty = BindableProperty
+            .Create(nameof(ProcessingState), typeof(ProcessingState), typeof(ProcessingPage), ProcessingState.Pending);
 
         private void CaptureBytes_ValueChanged(Backend.Utils.Observable<byte[]> observable, byte[] newValue)
         {
