@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LillyScan.FrontendXamarin.Models
+﻿namespace LillyScan.FrontendXamarin.Models
 {
     public class PredictedLine
     {

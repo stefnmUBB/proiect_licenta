@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vws="clr-namespace:LillyScan.FrontendXamarin.Views"
+             x:Class="LillyScan.FrontendXamarin.Views.Controls.PreviewLinePredictionList" Background="Blue">
+    <ContentView.Content>
+        <StackLayout VerticalOptions="StartAndExpand">
+            <Label TextColor="Black">Predicted lines</Label>
+            <ListView x:Name="ListView" Margin="10">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <StackLayout>
+                                <Label Text="{Binding PredictedText}" TextColor="Black"/>
+                            </StackLayout>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackLayout>
+    </ContentView.Content>
+</ContentView>

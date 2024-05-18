@@ -26,12 +26,19 @@ namespace LillyScan.FrontendXamarin.Views.Pages
             ProcessingState = ProcessingState.Pending;
 
             InputRetryButton.Clicked += InputRetryButton_Clicked;
-            InputConfirmButton.Clicked += InputConfirmButton_Clicked;
+            InputConfirmButton.Clicked += InputConfirmButton_Clicked;                        
+        }
+
+        private void SetVerticalViewSplit(double value)
+        {
+            AbsoluteLayout.SetLayoutBounds(PreviewMaskGrid, new Rectangle(0, 0, 1, value));
+            AbsoluteLayout.SetLayoutBounds(PreviewLinePredictionList, new Rectangle(0, 1, 1, 1 - value));
         }
 
         private void InputConfirmButton_Clicked(object sender, System.EventArgs e)
         {
-            ProcessingState = ProcessingState.Running;
+            ProcessingState = ProcessingState.Running;           
+            new Animation((t) => SetVerticalViewSplit(t), 1, 0.3).Commit(this, "SlideViewsAnim", 16, 500);
         }
 
         private void InputRetryButton_Clicked(object sender, System.EventArgs e)
@@ -50,6 +57,8 @@ namespace LillyScan.FrontendXamarin.Views.Pages
 
         private void CaptureBytes_ValueChanged(Backend.Utils.Observable<byte[]> observable, byte[] newValue)
         {
+            MainThread.InvokeOnMainThreadAsync(() => SetVerticalViewSplit(1));
+
             Task.Run(async () =>
             {
                 var captureBytes = newValue;
