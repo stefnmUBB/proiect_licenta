@@ -4,6 +4,7 @@ using LillyScan.Backend.Parsers;
 using LillyScan.Backend.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace LillyScan.Backend.HTR
@@ -16,7 +17,7 @@ namespace LillyScan.Backend.HTR
             for (int j = 0; j < N; j++) result[j] = new List<LocalizedMask>();
             int M = masks.Length;
             float eps = (float)System.Math.Sin(System.Math.PI / (2*N));// * 0.8f;
-
+            
             for(int j=0;j<N;j++)
             {
                 (var vx, var vy) = ((float)System.Math.Cos(j * System.Math.PI / N), (float)System.Math.Sin(j * System.Math.PI / N));
@@ -41,8 +42,10 @@ namespace LillyScan.Backend.HTR
                 foreach (var r in result[j])
                     Console.WriteLine(r.LineFit);
                 var baseVector = ((float)System.Math.Cos(j * System.Math.PI / N), (float)System.Math.Sin(j * System.Math.PI / N));
-                
+
+                Debug.WriteLine("Before FindLines?");
                 var lines = MasksLineSplitter.FindLines(result[j].ToArray(), baseVector);
+                Debug.WriteLine("After FindLines?");
                 lineGroups.Add(lines);
                 Console.WriteLine($"Lines = {lines.Length}");
                 

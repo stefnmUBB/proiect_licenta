@@ -1,7 +1,11 @@
 ﻿using LillyScan.FrontendXamarin.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,18 +19,16 @@ namespace LillyScan.FrontendXamarin.Views.Controls
 	{
 		public PreviewLinePredictionList()
 		{
-			InitializeComponent();		
-
-			for(int i=0;i<3;i++)
-			{
-				Items.Add(new PreviewLinePrediction { PredictedText = $"This is line {i + 1}" });
-            }			
+			InitializeComponent();			
 			ListView.ItemsSource = Items;
+		}		
+		private readonly ObservableCollection<PreviewLinePrediction> Items = new ObservableCollection<PreviewLinePrediction>();
+
+		public void AddItem(PreviewLinePrediction item)
+		{
+			Debug.WriteLine($"[PreviewLinePredictionList] Added item");
+			Items.Add(item);			
 		}
-
-		private IList<PreviewLinePrediction> Items = new List<PreviewLinePrediction>();
-
-
 
 	}
 }

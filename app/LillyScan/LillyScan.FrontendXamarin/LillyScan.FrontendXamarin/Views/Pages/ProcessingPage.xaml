@@ -16,7 +16,7 @@
         <Style TargetType="Button" x:Key="InputValidateButtonStyle">
             <Style.Triggers>
                 <DataTrigger TargetType="{x:Type Button}" Binding="{Binding ProcessingState, Source={x:Reference ContentPage}}" Value="Running">
-                    <Setter Property="IsVisible" Value="True"/>
+                    <Setter Property="IsVisible" Value="False"/>
                 </DataTrigger>
 
                 <DataTrigger TargetType="{x:Type Button}" Binding="{Binding ProcessingState, Source={x:Reference ContentPage}}" Value="Done">
@@ -46,6 +46,23 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <Style TargetType="{x:Type controls:ProgressBar}" x:Key="ProgressBarStyle">
+            <Style.Triggers>
+                <DataTrigger TargetType="{x:Type controls:ProgressBar}" Binding="{Binding ProcessingState, Source={x:Reference ContentPage}}" Value="Running">
+                    <Setter Property="IsVisible" Value="True"/>
+                </DataTrigger>
+
+                <DataTrigger TargetType="{x:Type controls:ProgressBar}" Binding="{Binding ProcessingState, Source={x:Reference ContentPage}}" Value="Done">
+                    <Setter Property="IsVisible" Value="False"/>
+                </DataTrigger>
+
+                <DataTrigger TargetType="{x:Type controls:ProgressBar}" Binding="{Binding ProcessingState, Source={x:Reference ContentPage}}" Value="Pending">
+                    <Setter Property="IsVisible" Value="False"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
     </ContentPage.Resources>
 
     <ContentPage.Content>
@@ -63,6 +80,10 @@
                         Style="{StaticResource Key=InputRetryButtonStyle}"
                         Clip="{StaticResource Key=CircleClipMask}" WidthRequest="80" HeightRequest="80"/>
                 </StackLayout>
+
+                <controls:ProgressBar x:Name="ProgressBar" HorizontalOptions="Fill" VerticalOptions="Center" Margin="30"
+                                      Style="{StaticResource Key=ProgressBarStyle}"
+                                      IsVisible="False"/>
             </Grid>
             <controls:PreviewLinePredictionList VerticalOptions="End" Background="Yellow"
                                                 AbsoluteLayout.LayoutFlags="All"    

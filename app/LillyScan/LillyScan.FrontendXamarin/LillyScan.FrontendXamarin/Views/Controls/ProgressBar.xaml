@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LillyScan.FrontendXamarin.Views.Controls.ProgressBar"
+             x:Name="Control">
+  <ContentView.Content>
+        <Grid>
+            <Grid BackgroundColor="Black" Opacity="0.4"/>
+            <StackLayout Margin="8">
+                <Label Text="{Binding Source={x:Reference Control}, Path=FormattedPercentage}"
+                        HorizontalOptions="Center"/>
+                <AbsoluteLayout HeightRequest="10">
+                    <BoxView AbsoluteLayout.LayoutFlags="SizeProportional" 
+                             AbsoluteLayout.LayoutBounds="{Binding Source={x:Reference Control}, Path=FormattedBarLayoutBounds}" 
+                             BackgroundColor="White"/>
+                </AbsoluteLayout>
+            </StackLayout>
+        </Grid>
+    </ContentView.Content>
+</ContentView>

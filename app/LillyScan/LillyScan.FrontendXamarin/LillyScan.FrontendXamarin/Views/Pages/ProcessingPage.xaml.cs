@@ -1,5 +1,8 @@
 ﻿using LillyScan.Backend.Imaging;
+using LillyScan.Backend.Utils;
 using LillyScan.FrontendXamarin.Utils;
+using LillyScan.FrontendXamarin.ViewModels;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
@@ -37,9 +40,37 @@ namespace LillyScan.FrontendXamarin.Views.Pages
 
         private void InputConfirmButton_Clicked(object sender, System.EventArgs e)
         {
-            ProcessingState = ProcessingState.Running;           
-            new Animation((t) => SetVerticalViewSplit(t), 1, 0.3).Commit(this, "SlideViewsAnim", 16, 500);
+            ProcessingState = ProcessingState.Running;                       
+            Task.Run(ProcessInput);
         }
+
+        private async void ProcessInput()
+        {
+            var image = ImageSource.FromStream(() => new MemoryStream(AppState.CaptureBytes.Value));
+            var pm = new ProgressMonitor();
+            pm.ProgressChanged += (o, progress, description) =>
+            {
+                MainThread.InvokeOnMainThreadAsync(() => ProgressBar.Percentage = progress);
+                Debug.WriteLine($"[{progress:000.00}] {description}");
+            };
+
+            using (var bitmap = await image.ToRawBitmap())
+            {
+                var lines = HTR.Engine.SegmentLines(bitmap, pm);
+                foreach (var mask in lines)
+                {
+                    var linebmp = mask.CutFromImage(bitmap);
+                    linebmp.CheckNaN();
+                    linebmp = linebmp.RotateAndCrop((float)-System.Math.Atan2(-mask.LineFit.A, mask.LineFit.B), disposeOriginal: true);
+                    linebmp.CheckNaN();
+                    var linePred = new PreviewLinePrediction { LineImage = await linebmp.ToImageSource() };
+                    await MainThread.InvokeOnMainThreadAsync(() => PreviewLinePredictionList.AddItem(linePred));
+                    linebmp.Dispose();                    
+                }
+            }
+
+            new Animation((t) => SetVerticalViewSplit(t), 1, 0.3).Commit(this, "SlideViewsAnim", 16, 500);
+        }        
 
         private void InputRetryButton_Clicked(object sender, System.EventArgs e)
         {

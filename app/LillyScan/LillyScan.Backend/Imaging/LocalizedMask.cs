@@ -204,12 +204,12 @@ namespace LillyScan.Backend.Imaging
 
             Console.WriteLine($"{LineFit} Err={MaxLineDistanceError}, SegLen={FitSegmentLength}, Conf={OrientationConfidence}");
 
-            if(MaxLineDistanceError>50)
+            /*if(MaxLineDistanceError>50)
             {
                 string s = $"x=[{pointsX.JoinToString(", ")}]\r\n";
                 s += $"y=[{pointsY.JoinToString(", ")}]\r\n";
                 File.WriteAllText("points.txt", s);
-            }
+            }*/
         }
 
         private int GetData(int y, int x) => Data[y * Width + x];

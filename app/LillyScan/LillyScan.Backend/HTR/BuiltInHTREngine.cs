@@ -131,13 +131,13 @@ namespace LillyScan.Backend.HTR
 
         public Action<RawBitmap, string> CCAction = null;
 
-        public unsafe LocalizedMask[] SegmentLines(RawBitmap bitmap, ProgressMonitor progressMonitor = null, bool resizeToOriginal = true, string taskName = null)
+        public unsafe LocalizedMask[] SegmentLines(RawBitmap bitmap, ProgressMonitor progressMonitor = null, string taskName = null)
         {
-            progressMonitor?.PushTask(taskName ?? nameof(SegmentLines), 3);
+            progressMonitor?.PushTask(taskName ?? nameof(SegmentLines), 4);
 
-            var normalSegm = SegmentTiles64(bitmap, SegmentationType.Normal, parallel: false, resizeToOriginal, progressMonitor, "NormalSegm");            
+            var normalSegm = SegmentTiles64(bitmap, SegmentationType.Normal, parallel: false, resizeToOriginal: false, progressMonitor, "NormalSegm");
             progressMonitor?.AdvanceOneStep();
-            var linearSegm = SegmentTiles64(bitmap, SegmentationType.PaddedLinear, parallel: false, resizeToOriginal, progressMonitor, "LinearSegm");
+            var linearSegm = SegmentTiles64(bitmap, SegmentationType.PaddedLinear, parallel: false, resizeToOriginal: false, progressMonitor, "LinearSegm");
             progressMonitor?.AdvanceOneStep();
 
             linearSegm = linearSegm.Threshold(0.5f, inPlace: true);
@@ -145,25 +145,28 @@ namespace LillyScan.Backend.HTR
 
             var blurred = linearSegm.Filter3x3(new[] { 1f / 9, 1f / 9, 1f / 9, 1f / 9, 1f / 9, 1f / 9, 1f / 9, 1f / 9, 1f / 9, });
             blurred = blurred.Threshold(0.5f, inPlace: true);
-
+            
             var cc = ConnectedComponents.FindInRawBitmapBinaryMask(linearSegm, progressMonitor);
-            var masks = cc.Components.Select(_ => _.ToLocalizedMask()).ToArray();
-            var lines = LineDefragmentation.BuildSubsets(masks.Where(m => m.Area > 10).ToArray(), 20, CCAction);
-            var linesMask = LineDefragmentation.BuildLinesMask(lines, CCAction);
+            progressMonitor?.AdvanceOneStep();
+            var masks = cc.Components.Select(_ => _.ToLocalizedMask()).ToArray();            
+            var lines = LineDefragmentation.BuildSubsets(masks.Where(m => m.Area > 10).ToArray(), 20, CCAction);            
+            var linesMask = LineDefragmentation.BuildLinesMask(lines, CCAction);                        
 
             normalSegm = normalSegm.Threshold(inPlace: true);
-            CCAction(normalSegm, "ns");
+            CCAction?.Invoke(normalSegm, "ns");            
             var normalMasks = ConnectedComponents.FindInRawBitmapBinaryMask(normalSegm, progressMonitor)
                 .Components.Select(_ => _.ToLocalizedMask())
                 .Where(_ => _.Area > 10).ToArray();
+            progressMonitor?.AdvanceOneStep();
+
             normalSegm.Clear();
-            CCAction(normalSegm, "ns");
+            CCAction?.Invoke(normalSegm, "ns");
             foreach (var m in normalMasks)
             {
                 Console.WriteLine(m);
                 LineDefragmentation.DrawMask(normalSegm, m, 1, 1, 1);
             }
-            CCAction(normalSegm, "ns");
+            CCAction?.Invoke(normalSegm, "ns");
 
             LineDefragmentation.AndMask(linesMask, normalSegm);
             LineDefragmentation.MaskView(linesMask, CCAction);
@@ -195,8 +198,9 @@ namespace LillyScan.Backend.HTR
                     CCAction(bmp, "");
                 }
             }*/
-
+            Debug.WriteLine("HERE?????????????????????????????");
             progressMonitor?.PopTask();
+            Debug.WriteLine("HERE2?????????????????????????????");
             return linesLocalized.ToArray();
         }
 

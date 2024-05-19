@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using LillyScan.Backend.Utils;
 using System.IO;
+using System.Diagnostics;
 
 namespace LillyScan.Backend.HTR
 {
@@ -61,23 +62,24 @@ namespace LillyScan.Backend.HTR
 
         public static LinesSplit[] FindLines(LocalizedMask[] masks, (float X, float Y) baseVector)
         {
+            Debug.WriteLine("CummulateY");
             var ycum = CummulateY(masks, baseVector);
-            File.WriteAllText($"dbg_{w}.txt", $"y=[{ycum.JoinToString(", ")}]");
-            w++;
+            //File.WriteAllText($"dbg_{w++}.txt", $"y=[{ycum.JoinToString(", ")}]");
+            Debug.WriteLine("Conv");
             Conv(ycum, 3, 4, 3);
             Conv(ycum, 2, 6, 2);
             Conv(ycum, 1, 8, 1);
-            File.WriteAllText($"dbg_{w}.txt", $"v=[{ycum.JoinToString(", ")}]");
-            w++;
+            //File.WriteAllText($"dbg_{w++}.txt", $"v=[{ycum.JoinToString(", ")}]");
+            Debug.WriteLine("MaskSpikesAndPlateaus");
             var c = MaskSpikesAndPlateaus(ycum);
-            File.WriteAllText($"dbg_{w}.txt", "p=[" + c.JoinToString(", ") + "]");
-            w++;
+            //File.WriteAllText($"dbg_{w++}.txt", "p=[" + c.JoinToString(", ") + "]");
+            Debug.WriteLine("FindContinuousActivations");
             var lineZones = FindContinuousActivations(c).ToArray();
             int linesCount = lineZones.Length;
 
-            File.WriteAllText($"dbg_{w}.txt", lineZones.JoinToString("\n"));
-            w++;
+            //File.WriteAllText($"dbg_{w++}.txt", lineZones.JoinToString("\n"));
 
+            Debug.WriteLine("ArgMin");
             var maskLine = new int[masks.Length];
             for(int i=0;i<masks.Length;i++)
             {
@@ -149,12 +151,14 @@ namespace LillyScan.Backend.HTR
             var ycum = new float[DiagLength];
             foreach (var mask in masks)
             {
+                Debug.WriteLine($"{(mask.X, mask.Y)} {(mask.Width, mask.Height)}, {baseVector}");
                 for (int y = 0; y < mask.Height; y++)
                 {
                     for (int x = 0; x < mask.Width; x++)
                     {
                         if (mask.Data[y * mask.Width + x] == 0) continue;
-                        var ny = ChangeBase(mask.X + x, mask.Y + y, baseVector).Y;                        
+                        var ny = ChangeBase(mask.X + x, mask.Y + y, baseVector).Y;
+                        //Debug.WriteLine($"{DiagLength / 2 + (int)ny} / {DiagLength}");
                         ycum[DiagLength / 2 + (int)ny]++;
                     }
                 }

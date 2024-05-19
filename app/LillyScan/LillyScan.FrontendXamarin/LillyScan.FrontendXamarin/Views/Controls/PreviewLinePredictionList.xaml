@@ -6,11 +6,12 @@
     <ContentView.Content>
         <StackLayout VerticalOptions="StartAndExpand">
             <Label TextColor="Black">Predicted lines</Label>
-            <ListView x:Name="ListView" Margin="10">
+            <ListView x:Name="ListView" Margin="10" RowHeight="100">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
                             <StackLayout>
+                                <Image Source="{Binding LineImage}" VerticalOptions="Fill" Aspect="AspectFit" HeightRequest="64"/>
                                 <Label Text="{Binding PredictedText}" TextColor="Black"/>
                             </StackLayout>
                         </ViewCell>
