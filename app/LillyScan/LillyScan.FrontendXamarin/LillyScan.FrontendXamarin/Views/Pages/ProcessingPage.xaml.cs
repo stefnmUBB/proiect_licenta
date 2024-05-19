@@ -1,4 +1,5 @@
 ﻿using LillyScan.Backend.Imaging;
+using LillyScan.Backend.Parallelization;
 using LillyScan.Backend.Utils;
 using LillyScan.FrontendXamarin.Utils;
 using LillyScan.FrontendXamarin.ViewModels;
@@ -68,9 +69,34 @@ namespace LillyScan.FrontendXamarin.Views.Pages
                     linebmp.Dispose();                    
                 }
             }
-
             new Animation((t) => SetVerticalViewSplit(t), 1, 0.3).Commit(this, "SlideViewsAnim", 16, 500);
+
+            RunPredictions();
         }        
+
+        private void SetProgressBarPercentage(double value)
+        {
+            MainThread.InvokeOnMainThreadAsync(() => ProgressBar.Percentage = value);
+        }
+
+
+        private void RunPredictions()
+        {            
+            Atomic<int> finished = 0;
+            int count = PreviewLinePredictionList.ItemsCount;
+            SetProgressBarPercentage(count == 0 ? 1 : 0);
+
+            PreviewLinePredictionList.ForeachItem(linePred =>
+            {
+                using var linebmp = linePred.LineImage.ToRawBitmapSync();
+                linePred.PredictedText = HTR.Engine.PredictTextLine(linebmp);
+                linePred.IsReady = true;                
+                Debug.WriteLine($"Predicted text: {linePred.PredictedText}");
+                MainThread.InvokeOnMainThreadAsync(() => PreviewLinePredictionList.RefreshItem(linePred));
+                finished.Increment();
+                SetProgressBarPercentage(count == 0 ? 1 : finished.Get() * 100.0 / count);
+            });
+        }
 
         private void InputRetryButton_Clicked(object sender, System.EventArgs e)
         {

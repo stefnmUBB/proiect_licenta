@@ -1,18 +1,24 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vws="clr-namespace:LillyScan.FrontendXamarin.Views"
-             x:Class="LillyScan.FrontendXamarin.Views.Controls.PreviewLinePredictionList" Background="Blue">
+             xmlns:vws="clr-namespace:LillyScan.FrontendXamarin.Views" 
+             xmlns:controls="clr-namespace:LillyScan.FrontendXamarin.Views.Controls"
+             x:Class="LillyScan.FrontendXamarin.Views.Controls.PreviewLinePredictionList">
     <ContentView.Content>
         <StackLayout VerticalOptions="StartAndExpand">
-            <Label TextColor="Black">Predicted lines</Label>
-            <ListView x:Name="ListView" Margin="10" RowHeight="100">
+            <Label TextColor="Black" FontSize="18" HorizontalTextAlignment="Center" Margin="2">Predicted lines</Label>
+            <ListView x:Name="ListView" Margin="10" RowHeight="120" SelectionMode="None">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
                             <StackLayout>
-                                <Image Source="{Binding LineImage}" VerticalOptions="Fill" Aspect="AspectFit" HeightRequest="64"/>
-                                <Label Text="{Binding PredictedText}" TextColor="Black"/>
+                                <Image Source="{Binding LineImage}" HorizontalOptions="Fill" Aspect="AspectFit" HeightRequest="50"/>
+                                <StackLayout IsVisible="{Binding IsWorking}">
+                                    <controls:LoadingSpinner/>
+                                </StackLayout>
+                                <StackLayout IsVisible="{Binding IsReady}">
+                                    <Label Text="{Binding PredictedText}" TextColor="Black"/>
+                                </StackLayout>
                             </StackLayout>
                         </ViewCell>
                     </DataTemplate>

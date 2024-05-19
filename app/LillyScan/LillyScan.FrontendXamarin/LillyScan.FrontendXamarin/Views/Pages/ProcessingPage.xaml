@@ -66,10 +66,10 @@
     </ContentPage.Resources>
 
     <ContentPage.Content>
-        <AbsoluteLayout VerticalOptions="Fill" Background="Red" x:Name="ContentBox">
-            <Grid VerticalOptions="FillAndExpand" Background="Green" x:Name="PreviewMaskGrid"
+        <AbsoluteLayout VerticalOptions="Fill" x:Name="ContentBox">
+            <Grid VerticalOptions="FillAndExpand" x:Name="PreviewMaskGrid"
                   AbsoluteLayout.LayoutFlags="All"
-                  AbsoluteLayout.LayoutBounds="0,0,1,1">
+                  AbsoluteLayout.LayoutBounds="0,0,1,1" Background="Black">
                 <Image x:Name="Image" Aspect="AspectFit" Grid.Row="0"></Image>
                 <Image x:Name="MaskImage" Aspect="AspectFit" Grid.Column="0"></Image>
                 <StackLayout Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="Center">
@@ -85,7 +85,7 @@
                                       Style="{StaticResource Key=ProgressBarStyle}"
                                       IsVisible="False"/>
             </Grid>
-            <controls:PreviewLinePredictionList VerticalOptions="End" Background="Yellow"
+            <controls:PreviewLinePredictionList VerticalOptions="End"
                                                 AbsoluteLayout.LayoutFlags="All"    
                                                 AbsoluteLayout.LayoutBounds="0,0,1,0"
                                                 x:Name="PreviewLinePredictionList"/>

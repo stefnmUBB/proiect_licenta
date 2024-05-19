@@ -71,16 +71,15 @@ namespace LillyScan.Backend.HTR
                         text += CharactersEn[am];
                 }
 
-                using (var f = File.OpenWrite($"cc\\Text{k++}.txt"))
+                /*using (var f = File.OpenWrite($"cc\\Text{k++}.txt"))
                 using (var w = new StreamWriter(f))
                 {
                     w.WriteLine("[::]" + text + "[::]");
                     predicted[0].Print("Pred", w);
-                }
-
-            }
-            progressMonitor?.PopTask();
-            return "";
+                }*/
+                progressMonitor?.PopTask();
+                return text;
+            }            
         }
 
         public RawBitmap SegmentTiles64(RawBitmap bitmap, SegmentationType segmentationType, bool parallel = true,

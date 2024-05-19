@@ -1,10 +1,12 @@
 ﻿using LillyScan.FrontendXamarin.ViewModels;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,6 +30,25 @@ namespace LillyScan.FrontendXamarin.Views.Controls
 		{
 			Debug.WriteLine($"[PreviewLinePredictionList] Added item");
 			Items.Add(item);			
+		}
+		public int ItemsCount => Items.Count;
+
+		public void ForeachItem(Action<PreviewLinePrediction> action)
+		{
+			var partition = Partitioner.Create(0, Items.Count, Items.Count / 4);
+			Parallel.ForEach(partition, new ParallelOptions { MaxDegreeOfParallelism = 4 }, range =>
+			{
+				for (int i = range.Item1; i < range.Item2; i++)
+					action(Items[i]);
+
+			});			
+		}
+
+		public void RefreshItem(PreviewLinePrediction item)
+		{
+			int index = Items.IndexOf(item);
+			if (index < 0) return;
+			Items[index] = item;			
 		}
 
 	}
