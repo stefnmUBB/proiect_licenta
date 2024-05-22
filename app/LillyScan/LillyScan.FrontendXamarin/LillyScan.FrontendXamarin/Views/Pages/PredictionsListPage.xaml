@@ -3,32 +3,34 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:flv="clr-namespace:DLToolkit.Forms.Controls;assembly=DLToolkit.Forms.Controls.FlowListView"
              x:Class="LillyScan.FrontendXamarin.Views.Pages.PredictionsListPage">
-    <flv:FlowListView
-        SeparatorVisibility="Default" 
-        HasUnevenRows="False" 
-        RowHeight="100"        
-        FlowColumnCount="2"        
-        FlowItemTappedCommand="{Binding ItemTappedCommand}"
-        FlowTotalRecords="{Binding Items.Count, Mode=OneWayToSource}"        
-        FlowItemsSource="{Binding Items}"
-        VerticalOptions="Fill">
-        <flv:FlowListView.FlowColumnTemplate>
-            <DataTemplate>
-                <Image Source="{Binding Thumbnail}" HorizontalOptions="Fill" VerticalOptions="Fill" Aspect="AspectFit" Background="Red"/>
-            </DataTemplate>
-        </flv:FlowListView.FlowColumnTemplate>
+    <StackLayout>
+        <Label FontSize="18" Text="My predictions" TextColor="Black" Margin="20"/>
+        <flv:FlowListView
+            SeparatorVisibility="Default" 
+            HasUnevenRows="False" 
+            RowHeight="100"        
+            FlowColumnCount="2"        
+            FlowItemTappedCommand="{Binding ItemTappedCommand}"
+            FlowTotalRecords="{Binding Items.Count, Mode=OneWayToSource}"        
+            FlowItemsSource="{Binding Items}"
+            VerticalOptions="Fill">
+            <flv:FlowListView.FlowColumnTemplate>
+                <DataTemplate>
+                    <Image Source="{Binding Thumbnail}" HorizontalOptions="Fill" VerticalOptions="Fill" Aspect="AspectFit"/>
+                </DataTemplate>
+            </flv:FlowListView.FlowColumnTemplate>
 
-        <flv:FlowListView.FlowEmptyTemplate>
-            <DataTemplate>
-                <ViewCell>
-                    <Label VerticalOptions="FillAndExpand"                           
+            <flv:FlowListView.FlowEmptyTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Label VerticalOptions="FillAndExpand"                           
                            HorizontalTextAlignment="Center"
                            VerticalTextAlignment="Center"
                            TextColor="Gray"
                            Text="No predictions yet"/>
-                </ViewCell>
-            </DataTemplate>
-        </flv:FlowListView.FlowEmptyTemplate>
-
-    </flv:FlowListView>
+                    </ViewCell>
+                </DataTemplate>
+            </flv:FlowListView.FlowEmptyTemplate>
+        </flv:FlowListView>
+    </StackLayout>
 </ContentPage>
