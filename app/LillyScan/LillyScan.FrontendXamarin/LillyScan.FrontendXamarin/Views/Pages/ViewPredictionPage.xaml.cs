@@ -18,7 +18,7 @@ namespace LillyScan.FrontendXamarin.Views.Pages
         {
             InitializeComponent();
             ImageStorage = Application.Current.As<App>().ImageStorage;
-            Repository = Application.Current.As<App>().PredictionRepository; 
+            Repository = Application.Current.As<App>().PredictionRepository;                         
         }
 
         Logger Log = Logger.Create<ViewPredictionPage>();
@@ -90,8 +90,20 @@ namespace LillyScan.FrontendXamarin.Views.Pages
             new Animation(SetVerticalViewSplit, CurrentVerticalSplit.Get(), toValue).Commit(ContentBox, "VerticalSplit");
         }
 
+        private void RemoveButton_Clicked(object sender, System.EventArgs e)
+        {
+            Task.Run(async () =>
+            {                
+                string promptResponse = "";
+                await MainThread.InvokeOnMainThreadAsync(async ()
+                    => promptResponse = await DisplayActionSheet("Are you sure you want to delete this record?", null, null, "Yes", "No"));
+                if (promptResponse != "Yes") 
+                    return;                
+                Repository.Remove(AppState.SelectedPrediction.Value);
+                AppState.SelectedPrediction.Value = null;
+                MainThread.BeginInvokeOnMainThread(() => Shell.Current.GoToAsync("//PredictionsListPage"));
+            });
 
-
-
+        }
     }
 }

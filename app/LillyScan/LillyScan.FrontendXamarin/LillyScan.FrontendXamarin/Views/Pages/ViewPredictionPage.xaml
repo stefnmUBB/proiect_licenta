@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="LillyScan.FrontendXamarin.Views.Pages.ViewPredictionPage"
+             xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
              xmlns:controls ="clr-namespace:LillyScan.FrontendXamarin.Views.Controls">
     <ContentPage.Content>
         <AbsoluteLayout VerticalOptions="Fill" x:Name="ContentBox">
@@ -14,6 +15,11 @@
                                         AbsoluteLayout.LayoutFlags="All"    
                                         AbsoluteLayout.LayoutBounds="0,0,1,0"
                                         x:Name="PreviewLinePredictionList"/>
+            <ImageButton Source="icon_remove.png" BackgroundColor="Transparent"
+                    x:Name="RemoveButton" xct:IconTintColorEffect.TintColor="Red"
+                    Clicked="RemoveButton_Clicked" WidthRequest="32" HeightRequest="32" 
+                    Margin="20" AbsoluteLayout.LayoutFlags="PositionProportional" AbsoluteLayout.LayoutBounds="1,0,-1,-1"
+                     />
         </AbsoluteLayout>
     </ContentPage.Content>
 </ContentPage>

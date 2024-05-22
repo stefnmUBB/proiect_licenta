@@ -11,9 +11,7 @@ namespace LillyScan.FrontendXamarin
     {
         public AppShell()
         {
-            InitializeComponent();
-            Routing.RegisterRoute(nameof(ProcessingPage), typeof(ProcessingPage));
-            Routing.RegisterRoute(nameof(ViewPredictionPage), typeof(ViewPredictionPage));
+            InitializeComponent();            
            
         }
 

@@ -62,7 +62,7 @@ namespace LillyScan.FrontendXamarin.Repository
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Remove(Prediction pred)
         {
-            foreach (var item in Items.Where(_ => _.Id == pred.Id))
+            foreach (var item in Items.Where(_ => _.Id == pred.Id).ToArray()) 
                 Items.Remove(item);            
             WriteToStorage();
         }

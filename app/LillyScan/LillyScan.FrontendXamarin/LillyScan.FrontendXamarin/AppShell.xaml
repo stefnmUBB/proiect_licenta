@@ -31,7 +31,7 @@
     </Shell.Resources>
 
     <TabBar>
-        <ShellContent Title="Capture" Icon="icon_about.png" Route="NewCapturePage" ContentTemplate="{DataTemplate local:NewCapturePage}" />
+        <ShellContent Title="Capture" Icon="icon_new.png" Route="NewCapturePage" ContentTemplate="{DataTemplate local:NewCapturePage}" />
         <ShellContent Title="My documents" Icon="icon_docs.png" Route="PredictionsListPage" ContentTemplate="{DataTemplate local:PredictionsListPage}" />
 
         <!--ShellContent Title="Dummy" Icon="icon_about.png" Route="DummyPage" ContentTemplate="{DataTemplate local:DummyPage}" /-->
