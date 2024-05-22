@@ -1,10 +1,14 @@
 ﻿using LillyScan.Backend.Imaging;
 using LillyScan.Backend.Parallelization;
 using LillyScan.Backend.Utils;
+using LillyScan.FrontendXamarin.Models;
 using LillyScan.FrontendXamarin.Utils;
 using LillyScan.FrontendXamarin.ViewModels;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
@@ -53,7 +57,7 @@ namespace LillyScan.FrontendXamarin.Views.Pages
             pm.ProgressChanged += (o, progress, description) =>
             {
                 MainThread.InvokeOnMainThreadAsync(() => ProgressBar.Percentage = progress);
-                Debug.WriteLine($"[{progress:000.00}] {description}");
+                //Debug.WriteLine($"[{progress:000.00}] {description}");
             };
 
             using (var bitmap = await image.ToRawBitmap())
@@ -157,9 +161,44 @@ namespace LillyScan.FrontendXamarin.Views.Pages
             return 0;
         }
 
-        private void FinalConfirmButton_Clicked(object sender, System.EventArgs e)
-        {
+        private Logger Log = Logger.Create<ProcessingPage>();
 
+        private async void FinalConfirmButton_Clicked(object sender, System.EventArgs e)
+        {
+            Log?.WriteLine("FinalConfirmButton_Clicked");
+
+            await MainThread.InvokeOnMainThreadAsync(() => PreviewLinePredictionList.BeginRefresh());
+
+            var imageStorage = Application.Current.As<App>().ImageStorage;
+            var repository = Application.Current.As<App>().PredictionRepository;
+            var imageRef = await imageStorage.MakeImageRef(Image.Source);
+
+
+            Log?.WriteLine("Building predictedLines");
+
+            var predictedLines = new List<PredictedLine>();
+            foreach(var item in PreviewLinePredictionList.GetItems())
+            {
+                var line = new PredictedLine
+                {
+                    PredictedText = item.PredictedText,
+                    SegmentedLine = await imageStorage.MakeImageRef(item.LineImage)
+                };
+                predictedLines.Add(line);
+            }
+
+            Log?.WriteLine($"Lines count = {predictedLines.Count}");
+            Log?.WriteLine("Building prediction");
+            var prediction = new Prediction
+            {
+                Date = DateTime.Now,
+                Image = imageRef,
+                PredictedLines = predictedLines
+            };
+            repository.Add(prediction);
+
+            await MainThread.InvokeOnMainThreadAsync(() => PreviewLinePredictionList.EndRefresh());
+            await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//PredictionsListPage"));
         }
 
         private void FinalRetryButton_Clicked(object sender, System.EventArgs e)

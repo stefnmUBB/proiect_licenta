@@ -33,6 +33,8 @@ namespace LillyScan.FrontendXamarin.Views.Controls
 		}
 		public int ItemsCount => Items.Count;
 
+		public List<PreviewLinePrediction> GetItems() => Items.ToList();
+
 		public void ForeachItem(Action<PreviewLinePrediction> action)
 		{
 			var partition = Partitioner.Create(0, Items.Count, Items.Count / 4);
@@ -43,6 +45,9 @@ namespace LillyScan.FrontendXamarin.Views.Controls
 
 			});			
 		}
+
+		public void BeginRefresh() => ListView.BeginRefresh();
+		public void EndRefresh() => ListView.EndRefresh();
 
 
 		public void Clear()

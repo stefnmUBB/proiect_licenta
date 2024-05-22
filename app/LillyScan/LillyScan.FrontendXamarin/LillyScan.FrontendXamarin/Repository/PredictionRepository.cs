@@ -1,7 +1,9 @@
 ﻿using LillyScan.FrontendXamarin.Models;
+using LillyScan.FrontendXamarin.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -19,8 +21,16 @@ namespace LillyScan.FrontendXamarin.Repository
         private bool IsLoaded = false;
         private int LastId;
 
-        public PredictionRepository(string path)
+        private Logger Log = Logger.Create<PredictionRepository>();
+
+        public event NotifyCollectionChangedEventHandler CollectionChanged
         {
+            add => Items.CollectionChanged += value;
+            remove => Items.CollectionChanged -= value;
+        }
+
+        public PredictionRepository(string path)
+        {            
             PredictionsFilename = Path.Combine(path, "items.dat");
             PredictedLinesDir = Path.Combine(path, "lines");
             if (!Directory.Exists(PredictedLinesDir))
@@ -33,8 +43,8 @@ namespace LillyScan.FrontendXamarin.Repository
         {
             if (!IsLoaded)
             {
-                LoadFromStorage();
                 IsLoaded = true;
+                LoadFromStorage();                
             }
             return Items;
         }
@@ -42,8 +52,9 @@ namespace LillyScan.FrontendXamarin.Repository
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Add(Prediction pred)
         {
+            Log?.WriteLine($"Add");
             pred.Id = LastId++;
-            Items.Add(pred);
+            Items.Add(pred);            
             NeedsLineSave.Add(pred.Id);
             WriteToStorage();
         }
@@ -64,19 +75,26 @@ namespace LillyScan.FrontendXamarin.Repository
 
         private void WriteToStorage()
         {
-            using(var f = File.Create(PredictionsFilename))
+            Log?.WriteLine($"WriteToStorage");
+            using (var f = File.Create(PredictionsFilename))
             using(var bw=new BinaryWriter(f))
             {
                 bw.Write(Items.Count);
                 bw.Write(LastId);
-                for (int i = 0; i < Items.Count; i++)                
-                    WriteItem(bw, Items[i]);        
+                for (int i = 0; i < Items.Count; i++)
+                {
+                    Log?.WriteLine($"WriteItem({i})");
+                    WriteItem(bw, Items[i]);
+                }
             }
 
             for (int i = 0; i < Items.Count; i++)
             {
                 if (NeedsLineSave.Contains(Items[i].Id))
+                {
+                    Log?.WriteLine($"WritePredictedLines({i})");
                     WritePredictedLines(Items[i]);
+                }
             }
             NeedsLineSave.Clear();
         }

@@ -1,33 +1,34 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:flv="clr-namespace:DLToolkit.Forms.Controls;assembly=DLToolkit.Forms.Controls.FlowListView"
              x:Class="LillyScan.FrontendXamarin.Views.Pages.PredictionsListPage">
-    
-  <ListView x:Name="MyListView"
-            ItemsSource="{Binding Items}"
-            ItemTapped="Handle_ItemTapped"
-            CachingStrategy="RecycleElement">
-    <!--Built in Cells-->
-    <ListView.ItemTemplate>
-        <DataTemplate>
-            <TextCell Text="{Binding .}" />
-        </DataTemplate>
-    </ListView.ItemTemplate>
-    
-    <!--Custom View Cells-->
-    <!--
-    <ListView.ItemTemplate>
-      <DataTemplate>
-        <ViewCell>
-          <StackLayout>
-            <Label Text="{Binding Text}" 
-                   Style="{DynamicResource ListItemTextStyle}" />
-            <Label Text="{Binding Detail}" 
-                   Style="{DynamicResource ListItemDetailTextStyle}"/>
-          </StackLayout>
-        </ViewCell>
-      </DataTemplate>
-    </ListView.ItemTemplate>
-    -->
-  </ListView>
+    <flv:FlowListView
+        SeparatorVisibility="Default" 
+        HasUnevenRows="False" 
+        RowHeight="100"        
+        FlowColumnCount="2"        
+        FlowItemTappedCommand="{Binding ItemTappedCommand}"
+        FlowTotalRecords="{Binding Items.Count, Mode=OneWayToSource}"        
+        FlowItemsSource="{Binding Items}"
+        VerticalOptions="Fill">
+        <flv:FlowListView.FlowColumnTemplate>
+            <DataTemplate>
+                <Image Source="{Binding Thumbnail}" HorizontalOptions="Fill" VerticalOptions="Fill" Aspect="AspectFit" Background="Red"/>
+            </DataTemplate>
+        </flv:FlowListView.FlowColumnTemplate>
+
+        <flv:FlowListView.FlowEmptyTemplate>
+            <DataTemplate>
+                <ViewCell>
+                    <Label VerticalOptions="FillAndExpand"                           
+                           HorizontalTextAlignment="Center"
+                           VerticalTextAlignment="Center"
+                           TextColor="Gray"
+                           Text="No predictions yet"/>
+                </ViewCell>
+            </DataTemplate>
+        </flv:FlowListView.FlowEmptyTemplate>
+
+    </flv:FlowListView>
 </ContentPage>
