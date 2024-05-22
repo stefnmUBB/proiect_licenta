@@ -5,6 +5,7 @@ using LillyScan.FrontendXamarin.Utils;
 using LillyScan.FrontendXamarin.ViewModels;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -31,7 +32,7 @@ namespace LillyScan.FrontendXamarin.Views.Pages
 
             InputRetryButton.Clicked += InputRetryButton_Clicked;
             InputConfirmButton.Clicked += InputConfirmButton_Clicked;                        
-        }
+        }        
 
         private void SetVerticalViewSplit(double value)
         {
@@ -89,13 +90,17 @@ namespace LillyScan.FrontendXamarin.Views.Pages
             PreviewLinePredictionList.ForeachItem(linePred =>
             {
                 using var linebmp = linePred.LineImage.ToRawBitmapSync();
-                linePred.PredictedText = HTR.Engine.PredictTextLine(linebmp);
+                //linePred.PredictedText = HTR.Engine.PredictTextLine(linebmp);
+                linePred.PredictedText = "(Placeholder)";
+                Thread.Sleep(2000);
                 linePred.IsReady = true;                
                 Debug.WriteLine($"Predicted text: {linePred.PredictedText}");
                 MainThread.InvokeOnMainThreadAsync(() => PreviewLinePredictionList.RefreshItem(linePred));
                 finished.Increment();
                 SetProgressBarPercentage(count == 0 ? 1 : finished.Get() * 100.0 / count);
             });
+
+            MainThread.BeginInvokeOnMainThread(() => ProcessingState = ProcessingState.Done);
         }
 
         private void InputRetryButton_Clicked(object sender, System.EventArgs e)
@@ -119,8 +124,16 @@ namespace LillyScan.FrontendXamarin.Views.Pages
             Task.Run(async () =>
             {
                 var captureBytes = newValue;
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    ProcessingState = ProcessingState.Pending;
+                    ProgressBar.Percentage = 0;
+                    PreviewLinePredictionList.Clear();
+                });
                 await LoadFromCaptureBytes(captureBytes);                
+                
             });
+            
         }        
 
         protected override bool OnBackButtonPressed()
@@ -131,6 +144,7 @@ namespace LillyScan.FrontendXamarin.Views.Pages
 
         private async Task<int> LoadFromCaptureBytes(byte[] captureBytes)
         {
+            await MainThread.InvokeOnMainThreadAsync(() => MaskImage.Source = null);
             var image = ImageSource.FromStream(() => new MemoryStream(captureBytes));
             await MainThread.InvokeOnMainThreadAsync(() => Image.Source = image);
             using (var bitmap = await image.ToRawBitmap()) 
@@ -143,5 +157,14 @@ namespace LillyScan.FrontendXamarin.Views.Pages
             return 0;
         }
 
+        private void FinalConfirmButton_Clicked(object sender, System.EventArgs e)
+        {
+
+        }
+
+        private void FinalRetryButton_Clicked(object sender, System.EventArgs e)
+        {
+            MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//NewCapturePage"));
+        }
     }
 }

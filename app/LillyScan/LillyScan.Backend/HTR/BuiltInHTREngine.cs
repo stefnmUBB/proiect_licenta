@@ -132,12 +132,15 @@ namespace LillyScan.Backend.HTR
 
         public unsafe LocalizedMask[] SegmentLines(RawBitmap bitmap, ProgressMonitor progressMonitor = null, string taskName = null)
         {
-            progressMonitor?.PushTask(taskName ?? nameof(SegmentLines), 4);
+            progressMonitor?.PushTask(taskName ?? nameof(SegmentLines), 3);
 
-            var normalSegm = SegmentTiles64(bitmap, SegmentationType.Normal, parallel: false, resizeToOriginal: false, progressMonitor, "NormalSegm");
+            var linearSegmTask = Task.Run(() => SegmentTiles64(bitmap, SegmentationType.PaddedLinear, parallel: false, resizeToOriginal: false));
+            var normalSegm = SegmentTiles64(bitmap, SegmentationType.Normal, parallel: false, resizeToOriginal: false, progressMonitor, "NormalSegm");            
+            linearSegmTask.Wait();
+            var linearSegm = linearSegmTask.Result;
             progressMonitor?.AdvanceOneStep();
-            var linearSegm = SegmentTiles64(bitmap, SegmentationType.PaddedLinear, parallel: false, resizeToOriginal: false, progressMonitor, "LinearSegm");
-            progressMonitor?.AdvanceOneStep();
+            //SegmentTiles64(bitmap, SegmentationType.PaddedLinear, parallel: false, resizeToOriginal: false, progressMonitor, "LinearSegm");
+            //progressMonitor?.AdvanceOneStep();
 
             linearSegm = linearSegm.Threshold(0.5f, inPlace: true);
             CCAction?.Invoke(linearSegm, "");

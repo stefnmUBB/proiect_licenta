@@ -5,6 +5,8 @@ using Android.Content.PM;
 using Android.Runtime;
 using Android.OS;
 using Android.Hardware.Usb;
+using Xamarin.Essentials;
+using System.IO;
 
 namespace LillyScan.FrontendXamarin.Droid
 {
@@ -22,8 +24,10 @@ namespace LillyScan.FrontendXamarin.Droid
 
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
-            global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
-            LoadApplication(new App());            
+            global::Xamarin.Forms.Forms.Init(this, savedInstanceState);            
+
+
+            LoadApplication(new App());                    
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {

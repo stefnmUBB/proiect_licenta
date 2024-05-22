@@ -63,6 +63,22 @@
             </Style.Triggers>
         </Style>
 
+        <Style TargetType="{x:Type StackLayout}" x:Key="FinalConfirmBoxStyle">
+            <Style.Triggers>
+                <DataTrigger TargetType="{x:Type StackLayout}" Binding="{Binding ProcessingState, Source={x:Reference ContentPage}}" Value="Running">
+                    <Setter Property="IsVisible" Value="False"/>
+                </DataTrigger>
+
+                <DataTrigger TargetType="{x:Type StackLayout}" Binding="{Binding ProcessingState, Source={x:Reference ContentPage}}" Value="Done">
+                    <Setter Property="IsVisible" Value="True"/>
+                </DataTrigger>
+
+                <DataTrigger TargetType="{x:Type StackLayout}" Binding="{Binding ProcessingState, Source={x:Reference ContentPage}}" Value="Pending">
+                    <Setter Property="IsVisible" Value="False"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
     </ContentPage.Resources>
 
     <ContentPage.Content>
@@ -89,6 +105,12 @@
                                                 AbsoluteLayout.LayoutFlags="All"    
                                                 AbsoluteLayout.LayoutBounds="0,0,1,0"
                                                 x:Name="PreviewLinePredictionList"/>
+            <StackLayout AbsoluteLayout.LayoutFlags="PositionProportional,WidthProportional" AbsoluteLayout.LayoutBounds="0.5,0.9,0.5,50" Orientation="Horizontal"
+                         IsVisible="False"
+                         HorizontalOptions="Center" Style="{StaticResource FinalConfirmBoxStyle}">
+                <Button Text="Confirm" CornerRadius="10" Background="Green" TextColor="White" x:Name="FinalConfirmButton" Clicked="FinalConfirmButton_Clicked"/>
+                <Button Text="Retry" CornerRadius="10" Background="Red" TextColor="White" x:Name="FinalRetryButton" Clicked="FinalRetryButton_Clicked"/>
+            </StackLayout>
         </AbsoluteLayout>
     </ContentPage.Content>
 </ContentPage>

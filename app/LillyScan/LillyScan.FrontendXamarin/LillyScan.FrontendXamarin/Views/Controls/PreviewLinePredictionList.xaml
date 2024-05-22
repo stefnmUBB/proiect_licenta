@@ -5,9 +5,9 @@
              xmlns:controls="clr-namespace:LillyScan.FrontendXamarin.Views.Controls"
              x:Class="LillyScan.FrontendXamarin.Views.Controls.PreviewLinePredictionList">
     <ContentView.Content>
-        <StackLayout VerticalOptions="StartAndExpand">
+        <StackLayout VerticalOptions="Fill">
             <Label TextColor="Black" FontSize="18" HorizontalTextAlignment="Center" Margin="2">Predicted lines</Label>
-            <ListView x:Name="ListView" Margin="10" RowHeight="120" SelectionMode="None">
+            <ListView x:Name="ListView" Margin="10" RowHeight="120" SelectionMode="None" VerticalOptions="Fill">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>

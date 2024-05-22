@@ -44,6 +44,11 @@ namespace LillyScan.FrontendXamarin.Views.Controls
 			});			
 		}
 
+
+		public void Clear()
+		{
+			Items.Clear();
+		}
 		public void RefreshItem(PreviewLinePrediction item)
 		{
 			int index = Items.IndexOf(item);
