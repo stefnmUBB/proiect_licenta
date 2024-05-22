@@ -150,21 +150,36 @@ namespace LillyScan.FrontendXamarin.Repository
 
         private void ReadPredictedLines(Prediction pred)
         {
-            var lines = pred.PredictedLines;
+            Log?.WriteLine("ReadPredictedLines");
+            var lines = pred.PredictedLines = new List<PredictedLine>();
             var path = Path.Combine(PredictedLinesDir, $"{pred.Id}.dat");
-            if(!File.Exists(path))
+
+            Log?.WriteLine($"path={path}");
+
+            if (!File.Exists(path))
             {
-                Debug.WriteLine($"File not found: {path}");
+                Log?.WriteLine($"File not found: {path}");
                 return;
             }
-
+            Log?.WriteLine($"Proceed");
             lines.Clear();
-            using(var f= File.OpenRead(path))
-            using(var br=new BinaryReader(f))
+
+            Log?.WriteLine($"Opening file");
+            using (var f = File.OpenRead(path))
             {
-                int count = br.ReadInt32();
-                for (int i = 0; i < count; i++)
-                    lines.Add(PredictedLine.ReadBinary(br));
+                Log?.WriteLine($"Opened file?");
+                using (var br = new BinaryReader(f))
+                {
+                    Log?.WriteLine($"Before reading?");
+
+                    int count = br.ReadInt32();
+                    Log?.WriteLine($"count={count}");
+                    for (int i = 0; i < count; i++)
+                    {
+                        Log?.WriteLine($"Line{i}");
+                        lines.Add(PredictedLine.ReadBinary(br));
+                    }
+                }
             }
 
         }

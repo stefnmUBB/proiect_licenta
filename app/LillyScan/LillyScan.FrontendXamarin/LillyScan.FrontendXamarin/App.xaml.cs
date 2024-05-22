@@ -21,7 +21,7 @@ namespace LillyScan.FrontendXamarin
             DependencyService.Register<MockDataStore>();
             FlowListView.Init();
 
-            ClearData();
+            //ClearData();
 
             MainPage = new AppShell();
             PredictionRepository = new PredictionRepository(Path.Combine(FileSystem.AppDataDirectory, "predictions"));

@@ -1,5 +1,6 @@
 ﻿using LillyScan.FrontendXamarin.ViewModels;
 using LillyScan.FrontendXamarin.Views;
+using LillyScan.FrontendXamarin.Views.Pages;
 using System;
 using System.Collections.Generic;
 using Xamarin.Forms;
@@ -11,8 +12,9 @@ namespace LillyScan.FrontendXamarin
         public AppShell()
         {
             InitializeComponent();
-            //Routing.RegisterRoute(nameof(ItemDetailPage), typeof(ItemDetailPage));
-            //Routing.RegisterRoute(nameof(NewItemPage), typeof(NewItemPage));            
+            Routing.RegisterRoute(nameof(ProcessingPage), typeof(ProcessingPage));
+            Routing.RegisterRoute(nameof(ViewPredictionPage), typeof(ViewPredictionPage));
+           
         }
 
         

@@ -1,11 +1,13 @@
 ﻿using LillyScan.FrontendXamarin.Models;
 using LillyScan.FrontendXamarin.Repository;
+using LillyScan.FrontendXamarin.Utils;
 using LillyScan.FrontendXamarin.Views.Pages;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace LillyScan.FrontendXamarin.ViewModels.Pages
@@ -65,8 +67,9 @@ namespace LillyScan.FrontendXamarin.ViewModels.Pages
         {
             get => new Command(async (data) =>
             {
-                
-                await Page.DisplayAlert("FlowListView", data + "", "Ok");
+                AppState.SelectedPrediction.Value = (data as Item).Prediction;
+                await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//ViewPredictionPage"));
+                //await Page.DisplayAlert("FlowListView", data + "", "Ok");
             });            
         }        
 

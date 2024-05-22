@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LillyScan.FrontendXamarin.Views.Pages.ViewPredictionPage"
+             xmlns:controls ="clr-namespace:LillyScan.FrontendXamarin.Views.Controls">
+    <ContentPage.Content>
+        <AbsoluteLayout VerticalOptions="Fill" x:Name="ContentBox">
+            <Grid VerticalOptions="FillAndExpand" x:Name="PreviewMaskGrid" 
+                  AbsoluteLayout.LayoutFlags="All" 
+                  AbsoluteLayout.LayoutBounds="0,0,1,1" Background="Black">
+                <Image x:Name="Image" Aspect="AspectFit" Grid.Row="0"></Image>                
+            </Grid>
+            <controls:PreviewLinePredictionList VerticalOptions="Fill"
+                                        AbsoluteLayout.LayoutFlags="All"    
+                                        AbsoluteLayout.LayoutBounds="0,0,1,0"
+                                        x:Name="PreviewLinePredictionList"/>
+        </AbsoluteLayout>
+    </ContentPage.Content>
+</ContentPage>
