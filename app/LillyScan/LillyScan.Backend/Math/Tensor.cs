@@ -151,7 +151,7 @@ namespace LillyScan.Backend.Math
             }
             w.WriteLine(sb);
             return this;
-        }
+        }        
 
         public override bool Equals(object obj)
         {

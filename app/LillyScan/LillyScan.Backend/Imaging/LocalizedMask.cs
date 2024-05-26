@@ -21,7 +21,7 @@ namespace LillyScan.Backend.Imaging
         public float OrientationConfidence;
         public float CenterX;
         public float CenterY;
-        public int Area;        
+        public int Area;                
         
         public LocalizedMask((int X, int Y)[] pixels)
         {
@@ -42,7 +42,7 @@ namespace LillyScan.Backend.Imaging
                 Data[(pixels[i].Y - Y) * Width + pixels[i].X - X] = 1;
             }
 
-        }
+        }        
 
         public LocalizedMask Rescale(float scaleX, float scaleY)
         {

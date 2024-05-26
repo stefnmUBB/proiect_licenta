@@ -1,5 +1,6 @@
 ﻿using LillyScan.Backend.Utils;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace LillyScan.Backend.Imaging
@@ -17,6 +18,12 @@ namespace LillyScan.Backend.Imaging
         {
             for (int i = 0, len = bitmap.Stride * bitmap.Height; i < len; i++)
                 bitmap.Buffer[i] = 0;
+        }
+
+        public static unsafe void Clear(this RawBitmap bitmap, float value)
+        {
+            for (int i = 0, len = bitmap.Stride * bitmap.Height; i < len; i++)
+                bitmap.Buffer[i] = value;
         }
 
         public static RawBitmap DrawImage(this RawBitmap target, RawBitmap src, int x, int y, bool inPlace = false)
@@ -180,6 +187,10 @@ namespace LillyScan.Backend.Imaging
                     *dbuf++ = sum / C;
                 }
             }
+
+            if (disposeOriginal)
+                bmp.Dispose();
+
             return res;
         }
 
@@ -278,6 +289,6 @@ namespace LillyScan.Backend.Imaging
             if (disposeOriginal) bitmap.Dispose();
 
             return result;
-        }
+        }        
     }
 }

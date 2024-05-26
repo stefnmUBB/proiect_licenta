@@ -165,7 +165,7 @@ namespace LillyScan.Backend.HTR
             }
             return ycum;
         }
-        private static void Conv(float[] ycum, float a, float b, float c)
+        public static void Conv(float[] ycum, float a, float b, float c)
         {
             if (ycum.Length <= 1) return;
             float s = a + b + c;

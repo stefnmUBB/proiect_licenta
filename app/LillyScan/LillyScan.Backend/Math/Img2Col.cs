@@ -1,0 +1,154 @@
+﻿using LillyScan.Backend.AI.Layers;
+
+namespace LillyScan.Backend.Math
+{
+    public static class Img2Col
+    {
+        private static unsafe void I2C_TransformSource(float* buf, float* res, int B, int N, int M, int C, int K1, int K2)
+        {
+            int NMC = N * M * C, MC = M * C;
+            int NM = N * M;
+            int NMCK1K2 = N * M * C * K1 * K2;
+            int CK1K2 = C * K1 * K2;
+            int hK1 = (K1 >> 1) - (1 - K1 % 2);
+            int hK2 = (K2 >> 1) - (1 - K2 % 2);
+
+            for (int b = 0; b < B; b++)
+            {
+                int ri0 = b * NMCK1K2;
+                for (int n = 0; n < N; n++)
+                {
+                    for (int m = 0; m < M; m++)
+                    {
+                        int ri = ri0 + (n * M + m), rj = 0;
+                        for (int k1 = 0; k1 < K1; k1++)
+                        {
+                            int ii = n + k1 - hK1;
+                            for (int k2 = 0; k2 < K2; k2++) 
+                            {
+                                int jj = m + k2 - hK2;
+                                if (ii < 0 || jj < 0 || ii >= N || jj >= M)
+                                {
+                                    for (int c = 0; c < C; c++)
+                                        res[ri + (rj++) * NM] = 0;                                        
+                                }
+                                else
+                                {
+                                    int i = b * NMC + ii * MC + jj * C;
+                                    for (int c = 0; c < C; c++)
+                                    {
+                                        res[ri + (rj++) * NM] = buf[i + c];
+                                    }
+                                }
+                            }
+                        }                             
+                    }
+                }
+            }
+        }
+
+        private static unsafe void I2C_TransformKernel(float* buf, float* res, int K1, int K2, int C, int F)
+        {
+            int CK1K2 = C * K1 * K2;
+            int K1K2 = K1 * K2;
+            for (int c = 0; c < C; c++)
+                for (int k1 = 0; k1 < K1; k1++)
+                    for (int k2 = 0; k2 < K2; k2++)
+                        for (int f = 0; f < F; f++)
+                        {
+                            res[f * CK1K2 + c * K1K2 + k1 * K2 + k2] = *buf++;
+                        }
+        }
+
+        private static unsafe void MatMulBatch(float* a, float* b, float* r, int B, int M, int N, int P)
+        {
+            for(int i=0;i<B;i++)
+            {
+                UnsafeOperations.MatMul(a, b + i * M * N, r + i * M * P, M, N, P);
+            }
+        }
+
+        public static unsafe void Conv2D(float* tbuff, float* kbuff, float* rbuff, int B, int N, int M, int C, int K1, int K2, int F)
+        {
+            var matK = new float[K1 * K2 * C * F];
+            var matT = new float[B * K1 * K2 * C * N * M];
+            var matR = new float[B * N * M * F];
+            fixed(float* pmatK = &matK[0])
+            fixed(float* pmatT = &matT[0])
+            fixed(float* pmatR = &matR[0])
+            {
+                I2C_TransformKernel(kbuff, pmatK, K1, K2, C, F);
+                I2C_TransformSource(tbuff, pmatT, B, N, M, C, K1, K2);
+                MatMulBatch(pmatK, pmatT, pmatR, B, F, K1 * K2 * C, M * N);
+
+                int NMF = N * M * F, NM = N * M;
+                for (int b = 0; b < B; b++)
+                {
+                    for (int i = 0; i < F; i++)
+                        for (int j = 0; j < N * M; j++)
+                        {
+                            rbuff[b * NMF + j * F + i] = pmatR[b * NMF + i * NM + j];
+                        }
+                }
+            }            
+        }
+
+        public static unsafe void Conv2D(float[] tbuff, float[] kbuff, float[] rbuff, int B, int N, int M, int C, int K1, int K2, int F)
+        {
+            fixed (float* ptbuff = &tbuff[0])
+            fixed (float* pkbuff = &kbuff[0])
+            fixed (float* prbuff = &rbuff[0])
+                Conv2D(ptbuff, pkbuff, prbuff, B, N, M, C, K1, K2, F);
+        }
+
+        public static unsafe void Run()
+        {
+            int B=1, N = 4, M = 4;
+            int K1 = 2, K2 = 2, C = 2, F = 2;
+            var k = new float[K1 * K2 * C * F];
+            for (int i = 0; i < k.Length; i++) k[i] = i + 1;
+            new Tensor<float>((K1, K2, C, F), k).Print();
+            var r = new float[F * K1 * K2 * C];
+            fixed (float* pk = &k[0])
+            fixed (float* pr = &r[0])
+                I2C_TransformKernel(pk, pr, K1, K2, C, F);
+            new Tensor<float>((F, K1 * K2 * C), r).Print();
+
+            var s = new float[B * N * M * C];
+            for (int i = 0; i < s.Length; i++) s[i] = i + 1;
+            new Tensor<float>((B,N,M,C), s).Print();
+
+            var t = new float[B * K1 * K2 * C * N * M];
+            fixed (float* ps = &s[0])
+            fixed (float* pt = &t[0])
+                I2C_TransformSource(ps, pt, B, N, M, C, K1, K2);
+            new Tensor<float>((B, K1 * K2 * C, N * M), t).Print();
+
+            var o = new float[B * N * M * F];
+            for (int i = 0; i < o.Length; i++) o[i] = 0;
+            fixed (float* pt = &t[0])
+            fixed (float* pr = &r[0])
+            fixed (float* po = &o[0])
+            {
+                MatMulBatch(pr, pt, po, B, F, K1 * K2 * C, M * N);
+            }            
+
+
+            new Tensor<float>((B, F, N * M), o).Print();
+
+            var oo = new float[B * N * M * F];
+            int NMF = N * M * F, MF = M * F, NM = N * M;
+            for(int b=0;b<B;b++)
+            {
+                for(int i=0;i<F;i++)
+                    for(int j=0;j<N*M;j++)
+                    {
+                        oo[b * NMF + j * F + i] = o[b * NMF + i * NM + j];
+                    }
+            }
+
+            new Tensor<float>((B, N * M, F), oo).Print();
+        }
+
+    }
+}

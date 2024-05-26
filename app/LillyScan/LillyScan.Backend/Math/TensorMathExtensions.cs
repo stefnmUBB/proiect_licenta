@@ -377,6 +377,12 @@ namespace LillyScan.Backend.Math
                 return MatMul2(t1, t2);
             return t1.SubDimBroadcast(t2, MatMul2, 2);
         }
-        
+
+        public static bool ApproxEquals(this Tensor<float> t1, Tensor<float> t2, float eps = 1e-4f)
+        {
+            return EqualityComparer<Shape>.Default.Equals(t1.Shape, t2.Shape) &&
+                t1.Buffer.Zip(t2.Buffer, (x, y) => System.Math.Abs(x - y)).All(_ => _ < eps);
+        }
+
     }
 }

@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace LillyScan.Backend.HTR
 {
-    internal class LineDefragmentation
+    public class LineDefragmentation
     {        
         public static unsafe List<LocalizedMask>[] BuildSubsets(LocalizedMask[] masks, int N, Action<RawBitmap, string> callback = null)
         {

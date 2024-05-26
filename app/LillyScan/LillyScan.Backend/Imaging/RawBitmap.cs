@@ -54,7 +54,7 @@ namespace LillyScan.Backend.Imaging
             get => pBuffer[y * Stride + x * Channels + c];
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal set => Buffer[y * Stride + x * Channels + c]=value;
+            set => Buffer[y * Stride + x * Channels + c]=value;
         }        
 
         public void Dispose()

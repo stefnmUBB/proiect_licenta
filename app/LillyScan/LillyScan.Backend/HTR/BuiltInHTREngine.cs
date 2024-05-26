@@ -183,7 +183,7 @@ namespace LillyScan.Backend.HTR
                 Console.WriteLine(points.ToArray());
                 var mask = new LocalizedMask(points);
                 mask.ComputeMetadata();
-                SmoothFillMask(mask);
+                //SmoothFillMask(mask);
                 if (mask.Area == 0) continue;
                 mask = mask.Rescale(scaleX, scaleY);
                 mask.ComputeMetadata();                
@@ -237,7 +237,7 @@ namespace LillyScan.Backend.HTR
                         }                                                
                     }
                 }
-            }
+            }            
 
             if (contour.Count == 0) return;
             var gx = (int)contour.Average(_ => _.X);
