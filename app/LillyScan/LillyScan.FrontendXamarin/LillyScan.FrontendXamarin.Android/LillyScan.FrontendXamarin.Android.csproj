@@ -60,6 +60,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Cloo.clSharp">
+      <Version>1.0.1</Version>
+    </PackageReference>
     <PackageReference Include="Xamarin.CommunityToolkit">
       <Version>1.3.2</Version>
     </PackageReference>
@@ -76,6 +79,7 @@
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SplashActivity.cs" />
+    <Compile Include="Utils\CLBinding.cs" />
     <Compile Include="Utils\RawBitmapIOAdapter.cs" />
   </ItemGroup>
   <ItemGroup>

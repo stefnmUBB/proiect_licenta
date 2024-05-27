@@ -271,7 +271,13 @@ namespace LillyScan.Backend.Math
             fixed (float* tbuff = &t.Buffer.Buffer[0])
             fixed (float* kbuff = &kernel.Buffer.Buffer[0])
             fixed (float* rbuff = &result[0])
-                UnsafeOperations.Conv2D(tbuff, kbuff, rbuff, B, n, m, C, K1, K2, F);
+            {
+                if (PlatformConfig.Conv2DMethod == Conv2DMethod.Img2Col)
+                    Img2Col.Conv2D(tbuff, kbuff, rbuff, B, n, m, C, K1, K2, F);
+                else
+                    UnsafeOperations.Conv2D(tbuff, kbuff, rbuff, B, n, m, C, K1, K2, F);
+
+            }
 
             return new Tensor<float>((B, n, m, F), result);            
         }        

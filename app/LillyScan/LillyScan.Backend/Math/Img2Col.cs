@@ -1,4 +1,7 @@
 ﻿using LillyScan.Backend.AI.Layers;
+using System;
+using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace LillyScan.Backend.Math
 {
@@ -12,32 +15,44 @@ namespace LillyScan.Backend.Math
             int CK1K2 = C * K1 * K2;
             int hK1 = (K1 >> 1) - (1 - K1 % 2);
             int hK2 = (K2 >> 1) - (1 - K2 % 2);
+            int K2C = K2 * C;
+            int Cd8 = C / 8;
+            int Cm8 = C % 8;
 
             for (int b = 0; b < B; b++)
-            {
-                int ri0 = b * NMCK1K2;
+            {                
                 for (int n = 0; n < N; n++)
                 {
                     for (int m = 0; m < M; m++)
-                    {
-                        int ri = ri0 + (n * M + m), rj = 0;
+                    {                        
                         for (int k1 = 0; k1 < K1; k1++)
                         {
                             int ii = n + k1 - hK1;
-                            for (int k2 = 0; k2 < K2; k2++) 
+                            if (ii < 0 || ii >= N)
                             {
-                                int jj = m + k2 - hK2;
-                                if (ii < 0 || jj < 0 || ii >= N || jj >= M)
+                                for (int q = 0; q < K2C; q++) *res++ = 0;                                
+                            }
+                            else
+                            {
+                                for (int k2 = 0; k2 < K2; k2++)
                                 {
-                                    for (int c = 0; c < C; c++)
-                                        res[ri + (rj++) * NM] = 0;                                        
-                                }
-                                else
-                                {
-                                    int i = b * NMC + ii * MC + jj * C;
-                                    for (int c = 0; c < C; c++)
+                                    int jj = m + k2 - hK2;
+                                    if (jj < 0 || jj >= M) 
                                     {
-                                        res[ri + (rj++) * NM] = buf[i + c];
+                                        for (int c = 0; c < C; c++) *res++ = 0;
+                                    }
+                                    else
+                                    {
+                                        float* src = buf + b * NMC + ii * MC + jj * C;
+                                        for(int c=Cd8;c>0;c--)
+                                        {
+                                            *res++ = *src++; *res++ = *src++; *res++ = *src++; *res++ = *src++;
+                                            *res++ = *src++; *res++ = *src++; *res++ = *src++; *res++ = *src++;
+                                        }
+                                        for (int c = Cm8; c > 0; c--)
+                                            *res++ = *src++;
+
+                                        //for (int c = 0; c < C; c++) *res++ = *src++;
                                     }
                                 }
                             }
@@ -68,28 +83,61 @@ namespace LillyScan.Backend.Math
             }
         }
 
+        private static unsafe void DotMulBatch(float* a, float* b, float* r, int B, int RA, int RB, int C)
+        {
+            for (int i = 0; i < B; i++)
+            {
+                DotMul(a, b + i * RB * C, r + i * RA * RB, RA, RB, C);
+            }
+        }
+
+        private static unsafe void DotMul(float* a, float* b, float* r, int RA, int RB, int C)
+        {
+            int Cd8 = C / 8, Cm8 = C % 8;
+            for (int j = 0; j < RB; j++)
+                for (int i = 0; i < RA; i++)                                           
+                {
+                    float* s1 = a + C * i;
+                    float* s2 = b + C * j;
+                    float s = 0;
+
+                    /*for (int c = Cd8; c > 0; c--) 
+                    {
+                        s += (*s1++) * (*s2++); s += (*s1++) * (*s2++); s += (*s1++) * (*s2++); s += (*s1++) * (*s2++);
+                        s += (*s1++) * (*s2++); s += (*s1++) * (*s2++); s += (*s1++) * (*s2++); s += (*s1++) * (*s2++);
+                    }*/
+                    for (int c = C; c > 0; c--) 
+                        s += (*s1++) * (*s2++);
+                    *r++ = s;
+                }                        
+        }
+
+        public static Stopwatch sw = new Stopwatch();
+
         public static unsafe void Conv2D(float* tbuff, float* kbuff, float* rbuff, int B, int N, int M, int C, int K1, int K2, int F)
         {
             var matK = new float[K1 * K2 * C * F];
             var matT = new float[B * K1 * K2 * C * N * M];
             var matR = new float[B * N * M * F];
-            fixed(float* pmatK = &matK[0])
-            fixed(float* pmatT = &matT[0])
-            fixed(float* pmatR = &matR[0])
+            fixed (float* pmatK = &matK[0])
+            fixed (float* pmatT = &matT[0])
+            fixed (float* pmatR = &matR[0]) 
             {
+                //sw?.Restart();
                 I2C_TransformKernel(kbuff, pmatK, K1, K2, C, F);
                 I2C_TransformSource(tbuff, pmatT, B, N, M, C, K1, K2);
-                MatMulBatch(pmatK, pmatT, pmatR, B, F, K1 * K2 * C, M * N);
-
-                int NMF = N * M * F, NM = N * M;
-                for (int b = 0; b < B; b++)
-                {
-                    for (int i = 0; i < F; i++)
-                        for (int j = 0; j < N * M; j++)
-                        {
-                            rbuff[b * NMF + j * F + i] = pmatR[b * NMF + i * NM + j];
-                        }
-                }
+                var el1 = sw?.Elapsed.TotalMilliseconds ?? 0.0;
+                //sw?.Restart();
+                if (PlatformConfig.DotMul != null)
+                    PlatformConfig.DotMul(matK, matT, matR, F, N * M, K1 * K2 * C);
+                else
+                    DotMulBatch(pmatK, pmatT, pmatR, B, F, N * M, K1 * K2 * C);
+                //sw?.Stop();
+                //var el2 = sw?.Elapsed.TotalMilliseconds ?? 0.0;                
+                //Debug.WriteLine($"Img2ColConv:");
+                //Debug.WriteLine($"Transform: {el1}");
+                //Debug.WriteLine($"Mul: {el2}");
+                for (int i = 0, l = matR.Length; i < l; i++) rbuff[i] = matR[i];
             }            
         }
 
@@ -99,10 +147,25 @@ namespace LillyScan.Backend.Math
             fixed (float* pkbuff = &kbuff[0])
             fixed (float* prbuff = &rbuff[0])
                 Conv2D(ptbuff, pkbuff, prbuff, B, N, M, C, K1, K2, F);
+            
         }
 
         public static unsafe void Run()
         {
+            int B = 1, N = 256, M = 256, C = 64, F = 128, K1 = 3, K2 = 3;
+            var t = new float[B * N * M * C];
+            var k = new float[K1*K2*C*F];
+            var o = new float[B * N * M * F];
+
+            var r = new Random();
+            for (int i = 0; i < t.Length; i++) t[i] = (float)r.NextDouble();
+            for (int i = 0; i < k.Length; i++) t[i] = (float)r.NextDouble();
+
+            Conv2D(t, k, o, B, N, M, C, K1, K2, F);
+        }
+
+        public static unsafe void Run0()
+        {            
             int B=1, N = 4, M = 4;
             int K1 = 2, K2 = 2, C = 2, F = 2;
             var k = new float[K1 * K2 * C * F];
@@ -122,7 +185,7 @@ namespace LillyScan.Backend.Math
             fixed (float* ps = &s[0])
             fixed (float* pt = &t[0])
                 I2C_TransformSource(ps, pt, B, N, M, C, K1, K2);
-            new Tensor<float>((B, K1 * K2 * C, N * M), t).Print();
+            new Tensor<float>((B, N * M, K1 * K2 * C), t).Print();
 
             var o = new float[B * N * M * F];
             for (int i = 0; i < o.Length; i++) o[i] = 0;
@@ -130,11 +193,12 @@ namespace LillyScan.Backend.Math
             fixed (float* pr = &r[0])
             fixed (float* po = &o[0])
             {
-                MatMulBatch(pr, pt, po, B, F, K1 * K2 * C, M * N);
-            }            
+                DotMulBatch(pr, pt, po, B, F, M * N, K1 * K2 * C);
+                //MatMulBatch(pr, pt, po, B, F, K1 * K2 * C, M * N);
+            }
 
 
-            new Tensor<float>((B, F, N * M), o).Print();
+            new Tensor<float>((B, F, N * M), o).Print("out=");
 
             var oo = new float[B * N * M * F];
             int NMF = N * M * F, MF = M * F, NM = N * M;
@@ -147,7 +211,7 @@ namespace LillyScan.Backend.Math
                     }
             }
 
-            new Tensor<float>((B, N * M, F), oo).Print();
+            new Tensor<float>((B, N * M, F), oo).Print("oo=");
         }
 
     }

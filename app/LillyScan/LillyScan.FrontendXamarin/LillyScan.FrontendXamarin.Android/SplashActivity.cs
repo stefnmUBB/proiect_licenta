@@ -3,6 +3,10 @@ using Android.Content;
 using Android.OS;
 using Android.Util;
 using AndroidX.AppCompat.App;
+using Java.Lang;
+using LillyScan.Backend.Math;
+using LillyScan.FrontendXamarin.Droid.Utils;
+using System;
 using System.Threading.Tasks;
 
 namespace LillyScan.FrontendXamarin.Droid
@@ -22,15 +26,26 @@ namespace LillyScan.FrontendXamarin.Droid
         protected override void OnResume()
         {
             base.OnResume();
-            Task startupWork = new Task(() => { SimulateStartup(); });
-            startupWork.Start();
+            Task.Run(Startup);            
         }
-
-        // Simulates background work that happens behind the splash screen
-        async void SimulateStartup()
+        
+        void Startup()
         {
-            //Log.Debug(TAG, "Performing some startup work that takes a bit of time.");
-            await Task.Delay(100); // Simulate a bit of startup work.
+            System.Diagnostics.Debug.WriteLine("CL Init");
+            CLBinding.Init();
+            System.Diagnostics.Debug.WriteLine("CL Run");
+
+            PlatformConfig.DotMul = null;
+            PlatformConfig.DotMul = CLBinding.DotMul;
+            //Img2Col.Run();
+
+            //Console.WriteLine(string.Join(", ", r));
+            //JavaSystem.Exit(0);
+
+            FrontendXamarin.Utils.RawBitmapIOAdapter.ImageSource2RawBitmap = Utils.RawBitmapIOAdapter.ToRawBitmap;
+            FrontendXamarin.Utils.RawBitmapIOAdapter.RawBitmap2ImageSource = Utils.RawBitmapIOAdapter.ToImageSource;
+            Backend.Initializer.Initialize();
+            System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(FrontendXamarin.Utils.HTR).TypeHandle);
             //Log.Debug(TAG, "Startup work is finished - starting MainActivity.");
             StartActivity(new Intent(Application.Context, typeof(MainActivity)));
         }

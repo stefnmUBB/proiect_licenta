@@ -7,6 +7,9 @@ using Android.OS;
 using Android.Hardware.Usb;
 using Xamarin.Essentials;
 using System.IO;
+using Android.Renderscripts;
+using Javax.Security.Auth;
+using Android.Content;
 
 namespace LillyScan.FrontendXamarin.Droid
 {
@@ -15,13 +18,7 @@ namespace LillyScan.FrontendXamarin.Droid
     {
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            base.OnCreate(savedInstanceState);
-
-            FrontendXamarin.Utils.RawBitmapIOAdapter.ImageSource2RawBitmap = Utils.RawBitmapIOAdapter.ToRawBitmap;
-            FrontendXamarin.Utils.RawBitmapIOAdapter.RawBitmap2ImageSource = Utils.RawBitmapIOAdapter.ToImageSource;
-            Backend.Initializer.Initialize();
-            System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(FrontendXamarin.Utils.HTR).TypeHandle);
-
+            base.OnCreate(savedInstanceState);                                         
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);            
@@ -32,8 +29,7 @@ namespace LillyScan.FrontendXamarin.Droid
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
+        }        
     }
 }

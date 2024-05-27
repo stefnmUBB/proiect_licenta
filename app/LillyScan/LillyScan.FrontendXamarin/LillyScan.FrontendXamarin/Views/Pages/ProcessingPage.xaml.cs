@@ -94,9 +94,14 @@ namespace LillyScan.FrontendXamarin.Views.Pages
             PreviewLinePredictionList.ForeachItem(linePred =>
             {
                 using var linebmp = linePred.LineImage.ToRawBitmapSync();
-                //linePred.PredictedText = HTR.Engine.PredictTextLine(linebmp);
-                linePred.PredictedText = "(Placeholder)";
-                Thread.Sleep(2000);
+                var sw = new Stopwatch();
+                sw.Start();
+                var predictedText = HTR.Engine.PredictTextLine(linebmp);                
+                sw.Stop();
+                Debug.WriteLine($"Line predicted in {sw.ElapsedMilliseconds}ms");
+                linePred.PredictedText = $"{sw.ElapsedMilliseconds}ms: " + predictedText;
+                //linePred.PredictedText = "(Placeholder)";
+                //Thread.Sleep(2000);
                 linePred.IsReady = true;                
                 Debug.WriteLine($"Predicted text: {linePred.PredictedText}");
                 MainThread.InvokeOnMainThreadAsync(() => PreviewLinePredictionList.RefreshItem(linePred));

@@ -37,13 +37,18 @@ namespace LillyScan.FrontendXamarin.Views.Controls
 
 		public void ForeachItem(Action<PreviewLinePrediction> action)
 		{
-			var partition = Partitioner.Create(0, Items.Count, Items.Count / 4);
+			for(int i=0, l=Items.Count;i<l;i++)			
+			{
+				action(Items[i]);
+			}
+
+			/*var partition = Partitioner.Create(0, Items.Count, Items.Count / 4);
 			Parallel.ForEach(partition, new ParallelOptions { MaxDegreeOfParallelism = 4 }, range =>
 			{
 				for (int i = range.Item1; i < range.Item2; i++)
 					action(Items[i]);
 
-			});			
+			});*/			
 		}
 
 		public void BeginRefresh() => ListView.BeginRefresh();

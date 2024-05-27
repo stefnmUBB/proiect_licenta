@@ -36,7 +36,7 @@ namespace LillyScan.Backend.Tests.TestTemplates
         }
 
         protected override bool CompareOutputs(Tensor<float> o1, Tensor<float> o2)
-        {          
+        {            
             return o1.ApproxEquals(o2);            
         }        
 
