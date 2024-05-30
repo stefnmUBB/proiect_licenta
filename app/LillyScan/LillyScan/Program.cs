@@ -81,11 +81,11 @@ namespace LillyScan
 
         static void Run()
         {
-            Img2Col.Run();
-
-            //Metrics.Measure();
-            Console.ReadLine();
+            //Img2Col.Run();
+            //CompileIAM();
+            Metrics.Measure();
             //Metrics.RunIam();
+            Console.ReadLine();            
             Environment.Exit(0);
             //CompileIAM();
             //var imagePath = @"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\IAM_0\322_in.png";
@@ -95,6 +95,8 @@ namespace LillyScan
             //var imagePath = @"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\nego\002_in.jpg";
             //var imagePath = @"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\tmp\cap_2_in.jpg";
             //var imagePath = @"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\tmp\rt2.jpg";
+            //var imagePath = @"D:\Users\Stefan\Datasets\hw_flex\IAM_full\1.png";
+
             var image = RawBitmapIO.FromFile(imagePath);          
             
             var cts = new CancellationTokenSource();
@@ -102,7 +104,7 @@ namespace LillyScan
             var pm = new ProgressMonitor(cts.Token);
             pm.ProgressChanged += (o, p, d) => Console.WriteLine($" [ProgressMonitor] [{p:000.00}]: {d}");
             int q = 0;
-            Action<RawBitmap, string> action = (b, c) => b.Save($"cc\\predCC{q++}_{c}.png");
+            Action<RawBitmap, string> action = (b, c) => b.Save($"cc2\\predCC{q++}_{c}.png");
             (HTR as BuiltInHTREngine).CCAction = action;
 
             /*using (var bmp = RawBitmapIO.FromFile(@"D:\anu3\proiect_licenta\app\LillyScan\LillyScan\bin\Debug\cc\IAM1.png")) 
@@ -125,7 +127,7 @@ namespace LillyScan
                         linebmp.CheckNaN();
                         //action(linebmp, "");
                         //Layer.X = 0;                        
-                        HTR.PredictTextLine(linebmp);
+                        //HTR.PredictTextLine(linebmp);
                         linebmp.Dispose();
                         break;
                     }                                        

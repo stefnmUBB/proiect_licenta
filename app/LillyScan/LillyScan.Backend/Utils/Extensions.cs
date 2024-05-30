@@ -59,6 +59,25 @@ namespace LillyScan.Backend.Utils
             return maxIndex;
         }
 
+        public static int ArgMin<T, U>(this IEnumerable<T> sequence, Func<T,U> selector) where U : IComparable<U>
+        {
+            int minIndex = -1;
+            U minValue = default(U);
+
+            int index = 0;
+            foreach (T value in sequence)
+            {
+                var s = selector(value);
+                if (s.CompareTo(minValue) < 0 || minIndex == -1) 
+                {
+                    minIndex = index;
+                    minValue = s;
+                }
+                index++;
+            }
+            return minIndex;
+        }
+
         public static void ForEach<T>(this IEnumerable<T> items, Action<T> action)
         {
             foreach (var item in items)

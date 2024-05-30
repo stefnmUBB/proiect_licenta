@@ -7,8 +7,7 @@
     <ContentView.Content>
         <StackLayout VerticalOptions="Fill">
             <Label TextColor="Black" FontSize="18" HorizontalTextAlignment="Center" Margin="2">Predicted lines</Label>
-            <ListView x:Name="ListView" Margin="10" RowHeight="120" SelectionMode="None" VerticalOptions="FillAndExpand"
-                      CachingStrategy="RecycleElement">
+            <ListView x:Name="ListView" Margin="10" RowHeight="120" SelectionMode="None" VerticalOptions="FillAndExpand">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>

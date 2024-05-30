@@ -96,7 +96,7 @@ namespace LillyScan
                 {
                     if (bmp[y, x] < 0.5)
                     {
-                        foreach ((int iy, int ix) in ForCircle(x, y, 10, 0, 0, bmp.Width, bmp.Height))
+                        foreach ((int iy, int ix) in ForCircle(x, y, 5, 0, 0, bmp.Width, bmp.Height))
                         {
                             result[iy, ix, 0] = color.R;
                             result[iy, ix, 1] = color.G;
@@ -123,6 +123,24 @@ namespace LillyScan
                 using (var image = RawBitmapIO.FromFile(imagePath).AverageChannels(disposeOriginal: true)) 
                 using (var bmp = SegmentIam(image))
                     bmp.Save(outDir + fn);                          
+                //break;
+            }
+        }
+
+        public static void RunIam0()
+        {
+            var dir = @"D:\Users\Stefan\Datasets\hw_flex\IAM_full";
+            var outDir = @"C:\Users\Stefan\Desktop\perftest\iam\";
+
+            foreach (var imagePath in Directory.EnumerateFiles(dir, "*.png"))
+            {
+                Console.WriteLine(imagePath);
+                var fn = Path.GetFileName(imagePath);
+                if (File.Exists(outDir + fn))
+                    continue;
+                using (var image = RawBitmapIO.FromFile(imagePath).AverageChannels(disposeOriginal: true))
+                using (var bmp = SegmentIam(image))
+                    bmp.Save(outDir + fn);
                 //break;
             }
         }
@@ -268,22 +286,60 @@ namespace LillyScan
             return (dr == 0 ? 1 : R / dr, dp == 0 ? 1 : P / dp);
         }
 
+        private static double LineAccuracy(RawBitmap real, RawBitmap pred)
+        {
+            var G = FindMasks(real);
+            var E = FindMasks(pred);
+
+            double A = 0;            
+            foreach (var g in G)
+            {
+                double s = 0;
+                double t = 0;                
+
+                foreach (var e in E)
+                {                    
+                    var intersect = MaskIntersect(g, e);                    
+                    if (intersect > 0)
+                    {
+                        s += intersect + MaskCpl(g, e);
+                        t += MaskTotal(g, e);                        
+                    }
+                }
+                A += t == 0 ? 0 : s / t;                
+            }
+            foreach (var g in G) g.Dispose();
+            foreach (var e in E) e.Dispose();
+
+            return G.Length == 0 ? 1 : A / G.Length;
+        }
+
 
         public static void Measure()
         {
-            //var mp = new Metric("Precision");
-            //var mr = new Metric("Recall");
-            var md = new Metric("Dice");
-            var mj = new Metric("IoU");
-            foreach(var (real, pred) in GetPairs())
+            var ma = new Metric("MaskAccuracy");
+            var mp = new Metric("MaskPrecision");
+            var mr = new Metric("MaskRecall");
+            var md = new Metric("MaskDice");
+            var mj = new Metric("MaskIoU");
+            var la = new Metric("LineAccuracy");
+            var lp = new Metric("LinePrecision");
+            var lr = new Metric("LineRecall");            
+            foreach (var (real, pred) in GetPairs())
             {
+                ma.Add(MaskAccuracy(real, pred));
                 (var d, var j) = IoU(real, pred);
                 md.Add(d);
                 mj.Add(j);
-                //(var r, var p) = MaskPR(real, pred);
-                //mp.Add(p);
-                //mr.Add(r);
-                //Console.WriteLine($"F-m = {2 * mp.Get() * mr.Get() / (mp.Get() + mr.Get())}");
+                (var r, var p) = MaskPR(real, pred);
+                mp.Add(p);
+                mr.Add(r);
+                Console.WriteLine($"Mask F-m = {2 * mp.Get() * mr.Get() / (mp.Get() + mr.Get())}");
+                (r, p) = LinePR(real, pred);
+                la.Add(LineAccuracy(real, pred));
+                lp.Add(p);
+                lr.Add(r);
+                Console.WriteLine($"Line F-m = {2 * lp.Get() * lr.Get() / (lp.Get() + lr.Get())}");
                 real.Dispose();
                 pred.Dispose();
             }
@@ -325,6 +381,64 @@ namespace LillyScan
                 }
             }
             return r;
+        }
+
+        private static unsafe int MaskUnion(LocalizedMask m1, LocalizedMask m2)
+        {
+            int r = 0;
+            //Console.WriteLine($"MaskIntersect {m1.Area} {m2.Area}");
+            for (int y = 0; y < m1.Height; y++)
+            {
+                for (int x = 0; x < m1.Width; x++)
+                {
+                    if (m1.Data[y * m1.Width + x] != 0)
+                    {
+                        r++;
+                        continue;
+                    }
+                    int y2 = m1.Y + y - m2.Y;
+                    int x2 = m1.X + x - m2.X;
+                    if (y2 < 0 || x2 < 0 || y2 >= m2.Height || x2 >= m2.Width) continue;
+
+                    if (m2.Data[y2 * m2.Width + x2] != 0)
+                        r++;
+                }
+            }
+            return r;
+        }
+
+        private static unsafe int MaskCpl(LocalizedMask m1, LocalizedMask m2)
+        {
+            int r = 0;
+            var d = new HashSet<(int, int)>();
+            for (int y = 0; y < m1.Height; y++)
+                for (int x = 0; x < m1.Width; x++)
+                    d.Add((m1.X + x, m1.Y + y));
+            for (int y = 0; y < m2.Height; y++)
+                for (int x = 0; x < m2.Width; x++)
+                    d.Add((m2.X + x, m2.Y + y));
+
+            foreach(var (x,y) in d)
+            {
+                int ix = x - m1.X, iy = y - m1.Y;
+                if (0 <= ix && ix < m1.Width && 0 <= iy && iy < m1.Height && m1.Data[iy * m1.Width + ix] != 0) continue;
+                ix = x - m2.X; iy = y - m2.Y;
+                if (0 <= ix && ix < m2.Width && 0 <= iy && iy < m2.Height && m2.Data[iy * m2.Width + ix] != 0) continue;
+                r++;
+            }
+            return r;
+        }
+
+        private static unsafe int MaskTotal(LocalizedMask m1, LocalizedMask m2)
+        {
+            var d = new HashSet<(int, int)>();
+            for (int y = 0; y < m1.Height; y++)            
+                for (int x = 0; x < m1.Width; x++)                
+                    d.Add((m1.X + x, m1.Y + y));
+            for (int y = 0; y < m2.Height; y++)
+                for (int x = 0; x < m2.Width; x++)
+                    d.Add((m2.X + x, m2.Y + y));
+            return d.Count;
         }
 
         private static LocalizedMask[] FindMasks(RawBitmap bmp)

@@ -85,7 +85,7 @@ namespace LillyScan.Backend.HTR
             {
                 var mask = masks[i];
                 maskLine[i] = lineZones
-                    .Select(l => System.Math.Abs(l.Y- DiagLength / 2 + l.Length / 2 - ChangeBase(mask.CenterX, mask.CenterY, baseVector).Y))
+                    .Select(l => System.Math.Abs(l.Y + l.Length / 2 - ChangeBase(mask.CenterX, mask.CenterY, baseVector).Y))
                     .ArgMin();
             }
 
@@ -94,7 +94,7 @@ namespace LillyScan.Backend.HTR
 
             for (int i=0;i<linesCount;i++)
             {
-                var lineFit = (baseVector.X, baseVector.Y, lineZones[i].Y + lineZones[i].Length * 0.5f);
+                var lineFit = (baseVector.X, baseVector.Y, -lineZones[i].Y - lineZones[i].Length * 0.5f);
                 var lineMasks = maskIndices.Where(k => maskLine[k] == i).Select(k => masks[k]).ToArray();
                 result[i] = lineMasks.Length > 0 ? new LinesSplit(lineFit, lineMasks, baseVector) : null;
             }
@@ -108,7 +108,7 @@ namespace LillyScan.Backend.HTR
             {
                 if (c[i]==0 && l>0)
                 {
-                    yield return (y, l);
+                    yield return (y - DiagLength / 2, l);
                     (y, l) = (-1, 0);                    
                     continue;
                 }
@@ -119,7 +119,7 @@ namespace LillyScan.Backend.HTR
                 }
             }
             if (l > 0)
-                yield return (y, l);
+                yield return (y - DiagLength / 2, l);
         }
 
         private static int[] MaskSpikesAndPlateaus(float[] ycum)

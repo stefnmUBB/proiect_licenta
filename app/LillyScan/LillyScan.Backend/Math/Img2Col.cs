@@ -91,6 +91,14 @@ namespace LillyScan.Backend.Math
             }
         }
 
+        public static unsafe void DotMul(float[] a, float[] b, float[] r, int RA, int RB, int C)
+        {
+            fixed (float* pa = &a[0])
+            fixed (float* pb = &b[0])
+            fixed (float* pr = &r[0])
+                DotMul(pa, pb, pr, RA, RB, C);
+        }
+
         private static unsafe void DotMul(float* a, float* b, float* r, int RA, int RB, int C)
         {
             int Cd8 = C / 8, Cm8 = C % 8;

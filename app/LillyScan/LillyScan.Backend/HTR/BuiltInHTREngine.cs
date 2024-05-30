@@ -191,7 +191,7 @@ namespace LillyScan.Backend.HTR
                 linesLocalized.Add(mask);                
             }
 
-
+            foreach (var mask in masks) mask.Dispose();
             /*foreach (var lm in linesLocalized)
             {
                 using (var bmp = new RawBitmap(bitmap.Width, bitmap.Height, 3)) 

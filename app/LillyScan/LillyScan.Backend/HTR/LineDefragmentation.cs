@@ -71,16 +71,29 @@ namespace LillyScan.Backend.HTR
             callback?.Invoke(tbmp, "");
             tbmp.Dispose();
             List<List<LocalizedMask>> finalLines = new List<List<LocalizedMask>>();
-
-            var dominantGroup = lineGroups.MaxBy(_ => _.Sum(l => l.TotalArea));           
-
-            var rlines = dominantGroup.Select(_ => _.Masks.ToList()).ToArray();
-            /*if(rlines.Length>0)
-            {
-                var baseVector = dominantGroup[0].BaseVector;                             
-            } */           
             
+            var dominantGroup = lineGroups.MaxBy(_ => _.Sum(l => l.TotalArea));
+            var dominantMasks = new HashSet<LocalizedMask>(dominantGroup.SelectMany(_ => _.Masks));            
+            var rlines = dominantGroup.Select(_ => _.Masks.ToList()).ToArray();
+
+            foreach(var mask in masks)
+            {
+                if (dominantMasks.Contains(mask)) continue;
+                var index = dominantGroup.ArgMin(_ => Proximity(_, mask));
+                Console.WriteLine($"______________________________________________");
+                rlines[index].Add(mask);
+            }            
+         
             return rlines;
+        }
+
+        private static float Proximity(MasksLineSplitter.LinesSplit line, LocalizedMask mask)
+        {
+            (var a, var b, var c) = (line.LineFit.A, line.LineFit.B, line.LineFit.C);
+            var d = a * mask.CenterX + b * mask.CenterY + c;            
+            d = System.Math.Abs(d);
+            Console.WriteLine($"Proximity = {d} / {(a,b,c)} / {(mask.CenterX, mask.CenterY)}");
+            return d;
         }
 
         public static unsafe int[] BuildLinesMask(List<LocalizedMask>[] lines, Action<RawBitmap, string> callback = null)

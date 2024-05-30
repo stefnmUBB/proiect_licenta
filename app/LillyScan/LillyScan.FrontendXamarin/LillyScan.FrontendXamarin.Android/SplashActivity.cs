@@ -37,6 +37,8 @@ namespace LillyScan.FrontendXamarin.Droid
 
             PlatformConfig.DotMul = null;
             PlatformConfig.DotMul = CLBinding.DotMul;
+
+            CLBinding.RuntimeTest();
             //Img2Col.Run();
 
             //Console.WriteLine(string.Join(", ", r));

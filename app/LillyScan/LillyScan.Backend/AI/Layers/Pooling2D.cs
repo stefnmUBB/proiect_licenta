@@ -133,9 +133,37 @@ namespace LillyScan.Backend.AI.Layers
 
         }
 
-        protected override Tensor<float>[] OnCall(Tensor<float>[] inputs)
+        /*protected override Tensor<float>[] OnCall(Tensor<float>[] inputs)
         {
             return new[] { Tensors.Stack(inputs[0].Unstack(axis: 0).Select(SolveSingleMap)) };
+        }*/
+
+        protected override Tensor<float>[] OnCall(Tensor<float>[] inputs)
+        {
+            var input = inputs[0];
+            (var B, var N, var M, var C) = (input.Shape[0], input.Shape[1], input.Shape[2], input.Shape[3]);            
+            switch (Padding)
+            {
+                case Padding.Valid:
+                    {
+                        (var h, var w) = Pooling.GetPooling2DValidPaddingDims(N, M, PoolSize.Rows, PoolSize.Cols, Strides.Rows, Strides.Cols);
+                        var r = new float[B * h * w * C];
+                        Pooling.Pooling2DValidPadding(input.Buffer.Buffer, r, B, N, M, C,
+                            PoolSize.Rows, PoolSize.Cols, Strides.Rows, Strides.Cols,
+                            Pooling.MaxKernel);
+                        return new[] { new Tensor<float>((B, h, w, C), r) };
+                    }
+                case Padding.Same:
+                    {
+                        (var h, var w) = Pooling.GetPooling2DSamePaddingDims(N, M, PoolSize.Rows, PoolSize.Cols, Strides.Rows, Strides.Cols);
+                        var r = new float[B * h * w * C];
+                        Pooling.Pooling2DSamePadding(input.Buffer.Buffer, r, B, N, M, C,
+                            PoolSize.Rows, PoolSize.Cols, Strides.Rows, Strides.Cols,
+                            Pooling.MaxKernel);
+                        return new[] { new Tensor<float>((B, h, w, C), r) };
+                    }
+            }
+            throw new NotImplementedException($"Not Implemented Padding: {Padding}");
         }
 
         protected override void OnValidateInputShapes(Shape[] inputShapes)

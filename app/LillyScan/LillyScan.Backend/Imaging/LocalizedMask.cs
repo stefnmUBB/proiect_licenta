@@ -1,6 +1,7 @@
 ﻿using LillyScan.Backend.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -21,8 +22,9 @@ namespace LillyScan.Backend.Imaging
         public float OrientationConfidence;
         public float CenterX;
         public float CenterY;
-        public int Area;                
-        
+        public int Area;
+
+
         public LocalizedMask((int X, int Y)[] pixels)
         {
             if(pixels.Length==0)
@@ -153,7 +155,7 @@ namespace LillyScan.Backend.Imaging
             if(Width>=Height)
             {
                 (float b0, float b1, float d) = LinearRegression.LeastSquare2D(pointsX, pointsY);
-                Console.WriteLine($"W>H: {(b0,b1)}");
+                //Console.WriteLine($"W>H: {(b0,b1)}");
                 // y=b0*x+b1 => b0*x - y + b1 = 0
                 double norm = System.Math.Sqrt(b0 * b0 + 1);
                 LineFit = ((float)(b0 / norm), (float)(-1 / norm), (float)(b1 / norm), d);
@@ -161,7 +163,7 @@ namespace LillyScan.Backend.Imaging
             else // prevent b0=inf for a vertical line
             {
                 (float b0, float b1, float d) = LinearRegression.LeastSquare2D(pointsY, pointsX);
-                Console.WriteLine($"W<H: {(b0, b1)}");
+                //Console.WriteLine($"W<H: {(b0, b1)}");
                 // x = b0*y + b1 => -x + b0*y+b1 = 0
                 double norm = System.Math.Sqrt(b0 * b0 + 1);
                 LineFit = ((float)(-1 / norm), (float)(b0 / norm), (float)(b1 / norm), d);
@@ -202,7 +204,7 @@ namespace LillyScan.Backend.Imaging
             else
                 OrientationConfidence = System.Math.Max(FitSegmentLength, MaxLineDistanceError) / (FitSegmentLength + MaxLineDistanceError);
 
-            Console.WriteLine($"{LineFit} Err={MaxLineDistanceError}, SegLen={FitSegmentLength}, Conf={OrientationConfidence}");
+            //Console.WriteLine($"{LineFit} Err={MaxLineDistanceError}, SegLen={FitSegmentLength}, Conf={OrientationConfidence}");
 
             /*if(MaxLineDistanceError>50)
             {
@@ -227,6 +229,19 @@ namespace LillyScan.Backend.Imaging
         public void Dispose()
         {
             Marshal.FreeHGlobal((IntPtr)Data);
+#if DEBUG
+            IsDisposed = true;
+#endif
         }
+
+
+#if DEBUG
+        private bool IsDisposed = false;
+        ~LocalizedMask()
+        {
+            if (!IsDisposed)
+                Debug.WriteLine($"Localized mask leaked: {(X, Y, Width, Height)}");
+        }
+#endif
     }
 }
