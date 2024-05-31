@@ -148,18 +148,16 @@ namespace LillyScan.Backend.AI.Layers
                     {
                         (var h, var w) = Pooling.GetPooling2DValidPaddingDims(N, M, PoolSize.Rows, PoolSize.Cols, Strides.Rows, Strides.Cols);
                         var r = new float[B * h * w * C];
-                        Pooling.Pooling2DValidPadding(input.Buffer.Buffer, r, B, N, M, C,
-                            PoolSize.Rows, PoolSize.Cols, Strides.Rows, Strides.Cols,
-                            Pooling.MaxKernel);
+                        Pooling.MaxPooling2DValidPadding(input.Buffer.Buffer, r, B, N, M, C,
+                            PoolSize.Rows, PoolSize.Cols, Strides.Rows, Strides.Cols);
                         return new[] { new Tensor<float>((B, h, w, C), r) };
                     }
                 case Padding.Same:
                     {
                         (var h, var w) = Pooling.GetPooling2DSamePaddingDims(N, M, PoolSize.Rows, PoolSize.Cols, Strides.Rows, Strides.Cols);
                         var r = new float[B * h * w * C];
-                        Pooling.Pooling2DSamePadding(input.Buffer.Buffer, r, B, N, M, C,
-                            PoolSize.Rows, PoolSize.Cols, Strides.Rows, Strides.Cols,
-                            Pooling.MaxKernel);
+                        Pooling.MaxPooling2DSamePadding(input.Buffer.Buffer, r, B, N, M, C,
+                            PoolSize.Rows, PoolSize.Cols, Strides.Rows, Strides.Cols);
                         return new[] { new Tensor<float>((B, h, w, C), r) };
                     }
             }

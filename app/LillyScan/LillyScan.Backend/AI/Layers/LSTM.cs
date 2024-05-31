@@ -2,6 +2,7 @@
 using LillyScan.Backend.Math;
 using LillyScan.Backend.Parsers;
 using LillyScan.Backend.Types;
+using LillyScan.Backend.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -61,8 +62,17 @@ namespace LillyScan.Backend.AI.Layers
         }        
         protected override Tensor<float>[] OnCall(Tensor<float>[] inputs)
         {            
-            var input = inputs[0];            
-            var output = input.SubDimMap(t =>
+            var input = inputs[0];
+            (var B, var T, var L) = (input.Shape[0], input.Shape[1], input.Shape[2]);
+            var U = Units;
+            var outBuf = new float[B * T * U];
+            var w = Context.GetWeight("W", (L, 4 * U)).Buffer.Buffer;
+            var u = Context.GetWeight("U", (U, 4 * U)).Buffer.Buffer;
+            var b = UseBias ? Context.GetWeight("B", (4 * U)).Buffer.Buffer : new float[4 * U];
+
+            QuickOps.ForwardLSTM(input.Buffer.Buffer, outBuf, w, u, b, B, T, L, U);
+            return new[] { new Tensor<float>((B, T, U), outBuf) };
+            /*var output = input.SubDimMap(t =>
             {
                 var hs = new List<Tensor<float>>();
                 var c = Tensors.Zeros<float>(Units);
@@ -78,13 +88,26 @@ namespace LillyScan.Backend.AI.Layers
                 }
                 return Tensors.Stack(hs);                
             }, 2);
-            return new[] { output };
+            return new[] { output };*/
         }
 
         public override void LoadWeights(Tensor<float>[] weights)
         {
             base.LoadWeights(weights);
             Cell.LoadWeights(weights);
+
+            Assert("LSTM: weights.Length == (UseBias ? 3 : 2)", weights.Length == (UseBias ? 3 : 2));
+            //Assert("LSTMCell: WShape.Equals(weights[0].Shape)", new Shape(InputShapes[0]).Equals(weights[0].Shape));
+            //Assert("LSTMCell: UShape.Equals(weights[1].Shape)", UShape.Equals(weights[1].Shape));
+
+            Context.Weights["W"] = weights[0];
+            Context.Weights["U"] = weights[1];
+
+            if (UseBias)
+            {
+                //Assert("LSTMCell: BiasShape.Equals(weights[2].Shape)", BiasShape.Equals(weights[2].Shape));
+                Context.Weights["B"] = weights[2];
+            }
         }
 
     }

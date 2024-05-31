@@ -191,23 +191,32 @@ namespace LillyScan.Backend.AI.Layers
                 }
             }
         }
-        public static unsafe void MatMul(float* a, float* b, float* r, int m, int n, int p)
+
+        public static unsafe void AddTo(float* a, float* r, int len)
         {
-            var rangePartitioner = Partitioner.Create(0, m);
-            Parallel.ForEach(rangePartitioner, new ParallelOptions { MaxDegreeOfParallelism = 8 }, (range, loopState) =>
+            for (int i = 0; i < len; i++)
+                r[i] += a[i];
+        }
+
+        public static unsafe void MatMul(float* a, float* b, float* r, int m, int n, int p, bool clearOutput = false)
+        {
+            if (clearOutput)
             {
-                for (int i = range.Item1; i < range.Item2; i++) 
-                //for (int i = 0; i < m; i++)
+                for (int i = 0; i < m; i++)
+                    for (int k = 0; k < p; k++)
+                        r[i * p + k] = 0;
+            }
+
+            for (int i = 0; i < m; i++)
+            {
+                for (int j = 0; j < n; j++)
                 {
-                    for (int j = 0; j < n; j++)
+                    for (int k = 0; k < p; k++)
                     {
-                        for (int k = 0; k < p; k++)
-                        {
-                            r[i * p + k] += a[i * n + j] * b[j * p + k];
-                        }
+                        r[i * p + k] += a[i * n + j] * b[j * p + k];
                     }
                 }
-            });
+            }            
         }        
 
         public static unsafe void UpSampling2D(float* tbuff, float* rbuff, int B, int N, int M, int C, int scaleRows, int scaleCols)

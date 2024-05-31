@@ -1,4 +1,6 @@
 ﻿using LillyScan.Backend.Tests.IO;
+using System.Diagnostics;
+using Xunit.Abstractions;
 using Xunit.Sdk;
 
 namespace LillyScan.Backend.Tests.TestTemplates
@@ -20,8 +22,13 @@ namespace LillyScan.Backend.Tests.TestTemplates
         {
             var i = DecodeInput();
             var o = DecodeOutput();
-            Assert.True(CompareOutputs(o, f(i)));
-        }        
+            var prod_o = f(i);
+            TestTemplate.Output?.WriteLine($"expected: {OutputToString(o)}");
+            TestTemplate.Output?.WriteLine($"produced: {OutputToString(prod_o)}");
+            Assert.True(CompareOutputs(o, prod_o));
+        }
+
+        protected virtual string OutputToString(O o) => o.ToString();
     }
 
     public static class TestTemplate
@@ -49,8 +56,12 @@ namespace LillyScan.Backend.Tests.TestTemplates
                 //Assert.Fail($"The following tests have failed: {listStr}");
                 throw new AggregateException($"The following tests have failed: {listStr}", exceptions.ToArray());
             }
-
         }
+
+        public static int[] ReadInts(string line) => line.Split(" ", StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToArray();
+        public static float[] ReadFloats(string line) => line.Split(" ", StringSplitOptions.RemoveEmptyEntries).Select(float.Parse).ToArray();
+
+        public static ITestOutputHelper Output;
     }
 
 }

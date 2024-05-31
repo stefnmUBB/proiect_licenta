@@ -80,7 +80,7 @@ namespace LillyScan
         }
 
         static void Run()
-        {
+        {            
             //Img2Col.Run();
             //CompileIAM();
             Metrics.Measure();

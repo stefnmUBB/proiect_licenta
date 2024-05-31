@@ -42,7 +42,7 @@ namespace LillyScan.Backend.AI.Layers
         public override Shape[] OnGetOutputShape(Shape[] inputShapes) => new[] { HidddenShape, HidddenShape }; // c,h                
 
         protected override Tensor<float>[] OnCall(Tensor<float>[] inputs)
-        {
+        {            
             (var c, var h, var x) = (inputs[0], inputs[1], inputs[2]);
             c = c.Reshape(1 + c.Shape);
             h = h.Reshape(1 + h.Shape);
@@ -53,11 +53,13 @@ namespace LillyScan.Backend.AI.Layers
             var t = x.MatMul(W).Add(h.MatMul(U));            
             
             if (UseBias) t = t.Add(Context.GetWeight("B"));            
-            t = t.Reshape((t.Shape[0], 4, Units));
+            t = t.Reshape((t.Shape[0], 4, Units));            
+
             var it = RecurrentActivation.Call(t[null, new IndexAccessor(0)]);
             var ft = RecurrentActivation.Call(t[null, new IndexAccessor(1)]);
             var ctt = Activation.Call(t[null, new IndexAccessor(2)]);
             var ot = RecurrentActivation.Call(t[null, new IndexAccessor(3)]);            
+
             var ct = ft.Multiply(c).Add(it.Multiply(ctt));            
             var ht = ot.Multiply(Activation.Call(ct));            
 
