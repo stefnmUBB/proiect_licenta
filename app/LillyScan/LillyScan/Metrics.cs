@@ -260,6 +260,7 @@ namespace LillyScan
             {
                 double n = 0, s = 0;
                 int interCount = 0;
+                double q = 0;
 
                 foreach(var e in E)
                 {
@@ -267,7 +268,8 @@ namespace LillyScan
                     n += intersect;
                     if (intersect > 0)
                     {
-                        s += e.Area;
+                        s += e.Area + g.Area;
+                        q += e.Area + g.Area - intersect;
                         interCount++;
                     }
                 }
@@ -275,9 +277,9 @@ namespace LillyScan
 
                 //Console.WriteLine($"{n}, {interCount}, {n - interCount}, {d}, {s}");
 
-                R += d == 0 ? 0 : (n - interCount) / d;
+                R += d == 0 ? 0 : (n - 1) / (q - 1);
                 dr += d == 0 ? 0 : 1;
-                P += s - 1 == 0 ? 0 : (n - 1) / (s - 1);
+                P += s - 1 == 0 ? 0 : (2 * n - 1) / (s - 1);
                 dp += s - 1 == 0 ? 0 : 1;
             }
             foreach (var g in G) g.Dispose();
@@ -317,29 +319,29 @@ namespace LillyScan
 
         public static void Measure()
         {
-            var ma = new Metric("MaskAccuracy");
+            /*var ma = new Metric("MaskAccuracy");
             var mp = new Metric("MaskPrecision");
             var mr = new Metric("MaskRecall");
             var md = new Metric("MaskDice");
             var mj = new Metric("MaskIoU");
-            var la = new Metric("LineAccuracy");
+            var la = new Metric("LineAccuracy");*/
             var lp = new Metric("LinePrecision");
             var lr = new Metric("LineRecall");            
             foreach (var (real, pred) in GetPairs())
             {
-                ma.Add(MaskAccuracy(real, pred));
+                /*ma.Add(MaskAccuracy(real, pred));
                 (var d, var j) = IoU(real, pred);
                 md.Add(d);
                 mj.Add(j);
                 (var r, var p) = MaskPR(real, pred);
                 mp.Add(p);
                 mr.Add(r);
-                Console.WriteLine($"Mask F-m = {2 * mp.Get() * mr.Get() / (mp.Get() + mr.Get())}");
-                (r, p) = LinePR(real, pred);
-                la.Add(LineAccuracy(real, pred));
+                Console.WriteLine($"Mask F-m = {2 * mp.Get() * mr.Get() / (mp.Get() + mr.Get())}");                
+                la.Add(LineAccuracy(real, pred));*/
+                (var r, var p) = LinePR(real, pred);
                 lp.Add(p);
                 lr.Add(r);
-                Console.WriteLine($"Line F-m = {2 * lp.Get() * lr.Get() / (lp.Get() + lr.Get())}");
+                //Console.WriteLine($"Line F-m = {2 * lp.Get() * lr.Get() / (lp.Get() + lr.Get())}");
                 real.Dispose();
                 pred.Dispose();
             }

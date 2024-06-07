@@ -1,4 +1,4 @@
-﻿using LillyScan.Backend.AI.Layers;
+using LillyScan.Backend.AI.Layers;
 using LillyScan.Backend.HTR;
 using LillyScan.Backend.Imaging;
 using LillyScan.Backend.Math;
@@ -83,15 +83,15 @@ namespace LillyScan
         {            
             //Img2Col.Run();
             //CompileIAM();
-            Metrics.Measure();
+            //Metrics.Measure();
             //Metrics.RunIam();
-            Console.ReadLine();            
-            Environment.Exit(0);
+            //Console.ReadLine();            
+            //Environment.Exit(0);
             //CompileIAM();
             //var imagePath = @"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\IAM_0\322_in.png";
             //var imagePath = @"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\Compuneri\51_in.png";
-            //var imagePath = @"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\IAM\5_in.png";
-            var imagePath = @"D:\Users\Stefan\Datasets\JL\018.jpg";
+            var imagePath = @"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\IAM\5_in.png";
+            //var imagePath = @"D:\Users\Stefan\Datasets\JL\018.jpg";
             //var imagePath = @"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\nego\002_in.jpg";
             //var imagePath = @"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\tmp\cap_2_in.jpg";
             //var imagePath = @"D:\Users\Stefan\Datasets\hw_flex\LineSegRaster\tmp\rt2.jpg";
@@ -104,7 +104,7 @@ namespace LillyScan
             var pm = new ProgressMonitor(cts.Token);
             pm.ProgressChanged += (o, p, d) => Console.WriteLine($" [ProgressMonitor] [{p:000.00}]: {d}");
             int q = 0;
-            Action<RawBitmap, string> action = (b, c) => b.Save($"cc2\\predCC{q++}_{c}.png");
+            Action<RawBitmap, string> action = (b, c) => b.Save($"cc3\\predCC{q++}_{c}.png");
             (HTR as BuiltInHTREngine).CCAction = action;
 
             /*using (var bmp = RawBitmapIO.FromFile(@"D:\anu3\proiect_licenta\app\LillyScan\LillyScan\bin\Debug\cc\IAM1.png")) 
@@ -145,11 +145,22 @@ namespace LillyScan
         {
             Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             Backend.Initializer.Initialize();
-            Run();
+            PredictLine(@"D:\Users\Stefan\Datasets\hw_flex\IAM_lines\1.png");
+            //Run();
             Console.ReadLine();
             return;
             //Console.WriteLine("Done"); Console.ReadLine();
             //Application.Run(new MainForm());
         }
+
+        static void PredictLine(string path)
+        {
+            using(var bmp=RawBitmapIO.FromFile(path))
+            {                
+                var line = (HTR as BuiltInHTREngine).PredictTextLine(bmp, cca: b => b.Save(@"C:\Users\Stefan\Desktop\w\1.png"));
+                Console.WriteLine(line);                
+            }
+        }
+
     }
 }

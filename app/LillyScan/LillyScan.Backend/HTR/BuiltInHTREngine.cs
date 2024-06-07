@@ -7,13 +7,9 @@ using LillyScan.Backend.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace LillyScan.Backend.HTR
 {
@@ -31,11 +27,14 @@ namespace LillyScan.Backend.HTR
             LinearSegmentationModel = ModelLoader.LoadFromBytes(Resources.LinearSegmentationModel64_lsm);
             PreviewSegmentationModel = ModelLoader.LoadFromBytes(Resources.PreviewSegmentationModel64_lsm);
             PaddedLinearSegmentationModel = ModelLoader.LoadFromBytes(Resources.PaddedLinearSegmentationModel64_lsm);
-            RecognitionModelEn = ModelLoader.LoadFromBytes(Resources.RecognitionModelEn_lsm);
+            RecognitionModelEn = ModelLoader.LoadFromBytes(Resources.RecognitionModelEnRo_lsm);
         }
 
-        static int k = 0;
         public unsafe string PredictTextLine(RawBitmap bitmap, ProgressMonitor progressMonitor = null, string taskName = null)
+            => PredictTextLine(bitmap, progressMonitor, taskName, null);
+
+        public unsafe string PredictTextLine(RawBitmap bitmap, ProgressMonitor progressMonitor = null, string taskName = null,
+            Action<RawBitmap> cca = null)
         {
             progressMonitor?.PushTask(taskName ?? "PredictTextLine", 1);
 
@@ -46,7 +45,7 @@ namespace LillyScan.Backend.HTR
                 if (bmp.Width > 1024 || bmp.Height > 64)
                 {
                     var scale = System.Math.Min(64f / bmp.Height, 1024f / bmp.Width);
-                    bmp = bmp.Resize((int)(bmp.Width * scale), (int)(bmp.Height * scale));
+                    bmp = bmp.Resize((int)(bmp.Width * scale), (int)(bmp.Height * scale), disposeOriginal: true);
                     bmp.CheckNaN();
                 }
                 tmp.Clear();
@@ -54,29 +53,30 @@ namespace LillyScan.Backend.HTR
                 tmp.CheckNaN();
                 bmp.Dispose();
 
+                cca?.Invoke(tmp);
+
                 CCAction?.Invoke(tmp, "");
 
                 var inputBuffer = new float[64 * 1024];
                 for (int i = 0; i < inputBuffer.Length; i++) inputBuffer[i] = tmp.Buffer[i];
                 var input = new Tensor<float>(new Shape(1, 64, 1024, 1), inputBuffer);
+
+                //RecognitionModelEn
+
                 var predicted = RecognitionModelEn.Call(new[] { input }, progressMonitor: progressMonitor);
                 var buffer = predicted[0].Buffer;
+
+                var charsLen = CharactersEn.Length;
+                var labelsLen = charsLen + 1;
 
                 string text = "";
                 for (int i=0;i<128;i++)
                 {
-                    var seq = buffer.Skip(82 * i).Take(82).ToArray();
+                    var seq = buffer.Skip(labelsLen * i).Take(labelsLen).ToArray();
                     int am = seq.ArgMax();
                     if (am < CharactersEn.Length)
                         text += CharactersEn[am];
                 }
-
-                /*using (var f = File.OpenWrite($"cc\\Text{k++}.txt"))
-                using (var w = new StreamWriter(f))
-                {
-                    w.WriteLine("[::]" + text + "[::]");
-                    predicted[0].Print("Pred", w);
-                }*/
                 progressMonitor?.PopTask();
                 return text;
             }            
@@ -138,14 +138,12 @@ namespace LillyScan.Backend.HTR
             var normalSegm = SegmentTiles64(bitmap, SegmentationType.Normal, parallel: false, resizeToOriginal: false, progressMonitor, "NormalSegm");            
             linearSegmTask.Wait();
             var linearSegm = linearSegmTask.Result;
-            progressMonitor?.AdvanceOneStep();
-            //SegmentTiles64(bitmap, SegmentationType.PaddedLinear, parallel: false, resizeToOriginal: false, progressMonitor, "LinearSegm");
-            //progressMonitor?.AdvanceOneStep();
+            progressMonitor?.AdvanceOneStep();            
 
             linearSegm = linearSegm.Threshold(0.5f, inPlace: true);
             CCAction?.Invoke(linearSegm, "");
 
-            var blurred = linearSegm.Filter3x3(new[] { 1f / 9, 1f / 9, 1f / 9, 1f / 9, 1f / 9, 1f / 9, 1f / 9, 1f / 9, 1f / 9, });
+            var blurred = linearSegm.Filter3x3(ImageFilters.BoxBlur3x3);
             blurred = blurred.Threshold(0.5f, inPlace: true);
             
             var cc = ConnectedComponents.FindInRawBitmapBinaryMask(linearSegm, progressMonitor);
@@ -165,7 +163,7 @@ namespace LillyScan.Backend.HTR
             CCAction?.Invoke(normalSegm, "ns");
             foreach (var m in normalMasks)
             {
-                Console.WriteLine(m);
+                //Console.WriteLine(m);
                 LineDefragmentation.DrawMask(normalSegm, m, 1, 1, 1);
             }
             CCAction?.Invoke(normalSegm, "ns");
@@ -206,7 +204,7 @@ namespace LillyScan.Backend.HTR
             return linesLocalized.ToArray();
         }
 
-        private void SmoothFillMask(LocalizedMask mask)
+        private static void SmoothFillMask(LocalizedMask mask)
         {
             var dy = new int[] { -1, 0, 1, 0 };
             var dx = new int[] { 0, -1, 0, 1 };
@@ -257,7 +255,7 @@ namespace LillyScan.Backend.HTR
             }
 
         }
-        static readonly string CharactersEn = " !\"#%&'()*+,-./0123456789:;>?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        static readonly string CharactersEn = " !\"#%&'()*+,-./0123456789:;>?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" + "ĂÂÎȘȚăâîșț";
 
         #region Private Methods
 
@@ -324,7 +322,7 @@ namespace LillyScan.Backend.HTR
         }
         private static bool ProcessTilesSegmentationInPlaceSequencial(RawBitmap[] tiles, Model segmentationModel, ProgressMonitor progressMonitor = null)
         {
-            Console.WriteLine("ProcessTilesSegmentationInPlaceSequencial");
+            Debug.WriteLine("ProcessTilesSegmentationInPlaceSequencial");
             bool canceled = false;
             for (int i = 0; i < tiles.Length; i++)
             {
@@ -362,7 +360,7 @@ namespace LillyScan.Backend.HTR
 
         private static bool ProcessTilesSegmentation80_64Sequencial(RawBitmap[] tiles, Model segmentationModel, ProgressMonitor progressMonitor=null)
         {
-            Console.WriteLine("ProcessTilesSegmentation80_64Sequencial");
+            Debug.WriteLine("ProcessTilesSegmentation80_64Sequencial");
             bool canceled = false;
             for (int i = 0; i < tiles.Length; i++)
             {
@@ -388,7 +386,7 @@ namespace LillyScan.Backend.HTR
             }
             catch(OperationCanceledException e)
             {
-
+                Debug.WriteLine($"{e.GetType().Name}: {e.Message}");
             }
         }
 
@@ -403,10 +401,9 @@ namespace LillyScan.Backend.HTR
             }
             catch(OperationCanceledException e)
             {
-
+                Debug.WriteLine($"{e.GetType().Name}: {e.Message}");
             }
         }
-
 
         #endregion
     }

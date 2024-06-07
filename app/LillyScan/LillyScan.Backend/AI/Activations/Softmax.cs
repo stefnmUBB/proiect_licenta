@@ -20,9 +20,10 @@ namespace LillyScan.Backend.AI.Activations
             {
                 for(int i=0;i<elemsCount;i+=logitsLen)
                 {
-                    float max = ibuff[0];
+                    float max = 0;
+                    /*float max = ibuff[0];
                     for (int j = 1; j < logitsLen; j++)
-                        if (ibuff[i + j] > max) max = ibuff[i + j];
+                        if (ibuff[i + j] > max) max = ibuff[i + j];*/
 
                     double sum = 0;
                     for(int j=0;j<logitsLen;j++)

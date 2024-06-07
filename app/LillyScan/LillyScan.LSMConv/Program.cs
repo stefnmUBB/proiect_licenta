@@ -20,13 +20,14 @@ namespace LillyScan.LSMConv
                     var bytes = ModelLoader.StreamToBytes(f);
                     var outFile = inFile + ".lsm";
                     if (args.Length == 2)
-                        outFile = args[2];
+                        outFile = args[1];
                     File.WriteAllBytes(outFile, bytes);
                 }
             }
             catch(Exception e)
             {
                 Console.WriteLine(e.Message);
+                throw;
                 Environment.Exit(-1);
             }
 

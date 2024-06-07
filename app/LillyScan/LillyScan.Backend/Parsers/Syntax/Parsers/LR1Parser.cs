@@ -21,9 +21,9 @@ namespace EsotericDevZone.Parsers.Syntax.Parsers
             Grammar = AnalysisTable.Grammar;
         }
 
-        public void PrintCanonicalCollection()
+        public void PrintCanonicalCollection(TextWriter w = null)
         {
-            Console.WriteLine(AnalysisTable.CanonicalCollection);
+            w?.WriteLine(AnalysisTable.CanonicalCollection);
         }
 
         public DisplayTable DisplayAnalysisTable => AnalysisTable.GetDisplayTable();

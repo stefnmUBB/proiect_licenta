@@ -26,6 +26,23 @@ namespace LillyScan.Backend.AI.Models
             InputFlow = inputFlow;
         }
 
+        static int K = 0;
+        static void SaveOutput(string fname, float[] b)
+        {
+            var path = $@"D:\anu3\proiect_licenta\app\LillyScan\LillyScan\bin\Debug\aa\{K++}_{fname}.txt";
+            using(var f =File.Create(path))
+            {                
+                using(var r=new StreamWriter(f))
+                {
+                    for(int i=0;i<b.Length;i++)
+                    {
+                        r.Write($"{b[i]} ");
+                        if (i % 100 == 99) r.WriteLine();
+                    }
+                }
+            }
+        }
+
         public Tensor<float>[] Call(Tensor<float>[] inputs, bool verbose = true, ProgressMonitor progressMonitor = null)
         {
             var log = verbose ? Console.Out : null;
@@ -34,6 +51,7 @@ namespace LillyScan.Backend.AI.Models
                 solvedValues[Inputs[i]] = Inputs[i].Call(inputs[i]);
             var queue = new Queue<Layer>(InputFlow.Keys.ToArray());
             progressMonitor?.PushTask("model_call", queue.Count);
+            SaveOutput("input", inputs[0].Buffer.Buffer);
             while (queue.Count > 0)
             {
                 var layer = queue.Dequeue();
@@ -45,10 +63,11 @@ namespace LillyScan.Backend.AI.Models
                     log?.WriteLine($"Enqueued {layer}");
                     continue;
                 }
-                var crtInputs = inputLayers.SelectMany(_ => solvedValues[_]).ToArray();
+                var crtInputs = inputLayers.SelectMany(_ => solvedValues[_]).ToArray();                
 
                 log?.WriteLine("in: " + crtInputs.SelectShapes().JoinToString(", "));                
                 var output = layer.Call(crtInputs);
+                SaveOutput(layer.Name, output[0].Buffer.Buffer);
                 log?.WriteLine("out: " + output.SelectShapes().JoinToString(", "));
                 solvedValues[layer] = output;
                 progressMonitor?.AdvanceOneStep();

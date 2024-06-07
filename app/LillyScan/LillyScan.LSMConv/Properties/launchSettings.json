@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "LillyScan.LSMConv": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\Stefan\\Desktop\\w\\model_crnn_lstm.txt C:\\Users\\Stefan\\Desktop\\w\\model.lsm"
+    }
+  }
+}
