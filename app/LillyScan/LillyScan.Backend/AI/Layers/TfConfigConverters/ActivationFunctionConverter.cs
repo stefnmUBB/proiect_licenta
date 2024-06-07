@@ -10,7 +10,7 @@ namespace LillyScan.Backend.AI.Layers.TfConfigConverters
             var type = NameSolver.GetType(name, typeof(Activations.Activation));
             if (type == null)
                 throw new TfConfigConverterFailedException($"No activation function named `{name}`");
-            Console.WriteLine(type);
+            //Console.WriteLine(type);
             try
             {
                 var activation = (Activations.Activation)Activator.CreateInstance(type);

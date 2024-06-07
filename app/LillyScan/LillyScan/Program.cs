@@ -145,7 +145,7 @@ namespace LillyScan
         {
             Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             Backend.Initializer.Initialize();
-            PredictLine(@"D:\Users\Stefan\Datasets\hw_flex\IAM_lines\1.png");
+            PredictLine(@"D:\Users\Stefan\Datasets\hw_flex\IAM_lines\1.png");            
             //Run();
             Console.ReadLine();
             return;

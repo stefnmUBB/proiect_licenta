@@ -2,6 +2,7 @@
 using LillyScan.Backend.Parsers.Lexic;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace LillyScan.Backend.Parsers.Internal
@@ -58,7 +59,7 @@ namespace LillyScan.Backend.Parsers.Internal
 
             if (lexParseResult is ParseResult<LexicalToken[]>.Error err)
             {
-                Console.WriteLine(err.Value.JoinToString("\n"));
+                Debug.WriteLine(err.Value.JoinToString("\n"));
                 throw new ParseException(err.Type, err.Message, err.Position);
             }
 
@@ -67,7 +68,7 @@ namespace LillyScan.Backend.Parsers.Internal
                 .Select(Token.FromLexicalToken)
                 .ToArray();
 
-            Console.WriteLine(tokens.JoinToString("\n"));
+            // Debug.WriteLine(tokens.JoinToString("\n"));
         }
 
 

@@ -124,7 +124,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
         public async Task RetrieveCameraDevice(bool force = false)
         {
             if (Context == null || (!force && initTaskSource != null))
-            {
+            {                
                 return;
             }
 
@@ -151,7 +151,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
             {
                 IsBusy = false;
                 captureSessionOpenCloseLock.Release();
-                Console.WriteLine("No camera found");
+                System.Diagnostics.Debug.WriteLine("No camera found");
             }
             else
             {
@@ -188,7 +188,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
                         OnErrorAction = (device, error) =>
                         {
                             initTaskSource?.TrySetResult(device);
-                            Console.WriteLine($"Camera device error: {error}");
+                            System.Diagnostics.Debug.WriteLine($"Camera device error: {error}");
                             CloseDevice(device);
                         },
                         OnClosedAction = device =>
@@ -208,7 +208,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
                 }
                 catch (Java.Lang.Exception ex)
                 {
-                    Console.WriteLine("Failed to open camera. ", ex);
+                    System.Diagnostics.Debug.WriteLine("Failed to open camera. ", ex);
                     Available = false;
                 }
                 finally
@@ -240,7 +240,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
             }
             catch (Java.Lang.Exception error)
             {
-                Console.WriteLine("Update preview exception.", error);
+                System.Diagnostics.Debug.WriteLine("Update preview exception.", error);
             }
             finally
             {
@@ -267,17 +267,17 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
                 if (!Fragment.Element.CapturePeekEnabled)
                     return;
                 base.OnCaptureCompleted(session, request, result);
-                Console.WriteLine("OnCaptureCompleted");
+                System.Diagnostics.Debug.WriteLine("OnCaptureCompleted");
                 if (Surface == null) return;
 
-                Console.WriteLine("Surface");
+                System.Diagnostics.Debug.WriteLine("Surface");
                 var listener = new PixelCopyFinishedListener();
-                Console.WriteLine($"{Size.Width} {Size.Height}");
+                System.Diagnostics.Debug.WriteLine($"{Size.Width} {Size.Height}");
                 using (var bmp = Bitmap.CreateBitmap(Size.Width, Size.Height, Bitmap.Config.Argb8888))
                 {
-                    Console.WriteLine($"Request");
+                    System.Diagnostics.Debug.WriteLine($"Request");
                     PixelCopy.Request(Surface, bmp, listener, Handler);
-                    Console.WriteLine("Request done");                                        
+                    System.Diagnostics.Debug.WriteLine("Request done");                                        
                     byte[] bytes = null;
                     using (var ms = new MemoryStream())
                     {
@@ -292,7 +292,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
             {
                 public void OnPixelCopyFinished(int copyResult)
                 {
-                    Console.WriteLine($"Pixel copy finished: {copyResult}");
+                    System.Diagnostics.Debug.WriteLine($"Pixel copy finished: {copyResult}");
                 }
             }
 
@@ -321,8 +321,8 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
                 backgroundHandler = null;
             }
             catch (InterruptedException ex)
-            {
-                Console.WriteLine("Error stopping background thread.", ex);
+            {                
+                System.Diagnostics.Debug.WriteLine("Error stopping background thread.", ex);
             }
         }
 
@@ -331,7 +331,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
 
         private void CaptureCallback_CapturePeeked(byte[] imageBytes)
         {
-            Console.WriteLine("Here?");
+            System.Diagnostics.Debug.WriteLine("Here?");
             CapturePeeked?.Invoke(imageBytes);
         }
 
@@ -364,7 +364,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
                     bigEnough.Add(option);
                 }
             }
-            Console.WriteLine(string.Join(", ", choices.Select(_ => $"({_.Width}, {_.Height})")));
+            System.Diagnostics.Debug.WriteLine(string.Join(", ", choices.Select(_ => $"({_.Width}, {_.Height})")));
 
             if (bigEnough.Count > 0)
             {
@@ -376,7 +376,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
             }
             else
             {
-                Console.WriteLine("Couldn't find any suitable preview size.");
+                System.Diagnostics.Debug.WriteLine("Couldn't find any suitable preview size.");
                 return choices[0];
             }
         }
@@ -433,7 +433,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
                     OnConfigureFailedAction = captureSession =>
                     {
                         tcs.SetResult(null);
-                        Console.WriteLine("Failed to create capture session.");
+                        System.Diagnostics.Debug.WriteLine("Failed to create capture session.");
                     },
                     OnConfiguredAction = captureSession => tcs.SetResult(captureSession)
                 }, null);
@@ -447,7 +447,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
             catch (Java.Lang.Exception ex)
             {
                 Available = false;
-                Console.WriteLine("Capture error.", ex);
+                System.Diagnostics.Debug.WriteLine("Capture error.", ex);
             }
             finally
             {
@@ -474,11 +474,11 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
             }
             catch (CameraAccessException ex)
             {
-                Console.WriteLine("Camera access error.", ex);
+                System.Diagnostics.Debug.WriteLine("Camera access error.", ex);
             }
             catch (Java.Lang.Exception ex)
             {
-                Console.WriteLine("Error closing device.", ex);
+                System.Diagnostics.Debug.WriteLine("Error closing device.", ex);
             }
         }
 
@@ -509,7 +509,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
             }
             catch (Java.Lang.Exception error)
             {
-                Console.WriteLine("Error closing device.", error);
+                System.Diagnostics.Debug.WriteLine("Error closing device.", error);
             }
         }
 
@@ -522,7 +522,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
             //matrix.PostScale(0.5f, 0.5f);
             //matrix.PostTranslate(viewWidth / 2, viewHeight / 2);
 
-            Console.WriteLine($"[ConfigureTransform] View={(viewWidth, viewHeight)} Preview={(previewSize.Width, previewSize.Height)}");
+            System.Diagnostics.Debug.WriteLine($"[ConfigureTransform] View={(viewWidth, viewHeight)} Preview={(previewSize.Width, previewSize.Height)}");
             //matrix.SetTranslate((viewWidth - previewSize.Width) / 2, (viewHeight - previewSize.Height) / 2);
             texture.SetTransform(matrix);
         }
@@ -584,7 +584,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
                     cameraPermissionsGranted = grantResults[i] == Permission.Granted;
                     if (!cameraPermissionsGranted)
                     {
-                        Console.WriteLine("No permission to use the camera.");
+                        System.Diagnostics.Debug.WriteLine("No permission to use the camera.");
                     }
                 }
             }

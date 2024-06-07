@@ -51,7 +51,7 @@ namespace LillyScan.Backend.AI.Models
                 solvedValues[Inputs[i]] = Inputs[i].Call(inputs[i]);
             var queue = new Queue<Layer>(InputFlow.Keys.ToArray());
             progressMonitor?.PushTask("model_call", queue.Count);
-            SaveOutput("input", inputs[0].Buffer.Buffer);
+            //SaveOutput("input", inputs[0].Buffer.Buffer);
             while (queue.Count > 0)
             {
                 var layer = queue.Dequeue();
@@ -67,7 +67,7 @@ namespace LillyScan.Backend.AI.Models
 
                 log?.WriteLine("in: " + crtInputs.SelectShapes().JoinToString(", "));                
                 var output = layer.Call(crtInputs);
-                SaveOutput(layer.Name, output[0].Buffer.Buffer);
+                //SaveOutput(layer.Name, output[0].Buffer.Buffer);
                 log?.WriteLine("out: " + output.SelectShapes().JoinToString(", "));
                 solvedValues[layer] = output;
                 progressMonitor?.AdvanceOneStep();

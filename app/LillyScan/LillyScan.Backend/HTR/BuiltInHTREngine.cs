@@ -1,4 +1,5 @@
-﻿using LillyScan.Backend.AI.Models;
+﻿using LillyScan.Backend.AI;
+using LillyScan.Backend.AI.Models;
 using LillyScan.Backend.Imaging;
 using LillyScan.Backend.Math;
 using LillyScan.Backend.Parallelization;
@@ -69,11 +70,18 @@ namespace LillyScan.Backend.HTR
                 var charsLen = CharactersEn.Length;
                 var labelsLen = charsLen + 1;
 
-                string text = "";
-                for (int i=0;i<128;i++)
+                var outBuff = new int[128];
+                for (int i = 0; i < 128; i++)
                 {
                     var seq = buffer.Skip(labelsLen * i).Take(labelsLen).ToArray();
-                    int am = seq.ArgMax();
+                    outBuff[i] = seq.ArgMax();
+                }
+                int len = CTC.GreedyDecode(outBuff, outBuff, labelsLen);                
+
+                string text = "";
+                for (int i = 0; i < len; i++) 
+                {
+                    int am = outBuff[i];
                     if (am < CharactersEn.Length)
                         text += CharactersEn[am];
                 }

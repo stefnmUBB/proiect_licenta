@@ -31,8 +31,7 @@ namespace LillyScan.Backend.AI.Layers
         protected override void OnValidateInputShapes(Shape[] inputShapes)
         {
             base.OnValidateInputShapes(inputShapes);
-            var itemShape = new Shape(inputShapes[0].Skip(1).ToArray());
-            Console.WriteLine($"{itemShape}, {TargetShape}");
+            var itemShape = new Shape(inputShapes[0].Skip(1).ToArray());            
             Assert("Invalid Reshape input shape", inputShapes.Length == 1, itemShape.ElementsCount == TargetShape.ElementsCount);
         }
     }

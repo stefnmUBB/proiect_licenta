@@ -42,7 +42,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="Imaging\ImageRGBIO.cs" />
     <Compile Include="Imaging\RawBitmapIO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

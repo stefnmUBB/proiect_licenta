@@ -39,7 +39,7 @@ namespace LillyScan.Backend.AI.Layers
             .Select(p => p.DeclaringType.GetProperty(p.Name, propertyFlags))
             .Where(p => p.GetCustomAttribute<TfConfigPropertyAttribute>() != null);
 
-            Console.WriteLine($">> {configProperties.Select(_ => _.Name).JoinToString(", ")}");
+            //Console.WriteLine($">> {configProperties.Select(_ => _.Name).JoinToString(", ")}");
 
             foreach (var property in configProperties)
             {
@@ -56,8 +56,8 @@ namespace LillyScan.Backend.AI.Layers
             }
 
             layer.Build();
-            Console.WriteLine($"-------------------------------");
-            Console.WriteLine($"Weights: {weights.SelectShapes().JoinToString(", ")}");
+            //Console.WriteLine($"-------------------------------");
+            //Console.WriteLine($"Weights: {weights.SelectShapes().JoinToString(", ")}");
             layer.LoadWeights(weights);
             return layer;
         }
@@ -75,35 +75,35 @@ namespace LillyScan.Backend.AI.Layers
 
             if (prop.PropertyType.IsClass && value == null)
             {
-                Console.WriteLine($"SetNull {prop}");
+                //Console.WriteLine($"SetNull {prop}");
                 prop.GetSetMethod(true).Invoke(obj, new object[] { null });
                 return;
             }
 
             if (value != null && prop.PropertyType == value.GetType())
             {
-                Console.WriteLine($"Set {prop} -> {value}");
+                //Console.WriteLine($"Set {prop} -> {value}");
                 prop.GetSetMethod(true).Invoke(obj, new object[] { value });
             }
             else
             {
-                Console.WriteLine($"Convert {prop} -> {value}");
+                //Console.WriteLine($"Convert {prop} -> {value}");
                 prop.GetSetMethod(true).Invoke(obj, new object[] { Convert.ChangeType(value, prop.PropertyType) });
             }
         }
 
         private static object ApplyConverter(Type converter, object value, Type targetType)
         {
-            value.DeepPrint();
+            //value.DeepPrint();
             var flags = BindingFlags.Static | BindingFlags.Public;
-            Console.WriteLine(converter.GetMethods(flags)
+            /*Console.WriteLine(converter.GetMethods(flags)
                 .Select(m =>
                 {
                     Console.WriteLine($"## {m.ReturnType} vs. {targetType} {m.ReturnType.IsAssignableFrom(targetType)} {targetType.IsAssignableFrom(m.ReturnType)}");
                     return m;
                 })
                 .Where(m => m.ReturnType.IsAssignableFrom(targetType))
-                .JoinToString("\n"));
+                .JoinToString("\n"));*/
             var convertMethod = (from method in converter.GetMethods(flags)
                                  where method.ReturnType.IsAssignableFrom(targetType)
                                  let pmsTypes = method.GetParameters().Select(p => p.ParameterType).ToArray()

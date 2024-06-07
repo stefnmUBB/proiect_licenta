@@ -12,15 +12,12 @@ namespace LillyScan.BackendWinforms.Imaging
     public static class RawBitmapIO
     {
         public static RawBitmap FromBitmap(Bitmap bmp)
-        {
-            Console.WriteLine($"BM {bmp.Width} {bmp.Height}");
+        {            
             using (var b = new Bitmap(bmp.Width, bmp.Height, PixelFormat.Format24bppRgb))
-            {                
-                Console.WriteLine($"BB {b.Width} {b.Height}");
+            {                                
                 using (var g = Graphics.FromImage(b))
                     g.DrawImage(bmp, 0, 0, bmp.Width, bmp.Height);                
-                var bmpdata = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.ReadOnly, b.PixelFormat);
-                Console.WriteLine(bmpdata.Stride);
+                var bmpdata = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.ReadOnly, b.PixelFormat);                
                 int numbytes = bmpdata.Stride * bmp.Height;
                 byte[] bytedata = new byte[numbytes];                
                 IntPtr ptr = bmpdata.Scan0;
