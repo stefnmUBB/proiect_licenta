@@ -127,9 +127,6 @@
   <data name="PreviewSegmentationModel64.lsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\PreviewSegmentationModel64.lsm.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="RecognitionModelEn.lsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\RecognitionModelEn.lsm.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="RecognitionModelEnRo.lsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\RecognitionModelEnRo.lsm.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

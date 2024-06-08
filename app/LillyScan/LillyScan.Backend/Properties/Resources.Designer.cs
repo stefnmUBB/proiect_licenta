@@ -93,16 +93,6 @@ namespace LillyScan.Backend.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] RecognitionModelEn_lsm {
-            get {
-                object obj = ResourceManager.GetObject("RecognitionModelEn.lsm", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
         internal static byte[] RecognitionModelEnRo_lsm {
             get {
                 object obj = ResourceManager.GetObject("RecognitionModelEnRo.lsm", resourceCulture);
