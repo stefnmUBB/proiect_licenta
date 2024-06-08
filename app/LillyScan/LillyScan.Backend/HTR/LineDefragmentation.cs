@@ -47,6 +47,7 @@ namespace LillyScan.Backend.HTR
                 var lines = MasksLineSplitter.FindLines(result[j].ToArray(), baseVector);
                 Debug.WriteLine("After FindLines?");
                 lineGroups.Add(lines);
+                Debug.WriteLine("After add?");
                 Console.WriteLine($"Lines = {lines.Length}");
                 
                 using(var bmp=new RawBitmap(256,256,3))
@@ -64,16 +65,18 @@ namespace LillyScan.Backend.HTR
                         bmp.DrawQuad(line.BoundingPoly, 1, 1, 1);
                         tbmp.DrawQuad(line.BoundingPoly, r0, g0, b0);
                     }
-
                     callback?.Invoke(bmp, $"{lines.Length}");
                 }                
             }
             callback?.Invoke(tbmp, "");
             tbmp.Dispose();
             List<List<LocalizedMask>> finalLines = new List<List<LocalizedMask>>();
-            
+
+            Debug.WriteLine("lineGroups.MaxBy?");
             var dominantGroup = lineGroups.MaxBy(_ => _.Sum(l => l.TotalArea));
-            var dominantMasks = new HashSet<LocalizedMask>(dominantGroup.SelectMany(_ => _.Masks));            
+            Debug.WriteLine("dominantMasks?");
+            var dominantMasks = new HashSet<LocalizedMask>(dominantGroup.SelectMany(_ => _.Masks));
+            Debug.WriteLine("rlines?");
             var rlines = dominantGroup.Select(_ => _.Masks.ToList()).ToArray();
 
             foreach(var mask in masks)
@@ -82,8 +85,9 @@ namespace LillyScan.Backend.HTR
                 var index = dominantGroup.ArgMin(_ => Proximity(_, mask));
                 Console.WriteLine($"______________________________________________");
                 rlines[index].Add(mask);
-            }            
-         
+            }
+
+            Debug.WriteLine("End?");
             return rlines;
         }
 
@@ -166,7 +170,8 @@ namespace LillyScan.Backend.HTR
             }
             while (count > 0);
 
-            MaskView(result, callback);
+            if (callback != null)
+                MaskView(result, callback);
 
             return result;
         }

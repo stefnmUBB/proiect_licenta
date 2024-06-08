@@ -93,17 +93,13 @@ namespace LillyScan.FrontendXamarin.Views.Pages
         private void RemoveButton_Clicked(object sender, System.EventArgs e)
         {
             Task.Run(async () =>
-            {                
-                string promptResponse = "";
-                await MainThread.InvokeOnMainThreadAsync(async ()
-                    => promptResponse = await DisplayActionSheet("Are you sure you want to delete this record?", null, null, "Yes", "No"));
-                if (promptResponse != "Yes") 
-                    return;                
+            {
+                if (await this.PromptYesNo(Strings.ItemRemovePrompt) == false) 
+                    return;
                 Repository.Remove(AppState.SelectedPrediction.Value);
                 AppState.SelectedPrediction.Value = null;
                 MainThread.BeginInvokeOnMainThread(() => Shell.Current.GoToAsync("//PredictionsListPage"));
             });
-
-        }
+        }        
     }
 }

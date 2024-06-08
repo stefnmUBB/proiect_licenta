@@ -51,7 +51,9 @@ namespace LillyScan.FrontendXamarin.Views.Pages
         }
 
         private async void ProcessInput()
-        {
+        {            
+            LinePredictionCTS = new CancellationTokenSource();
+
             var image = ImageSource.FromStream(() => new MemoryStream(AppState.CaptureBytes.Value));
             var pm = new ProgressMonitor();
             pm.ProgressChanged += (o, progress, description) =>
@@ -69,6 +71,7 @@ namespace LillyScan.FrontendXamarin.Views.Pages
                     linebmp.CheckNaN();
                     linebmp = linebmp.RotateAndCrop((float)-System.Math.Atan2(-mask.LineFit.A, mask.LineFit.B), disposeOriginal: true);
                     linebmp.CheckNaN();
+                    mask.Dispose();
                     var linePred = new PreviewLinePrediction { LineImage = await linebmp.ToImageSource() };
                     await MainThread.InvokeOnMainThreadAsync(() => PreviewLinePredictionList.AddItem(linePred));
                     linebmp.Dispose();                    
@@ -84,31 +87,44 @@ namespace LillyScan.FrontendXamarin.Views.Pages
             MainThread.InvokeOnMainThreadAsync(() => ProgressBar.Percentage = value);
         }
 
+        CancellationTokenSource LinePredictionCTS = null;
 
         private void RunPredictions()
         {            
             Atomic<int> finished = 0;
             int count = PreviewLinePredictionList.ItemsCount;
             SetProgressBarPercentage(count == 0 ? 1 : 0);
-
+            var linePredictionPM = new ProgressMonitor(LinePredictionCTS.Token);
+            bool canceled = false;
             PreviewLinePredictionList.ForeachItem(linePred =>
             {
                 using var linebmp = linePred.LineImage.ToRawBitmapSync();
+                string predictedText = "";
                 var sw = new Stopwatch();
                 sw.Start();
-                var predictedText = HTR.Engine.PredictTextLine(linebmp);                
+                try
+                {
+                    predictedText = HTR.Engine.PredictTextLine(linebmp, linePredictionPM);
+                }
+                catch(OperationCanceledException)
+                {
+                    canceled = true;
+                    Debug.WriteLine("PredictTextLine cancel");
+                    LinePredictionCTS?.Dispose();
+                    LinePredictionCTS = null;
+                    return true;
+                }
                 sw.Stop();
                 Debug.WriteLine($"Line predicted in {sw.ElapsedMilliseconds}ms");
-                linePred.PredictedText = $"{sw.ElapsedMilliseconds}ms: " + predictedText;
-                //linePred.PredictedText = "(Placeholder)";
-                //Thread.Sleep(2000);
+                linePred.PredictedText = $"{sw.ElapsedMilliseconds}ms: " + predictedText;                
                 linePred.IsReady = true;                
                 Debug.WriteLine($"Predicted text: {linePred.PredictedText}");
                 MainThread.InvokeOnMainThreadAsync(() => PreviewLinePredictionList.RefreshItem(linePred));
                 finished.Increment();
                 SetProgressBarPercentage(count == 0 ? 1 : finished.Get() * 100.0 / count);
+                return false;
             });
-
+            if (canceled) return;
             MainThread.BeginInvokeOnMainThread(() => ProcessingState = ProcessingState.Done);
         }
 
@@ -147,9 +163,18 @@ namespace LillyScan.FrontendXamarin.Views.Pages
 
         protected override bool OnBackButtonPressed()
         {
-            MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//NewCapturePage"));
-            return true;            
+            Task.Run(async () =>
+            {
+                if (await this.PromptYesNo(Strings.OperationCancelPrompt) == false)
+                    return;
+                Debug.WriteLine("LinePredictionCTS cancel");
+                LinePredictionCTS?.Cancel();                
+                await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//NewCapturePage"));
+                return;
+            });
+            return true;
         }
+        
 
         private async Task<int> LoadFromCaptureBytes(byte[] captureBytes)
         {
@@ -209,6 +234,6 @@ namespace LillyScan.FrontendXamarin.Views.Pages
         private void FinalRetryButton_Clicked(object sender, System.EventArgs e)
         {
             MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//NewCapturePage"));
-        }
+        }        
     }
 }

@@ -105,14 +105,7 @@ namespace LillyScan
             pm.ProgressChanged += (o, p, d) => Console.WriteLine($" [ProgressMonitor] [{p:000.00}]: {d}");
             int q = 0;
             Action<RawBitmap, string> action = (b, c) => b.Save($"cc3\\predCC{q++}_{c}.png");
-            (HTR as BuiltInHTREngine).CCAction = action;
-
-            /*using (var bmp = RawBitmapIO.FromFile(@"D:\anu3\proiect_licenta\app\LillyScan\LillyScan\bin\Debug\cc\IAM1.png")) 
-            {
-                Layer.X = 0;
-                HTR.PredictTextLine(bmp);
-            }
-            return;*/
+            (HTR as BuiltInHTREngine).CCAction = action;           
 
             //var task = Task.Run(() =>
             {
@@ -124,12 +117,10 @@ namespace LillyScan
                         var linebmp = mask.CutFromImage(image);
                         linebmp.CheckNaN();
                         linebmp = linebmp.RotateAndCrop((float)-System.Math.Atan2(-mask.LineFit.A, mask.LineFit.B), disposeOriginal: true);
-                        linebmp.CheckNaN();
-                        //action(linebmp, "");
-                        //Layer.X = 0;                        
-                        //HTR.PredictTextLine(linebmp);
+                        linebmp.CheckNaN();                       
                         linebmp.Dispose();
-                        break;
+                        mask.Dispose();
+                        //break;
                     }                                        
                 });
             }
@@ -145,8 +136,8 @@ namespace LillyScan
         {
             Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             Backend.Initializer.Initialize();
-            PredictLine(@"D:\Users\Stefan\Datasets\hw_flex\IAM_lines\1.png");            
-            //Run();
+            //PredictLine(@"D:\Users\Stefan\Datasets\hw_flex\IAM_lines\1.png");            
+            Run();
             Console.ReadLine();
             return;
             //Console.WriteLine("Done"); Console.ReadLine();

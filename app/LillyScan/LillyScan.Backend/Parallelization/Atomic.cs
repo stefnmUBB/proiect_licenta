@@ -28,9 +28,13 @@ namespace LillyScan.Backend.Parallelization
         public void With(Action<T> action)
         {
             lock (locker) action(Value);
-        }        
+        }
 
-        public override string ToString() => Get()?.ToString() ?? "null";        
+        public T With(Func<T,T> action)
+        {
+            lock (locker) return Value = action(Value);
+        }
 
-    }
+        public override string ToString() => Get()?.ToString() ?? "null";
+    }    
 }

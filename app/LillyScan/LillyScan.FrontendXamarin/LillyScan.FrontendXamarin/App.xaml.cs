@@ -25,6 +25,7 @@ namespace LillyScan.FrontendXamarin
 
             MainPage = new AppShell();
             PredictionRepository = new PredictionRepository(Path.Combine(FileSystem.AppDataDirectory, "predictions"));
+            PredictionRepository.GetAll();
             ImageStorage = new ImageStorage(Path.Combine(FileSystem.AppDataDirectory, "images"));
         }
 

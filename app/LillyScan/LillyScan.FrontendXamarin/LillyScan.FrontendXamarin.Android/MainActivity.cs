@@ -4,12 +4,6 @@ using Android.App;
 using Android.Content.PM;
 using Android.Runtime;
 using Android.OS;
-using Android.Hardware.Usb;
-using Xamarin.Essentials;
-using System.IO;
-using Android.Renderscripts;
-using Javax.Security.Auth;
-using Android.Content;
 
 namespace LillyScan.FrontendXamarin.Droid
 {
@@ -23,8 +17,9 @@ namespace LillyScan.FrontendXamarin.Droid
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);            
 
+            LoadApplication(new App());
+            Window.SetStatusBarColor(Android.Graphics.Color.Argb(255, 0x00, 0xc7, 0x84));
 
-            LoadApplication(new App());                    
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {

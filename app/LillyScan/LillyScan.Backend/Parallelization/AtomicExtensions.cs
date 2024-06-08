@@ -7,5 +7,11 @@
             lock (at.locker)
                 at.Value++;           
         }
+
+        public static int PreIncrement(this Atomic<int> a)
+        {
+            return a.With(v => v + 1);
+        }
+
     }
 }

@@ -75,7 +75,7 @@ namespace LillyScan.FrontendXamarin.Repository
 
         private void WriteToStorage()
         {
-            Log?.WriteLine($"WriteToStorage");
+            Log?.WriteLine($"WriteToStorage {Items.Count}");
             using (var f = File.Create(PredictionsFilename))
             using(var bw=new BinaryWriter(f))
             {

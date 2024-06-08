@@ -612,7 +612,7 @@ namespace LillyScan.FrontendXamarin.Droid.Camera
 
         void TextureView.ISurfaceTextureListener.OnSurfaceTextureUpdated(SurfaceTexture surface)
         {
-            View.SetBackgroundColor(Android.Graphics.Color.Blue);            
+            View.SetBackgroundColor(Android.Graphics.Color.Argb(255, 0x04, 0xb5, 0x7a));            
         }
 
         #endregion

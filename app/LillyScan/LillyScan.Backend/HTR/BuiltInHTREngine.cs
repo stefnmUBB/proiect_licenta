@@ -76,7 +76,7 @@ namespace LillyScan.Backend.HTR
                     var seq = buffer.Skip(labelsLen * i).Take(labelsLen).ToArray();
                     outBuff[i] = seq.ArgMax();
                 }
-                int len = CTC.GreedyDecode(outBuff, outBuff, labelsLen);                
+                int len = CTC.GreedyDecode(outBuff, outBuff, labelsLen);             
 
                 string text = "";
                 for (int i = 0; i < len; i++) 
@@ -161,18 +161,23 @@ namespace LillyScan.Backend.HTR
             var linesMask = LineDefragmentation.BuildLinesMask(lines, CCAction);                        
 
             normalSegm = normalSegm.Threshold(inPlace: true);
-            CCAction?.Invoke(normalSegm, "ns");            
+            CCAction?.Invoke(normalSegm, "ns");
             var normalMasks = ConnectedComponents.FindInRawBitmapBinaryMask(normalSegm, progressMonitor)
                 .Components.Select(_ => _.ToLocalizedMask())
-                .Where(_ => _.Area > 10).ToArray();
+                .Where(_ =>
+                {
+                    var cond = _.Area > 10;
+                    if (!cond) _.Dispose();
+                    return cond;
+                }).ToArray();
             progressMonitor?.AdvanceOneStep();
 
             normalSegm.Clear();
             CCAction?.Invoke(normalSegm, "ns");
             foreach (var m in normalMasks)
-            {
-                //Console.WriteLine(m);
+            {                
                 LineDefragmentation.DrawMask(normalSegm, m, 1, 1, 1);
+                m.Dispose();
             }
             CCAction?.Invoke(normalSegm, "ns");
 
@@ -191,9 +196,8 @@ namespace LillyScan.Backend.HTR
                 mask.ComputeMetadata();
                 //SmoothFillMask(mask);
                 if (mask.Area == 0) continue;
-                mask = mask.Rescale(scaleX, scaleY);
+                mask = mask.Rescale(scaleX, scaleY, disposeOriginal: true);
                 mask.ComputeMetadata();                
-
                 linesLocalized.Add(mask);                
             }
 

@@ -78,6 +78,6 @@ namespace LillyScan.Backend.Imaging
             if (disposeBitmap)
                 Dispose();
             return result;
-        }
+        }        
     }
 }

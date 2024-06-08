@@ -28,27 +28,20 @@ namespace LillyScan.FrontendXamarin.Views.Controls
 
 		public void AddItem(PreviewLinePrediction item)
 		{
-			Debug.WriteLine($"[PreviewLinePredictionList] Added item");
-			Items.Add(item);			
-		}
+			Debug.WriteLine($"[PreviewLinePredictionList] Adding item");
+			Items.Add(item);
+            Debug.WriteLine($"[PreviewLinePredictionList] Adding item");
+        }
 		public int ItemsCount => Items.Count;
 
 		public List<PreviewLinePrediction> GetItems() => Items.ToList();
 
-		public void ForeachItem(Action<PreviewLinePrediction> action)
+		public void ForeachItem(Func<PreviewLinePrediction, bool> action)
 		{
 			for(int i=0, l=Items.Count;i<l;i++)			
 			{
-				action(Items[i]);
-			}
-
-			/*var partition = Partitioner.Create(0, Items.Count, Items.Count / 4);
-			Parallel.ForEach(partition, new ParallelOptions { MaxDegreeOfParallelism = 4 }, range =>
-			{
-				for (int i = range.Item1; i < range.Item2; i++)
-					action(Items[i]);
-
-			});*/			
+				if (action(Items[i])) return;
+			}	
 		}
 
 		public void BeginRefresh() => ListView.BeginRefresh();

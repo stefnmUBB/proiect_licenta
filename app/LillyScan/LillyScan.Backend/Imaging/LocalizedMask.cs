@@ -1,4 +1,5 @@
-﻿using LillyScan.Backend.Utils;
+﻿using LillyScan.Backend.Parallelization;
+using LillyScan.Backend.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,10 +25,9 @@ namespace LillyScan.Backend.Imaging
         public float CenterY;
         public int Area;
 
-
         public LocalizedMask((int X, int Y)[] pixels)
         {
-            if(pixels.Length==0)
+            if (pixels.Length==0)
             {
                 X = Y = Width = Height = 0;
                 Console.WriteLine("[LocalizedMask] Alloc 0 bytes!");
@@ -44,9 +44,9 @@ namespace LillyScan.Backend.Imaging
                 Data[(pixels[i].Y - Y) * Width + pixels[i].X - X] = 1;
             }
 
-        }        
+        }
 
-        public LocalizedMask Rescale(float scaleX, float scaleY)
+        public LocalizedMask Rescale(float scaleX, float scaleY, bool disposeOriginal = false)
         {
             var x0 = (int)(X * scaleX);
             var y0 = (int)(Y * scaleY);
@@ -65,6 +65,7 @@ namespace LillyScan.Backend.Imaging
                     data[w * y + x] = Data[Width * yy + xx];
                 }
             }
+            if (disposeOriginal) Dispose();
             return new LocalizedMask(x0, y0, w, h, data);
         }
 
@@ -227,20 +228,27 @@ namespace LillyScan.Backend.Imaging
         public override string ToString() => $"LocalizedMask({X},{Y},{Width},{Height}, Area={Area})";
 
         public void Dispose()
-        {
+        {            
+#if DEBUG
+            if (IsDisposed) throw new Exception("Double dispose");
+#else 
+            if (IsDisposed) return;
+#endif
             Marshal.FreeHGlobal((IntPtr)Data);
 #if DEBUG
-            IsDisposed = true;
+            IsDisposed = true;            
 #endif
         }
-
 
 #if DEBUG
         private bool IsDisposed = false;
         ~LocalizedMask()
         {
             if (!IsDisposed)
+            {
                 Debug.WriteLine($"Localized mask leaked: {(X, Y, Width, Height)}");
+                throw new Exception();
+            }
         }
 #endif
     }

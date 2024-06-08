@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -27,6 +28,7 @@ namespace LillyScan.FrontendXamarin.Views.Pages
 
         int k = 0;
         Atomic<CancellationTokenSource> MaskPreviewCancellationTokenSource = new Atomic<CancellationTokenSource>();
+        Atomic<byte[]> ImageBytesFromStorage = new Atomic<byte[]>(null);
 
         private async void CameraPreview_CapturePeeked(object sender, byte[] imageBytes)
         {
@@ -35,8 +37,9 @@ namespace LillyScan.FrontendXamarin.Views.Pages
             if(RedirectToProcessing.Get())
             {
                 RedirectToProcessing.Set(false);
-                AppState.CaptureBytes.Value = imageBytes; // .Set(imageBytes);
-                await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//ProcessingPage"));
+                var imgExternal = ImageBytesFromStorage.Get();
+                AppState.CaptureBytes.Value = imgExternal ?? imageBytes;                
+                await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//ProcessingPage"));                
                 return;
             }
 
@@ -144,6 +147,21 @@ namespace LillyScan.FrontendXamarin.Views.Pages
         private void CaptureButton_Clicked(object sender, EventArgs e)
         {
             RedirectToProcessing.Set(true);
+        }
+
+        private void LoadButton_Clicked(object sender, EventArgs e)
+        {            
+            Task.Run(async () =>
+            {
+                var photo = await MediaPicker.PickPhotoAsync(new MediaPickerOptions() { Title = "Pick a photo to scan" });                
+                using(var stream = await photo.OpenReadAsync())                
+                using(var ms = new MemoryStream())
+                {
+                    stream.CopyTo(ms);
+                    ImageBytesFromStorage.Set(ms.ToArray());
+                }
+                RedirectToProcessing.Set(true);
+            });             
         }
     }
 }
