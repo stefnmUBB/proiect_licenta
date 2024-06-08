@@ -1,0 +1,27 @@
+\chapter{Optical Character Recognition}
+\label{chap:ch2}
+
+\section{Problem overview}
+\label{sec:ch3sec1}
+
+Optical character recognition (OCR) is the problem of programatically converting pictures of scanned text, either printed or handwritten, into a digital text format. An automated system has to optically find and interpret characters in an image the same way humans can read a block of text just by looking at it \cite{ocr_desc}. OCR is needed anywhere document digitization is a necessity, like for example in automatically registering bank cheques, fast query access to a database of scanned papers, quick school notes or historical preservation of manuscripts \cite{ocr_desc}. 
+
+\section{Printed/handwritten text recognition}
+\label{sec:ch3sec1}
+
+Printed text recognition handles typefont characters. The early dives into this problem are as old as 1940s and the first OCR systems were able to identify digits as well as both printed and handwritten isolated characters \cite{ocr_review}. Solutions to this problem evolved in complexity and performance along with the development of new technologies.
+
+The real difficulty in handwritten text recognition (HTR) is recognizing text written in a human calligraphy style. Letters in a word are linked by cursive connections, not to mention that, depending on the writer's interest in their own handwriting aestetics, some letters may be fusing, missing, even have multiple glyph representations \cite{ocr_review}.
+
+
+\section{Offline recognition. Online recognition}
+
+Online text recognition usually takes input from a specialized pen and tablet device which tracks the user's movements and tries to deduce the written text by the curves, turns and corners it manifests.  On the other hand, an offline recognition system reads text from a rasterized image of pixels with no geometrical information about how the containing representations of text \cite{ocr_review}. The current work is a research on the topic of offline handwritten recognition.
+
+\section{Motivation of AI-based solutions}
+
+Handwriting is a complex process in itself since it is the product of biological beings and was not specifically designed for machine understanding. It is almost impossible to come up with algorithm in a traditional sense that performs image to text conversion, because handwritings are extremely variate, it is dependent on the language spoken, the alphabet, the region and even the individual's own way to learn, practice and use it, let alone other external factors like partially overlapping text, pen properties or environment conditions. This creates a perfect playground for artificial intelligence to try and excel at the task it was acknowledged for: features extraction and pattern recognition.
+
+\section{Current work overview and original contributions}
+
+This thesis contains a register of machine learning related solutions already proposed to the HTR problem, from HMMs, CNN-based networks, MDLSTM and transformers, mentioning of course the state of the art results in the field. Next, the author's own approach is described. It introduces SegUnetLSTM, a U-Net based line segmentation model with one bidirectional LSTM layer between encoder and decoder, a line extraction and reconstruction algorithm and a slightly modified CNN-LSTM-CTC model trained on English and Romanian texts, which reaches results not too far from the best performning approaches on the HTR topic, although there objectively exists improvement opportunities. Last but not least, the works will guide through the implementation details of an intelligent HTR system prototype created as a practical application of the proposed approach.

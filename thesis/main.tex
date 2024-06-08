@@ -1,0 +1,77 @@
+%\documentclass[12pt]{scrreprt}
+\documentclass[12pt]{report} 
+
+\setcounter{tocdepth}{3}
+\setcounter{secnumdepth}{3}
+
+% language may be romanian or english (default is english)
+% type may be bachelor or master (default is bachelor)
+\usepackage[language=english, type=bachelor]{style}
+
+%\geometry{a4paper,top=2.5cm,left=3cm,right=2.5cm,bottom=2.5cm}
+%in style
+%controlling the appearance of your headers and footers
+\usepackage{fancyhdr}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{color}
+\pagestyle{fancy}
+\usepackage{floatrow}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{listings}
+\usepackage{caption}
+\lhead{}
+\chead{}
+\renewcommand{\headrulewidth}{0.2pt}
+\renewcommand{\footrulewidth}{0.2pt}
+
+\begin{document}
+
+\specialization{Computer Science}	
+\title{Handwritten text recognition techniques applied on English-Romanian texts}
+\author{Neac\c{s}u-Miclea Liviu-\c{S}tefan}
+\supervisor{Prof. Laura Dio\c{s}an}		
+
+\maketitle
+
+
+\newpage
+\thispagestyle{empty}
+\mbox{}
+\newpage
+\pagenumbering{roman} 
+
+\cleardoublepage
+ABSTRACT
+\vspace{0.5cm}	
+\hrule
+\vspace{0.5cm}	
+%\cleardoublepage
+
+This work is an attempt to address the handwritten text recognition (HTR) problem using a deep learning approach. The solution recipe involves three steps: text line segmentation performed by a fused U-Net-LSTM model, line extraction and reconstruction postprocessing, and line level text recognition via a CRNN model.
+
+The thesis seven chapters are structured in a progressive manner. The introduction describes the motivation of this project. Next, there is a short summary about OCR, followed by a chapter providing an insightful picture behind the scenes of neural networks and a literature survey. Then, a new image text line extraction algorithm is presented as well as a particularization of a CNN-LSTM-CTC based line recognition model on the Romanian language, along with experimental details and results. The entire system has been showcased into a simple mobile application capable of taking pictures of documents and predicting whatever is written in there. The technical matters are covered in a separate chapter. Finally, some thoughts are expressed on possible refinement and further development of the presented approach.
+
+\tableofcontents
+% \listoffigures
+
+\newpage
+\pagenumbering{arabic}
+
+
+\input{chapters/chapter1_introduction}
+%\addcontentsline{toc}{chapter}{Introducere}
+%\addcontentsline{toc}{chapter}{Introduction}
+
+\input{chapters/chapter_2_OCR}
+\input{chapters/chapter_3_NeuralNetworks}
+\input{chapters/chapter_4_HTR}
+\input{chapters/chapter_5_Proposed_Approach}
+\input{chapters/chapter_6_App}
+\input{chapters/chapter_7_conclusion}
+
+
+\bibliography{references}
+
+\end{document}

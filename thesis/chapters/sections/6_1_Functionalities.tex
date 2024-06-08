@@ -1,0 +1,13 @@
+\section{Requirements analysis}
+
+The objective of this practical work is to showcase the previously described HTR solution by incorporating it into a simple Android application that allows for text detection and recognition in a picture provided by the user. The application is meant to satisfy the following requirements:
+
+\begin{description}   
+  \item[F01. Capture an image:] The user is able to make a picture of a paper containing handwritten text using the device's camera. A live segmentation preview is displayed over the image feed to visually mark that the text can be detected correctly from the provided conditions.   
+  \item[F02. Upload an image:] The user is able to load an existing image from the device's filesystem.
+  \item[F03. Check a prediction:] For a given picture input, the user can see a list of the segmented lines and the recognized text associated to each of them. The list is updated gradually whenever a line recognition finishes. When prediction finishes, the user is prompted with the option to save the results or try another picture.  
+  \item[F04. View predictions list:] The user is allowed to view a list of the stored records.
+  \item[F05. View a single prediction:] The user can select a record and view its content.
+  \item[F06. Delete a prediction:] The user can remove a record of their choice.
+  \item[F07. Persistence:] The images and predicted outputs are stored in the local memory for further access.
+\end{description}

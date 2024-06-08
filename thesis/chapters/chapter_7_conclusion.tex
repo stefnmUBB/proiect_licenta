@@ -1,0 +1,7 @@
+\chapter{Conclusion and future work}
+\label{chap:ch7}
+
+Despite numerous continuously improving methods that come into solving this problem, HTR still remains a subject open for debate. Although solutions can be successfully applied in isolated contexts like banks and post offices, general purpose text recognition still has a ways to go \cite{ocr_review}.
+
+The solution proposed in this thesis can be further improved first by treating line segmentation with a lot more care. The line masks dataset was created singlehandedly under the pressure of deadlines, therefore contains few unbalanced samples and human errors may have infiltrated into masks labelling. Increasing the size and quality of the dataset would certainly improve the segmentation performance. Moreover, the line reconstruction algorithm, in the form it was described, has taken some shortcuts from the author's initial intentions. More analysis on the orientation layers needs to be done to correctly find lines of different slants within the same image, and even detect curved lines potentially using a graph partition algorithm. On the same note, the recognition model needs more samples produced by the used segmentation model. Even if it performs well on the original IAM lines dataset, surrounding the line of text with a chaotic polygon to look like a segmented output may produce misleading results.
+Last but not least, it is worth playing around with other OCR models like transformer-based ones on both line and page level inputs.

@@ -1,0 +1,26 @@
+\par Let $f:\mathbb{R}->\mathbb{R}$ a real function. We call derivative of $f$, the function $f'$ such that
+$$f'(x) =\lim_{h\rightarrow 0}\frac{f(x+h)-f(x)}{h}.$$
+Function $f$ is differentiable at $x$ if the limit in $f'$ exists. $f$ is differentiable on an interval $[a,b]$ if it is differentiable at any point in that interval. We can also use $\frac{df}{dx} = f'$ as a notation for the derivative \cite{D2l}.
+
+\par We recall the fundamental properties of derivatives \cite{D2l}:
+\begin{itemize}
+\item $\frac{d}{dx}(cf) = c\frac{df}{dx}, c\in\mathbb{R}$;
+\item $\frac{d}{dx}(f+g) = \frac{df}{dx} + \frac{dg}{dx}$;
+\item $\frac{d}{dx}(fg) = \frac{df}{dx}g + f\frac{dg}{dx}$;
+\item $\frac{d}{dx}(\frac{f}{g}) = \frac{\frac{df}{dx}g - f\frac{dg}{dx}}{g^2}$;
+\item $\frac{d}{dx}(f(g)) = \frac{d(f(g))}{dg}\frac{dg}{dx}$ (chain rule)
+\end{itemize}
+
+
+\par Let's consider $f:\mathbb{R}^n\rightarrow \mathbb{R}$ a function of multiple variables. The partial derivative of $f$ with respect to the $i$-th argument is
+$$\frac{\partial f}{\partial x_i} = \partial_{x_i}f = \lim_{h \rightarrow 0} \frac{f(x_1, \ldots,x_{i-1},x_i+h,x_{i+1},\ldots,x_n)-f(x_1, \ldots,x_{i-1},x_i,x_{i+1},\ldots,x_n)}{h}.$$ The function $\nabla_{\mathrm{x}}f:\mathbb{R}^n\rightarrow\mathbb{R}^n$,
+$$\nabla_{\mathrm{x}}f(\mathrm{x}) = \begin{bmatrix} \partial_{x_1}f(\mathrm{x}) \ldots \partial_{x_n}f(\mathrm{x}) \end{bmatrix}^T $$
+is called the gradient of $f$. All these definitions can be easily adapted to functions with multiple outputs \cite{D2l}.
+
+\par As in machine learning we often meet the need to differentiate chains of composite functions, it is critical to remind the chain rule for multivariate derivatives. For a composite function $y(\mathrm{x})=f(u(\mathrm{x}))$, where $f:\mathbb{R}^m\rightarrow \mathbb{R}^q$ and $u:\mathbb{R^n}\rightarrow\mathbb{R^m}$, the derivative of $y$ with respect to $x_i$ is
+$$\frac{\partial y}{\partial x_i} = \sum_{j=0}^m \frac{\partial y}{\partial u_j} \frac{\partial u_j}{\partial x_i}, $$
+and therefore $\nabla_\mathrm{x}y = J_u(\mathrm{x}) \nabla_u{y}$, where $J_u$ is the Jacobian matrix of $\mathrm{u}$ \cite{D2l} \cite{damadi2023backpropagation}.
+
+\par The chain rule constitutes the foundation of training AI models, because it provides a way to automatically perform differentiation. This operation fortunately is handled internally by the usual machine learning libraries. A complex function is converted into an operation flow graph, where nodes represent operations and edges illustrate dependencies. To graphically represent $f(g)$, one would draw a directed arc from node $g$ to node $f$. An input is pumped through the graph starting from $g$, and it is gradually transformed by the function residing at each node it visits. This process is called (forward) propagation. To obtain the gradient of the composite function, one would process the graph the reverse way starting from outputs and applying the gradients according to the chain rule, thus performing a backpropagation through the computational graph \cite{D2l}. The goal of backpropagation is to compute the gradients that will be used in adjusting the parameters of the prediction function by the optimizer algorithms \cite{damadi2023backpropagation}.
+
+
