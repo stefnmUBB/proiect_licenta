@@ -1,0 +1,1 @@
+loss: 0.1190 - accuracy: 0.9341 - precision: 0.9212 - recall: 0.8318 - IoU: 0.8563 - dice: 0.8770 - val_loss: 0.0659 - val_accuracy: 0.9635 - val_precision: 0.9688 - val_recall: 0.8864 - val_IoU: 0.9197 - val_dice: 0.9326 - lr: 1.6777e-04
