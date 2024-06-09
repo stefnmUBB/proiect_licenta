@@ -38,17 +38,13 @@ namespace LillyScan.Backend.HTR
             for(int j=0;j<N;j++)
             {
                 if (result[j].Count == 0) continue;
-                Console.WriteLine("_____________________________________________________________________");
-                foreach (var r in result[j])
-                    Console.WriteLine(r.LineFit);
+                //Console.WriteLine("_____________________________________________________________________");
+                //foreach (var r in result[j]) Console.WriteLine(r.LineFit);
                 var baseVector = ((float)System.Math.Cos(j * System.Math.PI / N), (float)System.Math.Sin(j * System.Math.PI / N));
-
-                Debug.WriteLine("Before FindLines?");
-                var lines = MasksLineSplitter.FindLines(result[j].ToArray(), baseVector);
-                Debug.WriteLine("After FindLines?");
-                lineGroups.Add(lines);
-                Debug.WriteLine("After add?");
-                Console.WriteLine($"Lines = {lines.Length}");
+                
+                var lines = MasksLineSplitter.FindLines(result[j].ToArray(), baseVector);                
+                lineGroups.Add(lines);                
+                //Console.WriteLine($"Lines = {lines.Length}");
                 
                 using(var bmp=new RawBitmap(256,256,3))
                 {
@@ -71,23 +67,19 @@ namespace LillyScan.Backend.HTR
             callback?.Invoke(tbmp, "");
             tbmp.Dispose();
             List<List<LocalizedMask>> finalLines = new List<List<LocalizedMask>>();
-
-            Debug.WriteLine("lineGroups.MaxBy?");
-            var dominantGroup = lineGroups.MaxBy(_ => _.Sum(l => l.TotalArea));
-            Debug.WriteLine("dominantMasks?");
-            var dominantMasks = new HashSet<LocalizedMask>(dominantGroup.SelectMany(_ => _.Masks));
-            Debug.WriteLine("rlines?");
+            
+            var dominantGroup = lineGroups.MaxBy(_ => _.Sum(l => l.TotalArea));            
+            var dominantMasks = new HashSet<LocalizedMask>(dominantGroup.SelectMany(_ => _.Masks));            
             var rlines = dominantGroup.Select(_ => _.Masks.ToList()).ToArray();
 
             foreach(var mask in masks)
             {
                 if (dominantMasks.Contains(mask)) continue;
                 var index = dominantGroup.ArgMin(_ => Proximity(_, mask));
-                Console.WriteLine($"______________________________________________");
+                //Console.WriteLine($"______________________________________________");
                 rlines[index].Add(mask);
             }
-
-            Debug.WriteLine("End?");
+            
             return rlines;
         }
 
@@ -96,7 +88,7 @@ namespace LillyScan.Backend.HTR
             (var a, var b, var c) = (line.LineFit.A, line.LineFit.B, line.LineFit.C);
             var d = a * mask.CenterX + b * mask.CenterY + c;            
             d = System.Math.Abs(d);
-            Console.WriteLine($"Proximity = {d} / {(a,b,c)} / {(mask.CenterX, mask.CenterY)}");
+            //Console.WriteLine($"Proximity = {d} / {(a,b,c)} / {(mask.CenterX, mask.CenterY)}");
             return d;
         }
 
@@ -166,12 +158,11 @@ namespace LillyScan.Backend.HTR
                     }
                 }
                 for (int i = 0; i < result.Length; i++) result[i] += tmp[i];                
-                Console.WriteLine($"Count={count}");
+                //Console.WriteLine($"Count={count}");
             }
             while (count > 0);
-
-            if (callback != null)
-                MaskView(result, callback);
+            
+            MaskView(result, callback);
 
             return result;
         }
@@ -190,6 +181,8 @@ namespace LillyScan.Backend.HTR
 
         public static void MaskView(int[] mask, Action<RawBitmap, string> callback)
         {
+#if DEBUG
+            if (callback == null) return;
             int L = mask.Max();
 
             var colors = new (float r, float g, float b)[L];
@@ -214,6 +207,7 @@ namespace LillyScan.Backend.HTR
                 }
                 callback?.Invoke(bmp, "");
             }
+#endif
         }
 
         public static unsafe void DrawMask(RawBitmap bmp, LocalizedMask mask, float r = 1, float g = 1, float b = 1)

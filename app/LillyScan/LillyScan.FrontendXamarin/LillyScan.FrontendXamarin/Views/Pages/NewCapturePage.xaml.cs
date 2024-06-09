@@ -150,11 +150,14 @@ namespace LillyScan.FrontendXamarin.Views.Pages
         }
 
         private void LoadButton_Clicked(object sender, EventArgs e)
-        {            
+        {
+            Debug.WriteLine("LoadButton_Clicked");
             Task.Run(async () =>
             {
-                var photo = await MediaPicker.PickPhotoAsync(new MediaPickerOptions() { Title = "Pick a photo to scan" });                
-                using(var stream = await photo.OpenReadAsync())                
+                Debug.WriteLine("Inside task");
+                var photo = await MediaPicker.PickPhotoAsync(new MediaPickerOptions() { Title = "Pick a photo to scan" });
+                Debug.WriteLine($"Picked photo: {photo?.ToString() ?? "null"}");
+                using (var stream = await photo.OpenReadAsync())                
                 using(var ms = new MemoryStream())
                 {
                     stream.CopyTo(ms);

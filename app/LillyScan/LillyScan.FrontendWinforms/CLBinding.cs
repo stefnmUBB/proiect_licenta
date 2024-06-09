@@ -1,19 +1,17 @@
-﻿using Android.Service.VR;
-using AndroidX.ConstraintLayout.Core.Motion.Utils;
-using Cloo;
+﻿using Cloo;
 using Cloo.Bindings;
 using LillyScan.Backend.Math;
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace LillyScan.FrontendXamarin.Droid.Utils
-{
+namespace LillyScan.FrontentWinforms
+{ 
     public static class CLBinding
     {
         private static ComputePlatform Platform;
         private static ComputeContext Context;
-        private static ComputeProgram Program;
+        private static ComputeProgram Program;        
         private static ComputeKernel DotMulKernel;
 
         private static string ProgramBuildFlags = "-cl-fast-relaxed-math -cl-no-signed-zeros";
@@ -24,16 +22,16 @@ namespace LillyScan.FrontendXamarin.Droid.Utils
             Debug.WriteLine("Context");
             Context = new ComputeContext(ComputeDeviceTypes.Gpu, new ComputeContextPropertyList(Platform), null, IntPtr.Zero);
             Debug.WriteLine("Program");
-            Program = new ComputeProgram(Context, KernelCode);
-            Program.Build(null, ProgramBuildFlags, null, IntPtr.Zero);
-            Debug.WriteLine("Kernel");
+            Program = new ComputeProgram(Context, KernelCode);            
+            Program.Build(null, ProgramBuildFlags, null, IntPtr.Zero);            
+            Debug.WriteLine("Kernel");            
             DotMulKernel = Program.CreateKernel("DotMul");
             Debug.WriteLine("Done");
         }
-
+   
         public static void DotMul(float[] a, float[] b, float[] r, int RA, int RB, int C)
         {
-            if (RA * RB % 4 != 0)
+            if (RA*RB % 4 != 0) 
             {
                 Debug.WriteLine($"DotMul: RA*RB is not multiple of 4: {RA}*{RB}");
                 throw new ArgumentException($"DotMul: RA*RB is not multiple of 4: {RA}*{RB}");
@@ -80,11 +78,11 @@ namespace LillyScan.FrontendXamarin.Droid.Utils
                 arrCHandle.Free();
             }
         }
-
+       
         private static void Free()
         {
-            DotMulKernel.Dispose();
-            Program.Dispose();
+            DotMulKernel.Dispose();            
+            Program.Dispose();            
             Context.Dispose();
         }
 
@@ -103,7 +101,7 @@ namespace LillyScan.FrontendXamarin.Droid.Utils
             }
         ";
 
-        static readonly string KernelCode = DotMulKernelCode;
+        static readonly string KernelCode = DotMulKernelCode;        
 
         public static void RuntimeTest()
         {
@@ -121,7 +119,7 @@ namespace LillyScan.FrontendXamarin.Droid.Utils
 
                 for (int i = 0; i < ra * rb; i++)
                 {
-                    if (System.Math.Abs(r1[i] - r2[i]) > 1e-4f)
+                    if (System.Math.Abs(r1[i] - r2[i]) > 1e-4f) 
                     {
                         Debug.WriteLine($"Failed TestRandomMul({ra},{rb},{c})");
                         Debug.WriteLine(string.Join(", ", r1));
@@ -133,5 +131,7 @@ namespace LillyScan.FrontendXamarin.Droid.Utils
             TestRandomMul(4, 4, 1);
             TestRandomMul(64, 64, 8);
         }
+
+
     }
 }

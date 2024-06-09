@@ -32,7 +32,6 @@ namespace LillyScan.BackendWinforms.Imaging
                         res[k++] = bytedata[y * bmpdata.Stride + 3 * x + 2] / 255f;
                         res[k++] = bytedata[y * bmpdata.Stride + 3 * x + 1] / 255f;
                         res[k++] = bytedata[y * bmpdata.Stride + 3 * x + 0] / 255f;
-                        
                     }
                 }                
 
@@ -42,11 +41,8 @@ namespace LillyScan.BackendWinforms.Imaging
 
         public static RawBitmap FromFile(string path)
         {
-            using (var bmp0 = new Bitmap(path))
-            using (var bmp = new Bitmap(bmp0)) 
-            {                
-                return FromBitmap(bmp);
-            }
+            using (var bmp = new Bitmap(path))  
+                return FromBitmap(bmp);            
         }
 
         public static void Save(this RawBitmap rawBitmap, string path)

@@ -45,7 +45,7 @@ namespace LillyScan.Backend.Imaging
             Stride = Width * Channels;
             pBuffer = (float*)Marshal.AllocHGlobal(Height * Stride * sizeof(float)).ToPointer();
             pBuffer[Width * Height * Channels-1] = 1;
-            Console.WriteLine(new IntPtr(pBuffer).ToString());
+            //Console.WriteLine(new IntPtr(pBuffer).ToString());
         }
 
         public float this[int index] { get => pBuffer[index]; set => pBuffer[index] = value; }

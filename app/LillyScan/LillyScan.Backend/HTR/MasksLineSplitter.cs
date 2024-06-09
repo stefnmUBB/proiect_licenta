@@ -27,7 +27,7 @@ namespace LillyScan.Backend.HTR
 
             public LinesSplit((float A, float B, float C) lineFit, LocalizedMask[] masks, (float X, float Y) baseVector)
             {
-                Console.WriteLine($"ML = {masks.Length}");
+                //Console.WriteLine($"ML = {masks.Length}");
                 LineFit = lineFit;
                 Masks = masks;
                 BaseVector = baseVector;

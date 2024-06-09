@@ -235,13 +235,11 @@ namespace LillyScan.Backend.Imaging
             if (IsDisposed) return;
 #endif
             Marshal.FreeHGlobal((IntPtr)Data);
-#if DEBUG
-            IsDisposed = true;            
-#endif
+            IsDisposed = true; 
         }
 
-#if DEBUG
         private bool IsDisposed = false;
+#if DEBUG        
         ~LocalizedMask()
         {
             if (!IsDisposed)
