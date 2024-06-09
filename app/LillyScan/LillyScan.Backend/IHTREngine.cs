@@ -12,8 +12,6 @@ namespace LillyScan.Backend
 
         float[] Segment(float[] image);
         float[] Segment64(float[] image, bool preview=false);
-        byte[] Segment(byte[] image);
-        string Predict(IReadMatrix<double> image);
-        string Predict(ImageRGB image);
+        byte[] Segment(byte[] image);        
     }
 }

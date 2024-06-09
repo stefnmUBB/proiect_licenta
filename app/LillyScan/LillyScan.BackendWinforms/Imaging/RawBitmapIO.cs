@@ -1,9 +1,7 @@
 ﻿using LillyScan.Backend.Imaging;
-using LillyScan.BackendWinforms.Utils;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
 using System.Runtime.InteropServices;
 using static LillyScan.Backend.Utils.Extensions;
 
